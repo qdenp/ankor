@@ -1,0 +1,25 @@
+{
+  "name": "ankor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:owner": "playwright test --project=owner",
+    "test:sysadmin": "playwright test --project=sysadmin",
+    "test:coach": "playwright test --project=coach",
+    "test:parent": "playwright test --project=parent",
+    "test:athlete": "playwright test --project=athlete",
+    "test:all": "npx concurrently --kill-others-on-fail \"npm run test:owner\" \"npm run test:sysadmin\" \"npm run test:coach\" \"npm run test:parent\" \"npm run test:athlete\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "concurrently": "^9.1.2",
+    "dotenv": "^18.0.9",
+    "playwright": "^1.64.1"
+  }
+}

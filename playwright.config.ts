@@ -1,0 +1,63 @@
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Playwright configuration for Ankor Athletics App
+ * @see https://playwright.dev/docs/configuration
+ */
+export default defineConfig({
+  testDir: './tests/specs',
+
+  /* Timeout for each test */
+  timeout: 60 * 1000,
+
+  /* Expect timeout */
+  expect: {
+    timeout: 10 * 1000,
+  },
+
+  /* Run tests in parallel */
+  fullyParallel: true,
+
+  /* Fail the build on CI if you accidentally left test.only */
+  forbidOnly: !!process.env.CI,
+
+  /* Retry on flaky tests (network errors, timing issues) */
+  retries: 2,
+
+  /* Limit workers to match number of roles (owner, coach, parent, athlete) */
+  workers: process.env.CI ? 1 : 4,
+
+  /* Reporter to use */
+  reporter: process.env.CI
+    ? [['html', { outputFolder: 'reports/html' }]]
+    : [['html', { outputFolder: 'reports/html' }], ['list']],
+
+  /* Shared settings for all projects */
+  use: {
+    /* Base URL */
+    baseURL: process.env.ANKOR_BASE_URL || 'https://d333afta2q6llv.cloudfront.net',
+
+    /* Collect trace when retrying */
+    trace: 'on-first-retry',
+
+    /* Take screenshot on failure */
+    screenshot: 'only-on-failure',
+
+    /* Record video on failure */
+    video: 'retain-on-failure',
+
+    /* Action timeout */
+    actionTimeout: 15 * 1000,
+
+    /* Navigation timeout */
+    navigationTimeout: 30 * 1000,
+  },
+
+  /* Configure browsers */
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});

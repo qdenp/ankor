@@ -1,0 +1,99 @@
+import { test, expect } from '../../fixtures';
+import { OrganizationPage } from '../../pages/organization-page';
+import { TIMEOUTS } from '../../config';
+
+/**
+ * 04 — Organization (пункт меню Organizations).
+ * SysAdmin tests run sequentially within the role.
+ */
+test.describe('SysAdmin Organization Tests', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  test.beforeEach(async ({ loginAs }) => {
+    await loginAs('sysadmin');
+  });
+
+  // 91832: SysAdmin sees all organizations
+  test('@TC-91832 sysadmin sees all organizations', async ({ page }) => {
+    const orgPage = new OrganizationPage(page);
+
+    await orgPage.gotoOrganizationsList();
+    await orgPage.waitForDataGridLoaded();
+
+    // Verify we're on organizations page (not sign-in)
+    await expect(page, 'Should be on organizations page, not sign-in').not.toHaveURL(/sign-in/);
+    
+    // Verify page loaded - check for heading
+    await orgPage.expectPageLoaded();
+  });
+
+  // 91861: Edit organization as SysAdmin
+  test('@TC-91861 sysadmin can edit organization name and revert', async ({ page }) => {
+    const orgPage = new OrganizationPage(page);
+
+    await orgPage.gotoOrganizationsList();
+    await orgPage.waitForDataGridLoaded();
+
+    // Wait for first data row (data-rowindex="0") to appear
+    const firstDataRow = orgPage.firstDataRow;
+    await expect(firstDataRow, 'First data row should be visible').toBeVisible({ timeout: TIMEOUTS.long });
+
+    // Click Edit on the first organization row
+    await orgPage.clickEditOnRow(firstDataRow);
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+
+    // Save original name
+    const originalName = await orgPage.nameInput.inputValue();
+
+    // Edit organization
+    const newName = `Test Org ${Date.now()}`;
+    await orgPage.fillOrgForm({ name: newName });
+    await orgPage.save();
+
+    // After save, go back to list and verify name changed by clicking edit again
+    await orgPage.gotoOrganizationsList();
+    await orgPage.waitForDataGridLoaded();
+
+    await orgPage.searchInput.fill(newName);
+    await orgPage.waitForDataGridLoaded();
+
+    const newOrgRow = orgPage.getOrgRow(newName);
+    await expect(newOrgRow, 'Edited org row should be visible').toBeVisible({ timeout: TIMEOUTS.long });
+
+    // Click Edit to verify name changed
+    await orgPage.clickEditOnRow(newOrgRow);
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+    await expect(orgPage.nameInput, 'Name input should show new name').toHaveValue(newName);
+
+    // Revert cleanup: go back to list, search by new name, edit, revert
+    await orgPage.gotoOrganizationsList();
+    await orgPage.waitForDataGridLoaded();
+
+    await orgPage.searchInput.fill(newName);
+    await orgPage.waitForDataGridLoaded();
+
+    const orgRowToEdit = orgPage.getOrgRow(newName);
+    await expect(orgRowToEdit, 'Org row to edit should be visible').toBeVisible({ timeout: TIMEOUTS.long });
+
+    // Click Edit to revert
+    await orgPage.clickEditOnRow(orgRowToEdit);
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+
+    await orgPage.fillOrgForm({ name: originalName });
+    await orgPage.save();
+
+    // Verify reverted - go back to list and click edit again
+    await orgPage.gotoOrganizationsList();
+    await orgPage.waitForDataGridLoaded();
+
+    await orgPage.searchInput.fill(originalName);
+    await orgPage.waitForDataGridLoaded();
+
+    const revertedOrgRow = orgPage.getOrgRow(originalName);
+    await expect(revertedOrgRow, 'Reverted org row should be visible').toBeVisible({ timeout: TIMEOUTS.long });
+
+    await orgPage.clickEditOnRow(revertedOrgRow);
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+    await expect(orgPage.nameInput, 'Name input should show original name').toHaveValue(originalName);
+  });
+});

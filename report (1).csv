@@ -1,0 +1,795 @@
+allure_id;name;full_name;description;precondition;expected_result;message;test_case_id;test_case_status;layer;scenario;tag;link;parameter;Suite;Story;Epic
+91830;[NEW] Home page (System Administrator);;;Зайти System Administrator;;;72679;Draft;;"[step 1] Перейти на Home (/)
+	[step 1.1] exp Total Athletes: общее число активных атлетов в организации
+	[step 1.2] exp Submitted Evaluations: общее число submitted evaluation reports по организации (НЕ включая In Progress)
+	[step 1.3] exp Shared Plans: число share-событий (не уникальных планов)
+	[step 1.4] exp Active Coaches: число активных коачей в организации
+	[step 1.5] exp Teams count НЕ должен отображаться как одна из 4 карточек
+[step 2] Проверить, что счётчики org-wide, а не только по работе текущего пользователя
+	[step 2.1] отображается статистика от всех организаций";;;;;Roles;sys admin
+91831;030 Parent cannot create plan;;;Зайти родителем;;;72602;Active;;"[step 1] Перейти в Plans
+	[step 1.1] exp нет кнопки/опции New Plan
+[step 2] Попробовать открыть /practice-plans/new напрямую по ссылке
+	[step 2.1] exp доступ заблокирован (редирект или ошибка доступа)";;;;;Plan;CRUD plan
+91832;sys admin see all organization;;;"Зайти sys admin 
+aextester+sysadmin@gmail.com Test123456";;;71922;Draft;;"[step 1] Перейти в Organization profile
+	[step 1.1] В профайле ВСЕ организации
+	[step 1.2] Есть таблица с информацией 
+Organization: Organization name.
+Sport: Sport name.
+Admin (Owner): Owner full name and email.
+Teams / Athletes / Coaches: Counts for that organization.";;;;;Organization Profile;
+91833;Athlete по join-коду с email родителя;;;"Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.";;;70979;Draft;;"[step 1] Открыть signin и Нажать signup
+[step 2] Ничего не заполнять и нажать next
+	[step 2.1] на все поля кроме Parent email валидация
+[step 3] Заполнить role как Athlete
+[step 4] Заполнить все поля
+[step 5] Parent email заполнить валидными данными
+[step 6] Принять Terms of Service and Privacy Policy. 
+[step 7] Зарегестрировать атлета
+	[step 7.1] атлет зарегестрирован
+	[step 7.2] у него роль и права атлета
+	[step 7.3] атлет в той команде, как в созданном  easy join
+	[step 7.4] На имайл родителя пришло приглашение
+[step 8] Зайти оунером / коучем на easy join
+	[step 8.1] Счётчик использований (usage counter) join-кода увеличивается на 1.
+[step 9] Зайти оунером на вкладку Athlete на зарегестрированного  атлета
+	[step 9.1] информация совпадает с заполненной информацией на создании
+	[step 9.2] у атлета есть   родитель";;;;Easy Join;Login;Singup
+91834;Athlete + existing parent;;;"Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.
+Есть уже зарегестрированный родитель в системе";;;71047;Draft;;"[step 1] Открыть signin и Нажать signup
+[step 2] Выбрать роль атлета
+[step 3] Ввести валидные данные
+[step 4] В имайл родителя вписать имайл, уже зарегестрированного родителя
+[step 5] Зарегестрироваться
+[step 6] Проверить почту родителя
+	[step 6.1] нет имайла -приглашения
+[step 7] Зайти оунером
+[step 8] Зайти в parent > найти родителя
+	[step 8.1] у родителя есть + 1 атлет";;;;Easy Join;Login;Singup
+91835;Drill/ skill;;;"Должны быть скилы и дрилсы как от организаций, так и публичные
+Создать оунером 1 скил и дрил 
+Иметь хзарегестрированного онуера 2";;;73162;Draft;;"[step 1] Зайти сис админом на edit skill/drill
+	[step 1.1] Есть дропдаун visability
+[step 2] Поменять на organization drill на public
+	[step 2.1] дрилс стал публичным
+	[step 2.2] оунеру 2 виден публичный дрил
+[step 3] Поменять public на  скил на  organization
+	[step 3.1] дрилс стал organization
+	[step 3.2] оунер 2 не видит в списке этот скил";;;;;Roles;sys admin
+91836;Permission;;;;;;71845;Draft;;"[step 1] Skill / drill -  view only
+[step 2] Evaluation - view only
+[step 3] Evaluation report -  view only
+[step 4] Plan - CRUD only own plan";;;;;Roles;Athlete
+91837;[NEW] Create/edit drill: fields, role permissions, Visibility rules;;;Зайти разными ролями поочерёдно (Owner/Admin, System Administrator, Coach);;;72684;Draft;;"[step 1] Зайти Coach/Athlete/Parent, попытаться найти Create/Edit drill
+	[step 1.1] exp Create/Edit недоступны — только просмотр (view-only)
+[step 2] Зайти Owner/Admin, открыть Create Drill
+	[step 2.1] exp доступны поля: name, description (опционально), segment, duration, min/max players, min/max age (опционально), Skill Mapping, YouTube URL (опционально), Visibility
+[step 3] Зайти System Administrator, открыть Create Drill
+	[step 3.1] exp  SysAdmin есть дропдаун Public или Organization при создании
+[step 4] Зайти Owner/Admin, открыть Edit на Public-дриле
+	[step 4.1] exp Owner/Admin НЕ должен иметь возможность редактировать Public drill (это должно быть доступно только System Administrator)
+[step 5] Зайти System Administrator, открыть Edit на Organization-scoped дриле
+	[step 5.1] exp  SysAdmin должен мочь изменить visibility Organization → Public на Edit";;;;;Drill;View drills
+91838;Prebuilt checkbox available to System Administrator on own plan in Edit;;;Зайти sys admin. Существует план, созданный sys admin, все drill в плане Public;;;72611;Active;;"[step 1] Открыть Edit на собственном плане sys admin
+	[step 1.1] exp есть чекбокс Make this a Prebuilt Plan
+[step 2] Отметить чекбокс и сохранить
+	[step 2.1] exp план опубликован в Prebuilt Plans для всех организаций того же вида спорта";;;;;Plan;CRUD plan
+91839;Home page;;;Зайти Owner/Admin;;;71823;Draft;;"[step 1] Перейти на Home (/)
+	[step 1.1] exp Total Athletes: общее число активных атлетов в организации (org-wide, не только по своей работе)
+	[step 1.2] exp Submitted Evaluations: общее число submitted evaluation reports по организации (НЕ включая In Progress)
+	[step 1.3] exp CHECK-BUG: Shared Plans — число share-событий (не уникальных планов; пример: план расшарен дважды одним коачем и трижды другим = 5)
+	[step 1.4] exp Active Coaches: число активных коачей в организации
+[step 2] Проверить, что счётчики отражают всю организацию, а не только работу текущего пользователя";;;;;Roles;Owner / admin
+91840;004 Athlete cannot edit a plan they were only invited to;;;Зайти коачем и пригласить атлета на план. Атлетом принять приглашение (план появился в Invited);;;72609;Active;;"[step 1] Зайти атлетом, перейти в Plan > Invited
+[step 2] Открыть план, на который атлет только приглашён (не владелец)
+	[step 2.1] exp нет кнопки/опции edit, либо поля недоступны для редактирования
+[step 3] Попробовать открыть /practice-plans/:id/edit напрямую по ссылке для этого плана
+	[step 3.1] exp редактирование запрещено (редирект или форма в read-only)";;;;;Plan;CRUD plan
+91841;Edit email;;;;;;74184;Draft;;"[step 1] Перейти в Manage user
+[step 2] Нажать edit на юзере
+[step 3] Изменить поле email на невалидные данные
+	[step 3.1] валидация на невалидный имайл
+[step 4] Изменить поле email на  email который уже использует другой юзер
+	[step 4.1] валидация на уже существующий имайл
+[step 5] Изменить имайл на валидный
+	[step 5.1] имайл изменен
+[step 6] Зайти юзером по старому имайлу
+	[step 6.1] валидация
+[step 7] Зайти юзером по новому имайлу
+	[step 7.1] юзер вошел, вся информация сохранена";;;;;Manage user;
+91842;Ввод рейтинга выше 5 блокируется с предупреждением;;;Открыта scorecard grid для evaluation.;;;71495;Draft;;"[step 1] Попытаться ввести значение рейтинга выше 5 для любой категории
+	[step 1.1] Предупреждение: 
+Values should be from 1 to 5.";;;;;Evaluation;CRUD evaluation
+91843;System Administrator does not see Prebuilt checkbox on a plan they did not create;;;Зайти sys admin. Существует план, созданный коачем или атлетом (не sys admin);;;72612;Active;;"[step 1] Открыть Edit на плане, созданном не sys admin (coach/athlete)
+	[step 1.1] exp чекбокса Make this a Prebuilt Plan нет";;;;;Plan;CRUD plan
+91844;002 Athlete and Parent do not see Org Plans tab;;;Зайти атлетом / родителем;;;72622;Active;;"[step 1] Перейти в Practice Plans
+	[step 1.1] exp нет вкладки Org Plans";;;;;Plan;CRUD plan
+91845;Add athlete + parent  existing;;;"Зайди админом / оунером
+Должен быть зарегестрированный аккаунт родителя";;;71215;Draft;;"[step 1] Перейти в athlete
+[step 2] нажать New athlete
+[step 3] Заполнить всю информаицю от атлете
+[step 4] Заполнить имайл  НЕ зарегестрированного родителя
+[step 5] Сохранить
+	[step 5.1] атлет зарегестрирован
+	[step 5.2] родитель привязан
+[step 6] Перейти во вкладку родителя
+[step 7] Зайти на родителя из прекондишн
+	[step 7.1] + 1 атлет";;;;;Athlete;Add manual
+91846;Переход по deep-link из уведомления/письма открывает отчёт напрямую родителя;;;"АТЛЕТУ И РОДИТЕЛЮ  пришло уведомление/email со ссылкой на конкретный evaluation report.";;;71606;Draft;;"[step 1] Быть залогиненным родителем
+[step 2] Родителем перейти по ссылке из письма
+	[step 2.1] Открывается сразу нужный отчёт  список Evaluation Reports ";;;;;Evaluation report;
+91847;003 Athlete cannot duplicate a plan;;;Зайти атлетом/ родителем. Есть собственный план и/или invited план;;;72631;Active;;"[step 1] Перейти в Practice Plans (My Plans / Invited)
+[step 2] Открыть меню действий на строке плана
+	[step 2.1] exp пункта Duplicate нет в меню";;;;;Plan;CRUD plan
+91848;Create team;;;Зайти оунером/админом/коачем;;;71851;Draft;;"[step 1] Перейти во вкладку Teams
+[step 2] Нажать ""New team""
+	[step 2.1] открылись поля 
+name
+sport (optional)
+active
+[step 3] Выбрать спорт, заполнить имя, и оставить тоггл active
+[step 4] Нажать create
+	[step 4.1] тима создалась
+	[step 4.2] отображается в таблице";;;;;Team;
+91849;Permission;;;;;;71844;Draft;;"[step 1] Skill / drill  -  view only
+[step 2] Scorecard Templates - view only
+[step 3] Athlete - CRUD
+[step 4] Parents - CRUD
+[step 5] Coach -view only
+[step 6] Team - CRUD
+[step 7] Easy join - CRUD
+[step 8] Evaluation - CRUD
+[step 9] Evaluation report - see all  organization report
+[step 10] Plan - see my plan/invited/prebuilt";;;;;Roles;Coach
+91850;Manually Add Athlete by coach;;;Зайти coach - aextester+coach3@gmail.com;;;71149;Draft;;"[step 1] Перейти во вкладку athlete
+	[step 1.1] показаны все атлеты
+[step 2] Нажать new athlete
+	[step 2.1] открылась форма заполнения  инфо атлета
+[step 3] Нажать create
+	[step 3.1] First name , first last name , email , gender , team, password, confirm password обязательны
+[step 4] Заполнить только обязательные поля
+[step 5] Зарегестрировать юзера
+	[step 5.1] успешно
+	[step 5.2] юзер отобразился в общей таблице юзеров
+[step 6] Перейти на логин
+[step 7] Зайти зарегестрированным юзером
+	[step 7.1] юзер вошел успешно
+	[step 7.2] юзер в роли атлета";;;;;Athlete;Add manual
+91851;Deactivate;;;Зайти owner/admin/sys admin;;;72065;Draft;;"[step 1] Перейти в Manage Users
+	[step 1.1] открылась таблица с юзерами
+[step 2] Нажать на юзере deactivate
+	[step 2.1] юзер отражен серым
+	[step 2.2] есть пометка deactivated
+[step 3] Зайти декактивированным юзером
+	[step 3.1] валидация - deactivated";;;;;Manage user;
+91852;Edit coach;;;"Зайти оунером / админом / коачем
+Должны быть коачи";;;71991;Draft;;"[step 1] Перейти в coach
+	[step 1.1] открылась таблица со всеми коачами
+[step 2] Нажать edit на выбранном юзере
+	[step 2.1] открылась таблица с редактированием 
+first name
+last name
+email 
+phone
+	[step 2.2] Email  нельзя отредактировать
+[step 3] Отредактировать first name
+last name  и phone
+[step 4] Сохранить
+	[step 4.1] информация отредактирована";;;;;Coach;
+91853;017 Duplicate creates a copy with exact name format;;;Зайти коачем / admin / owner. Есть собственный план с именем "Training A";;;72628;Active;;"[step 1] Перейти в Practice Plans > My Plans
+[step 2] Открыть меню действий на плане ""Training A"", нажать Duplicate
+	[step 2.1] exp создана копия с именем ""Training A (copy)""
+[step 3] Проверить оригинальный план
+	[step 3.1] exp имя оригинала не изменилось (""Training A"")";;;;;Plan;CRUD plan
+91854;Parent регистрация по имайлу;;;"Зарегестрировать через easy join атлета 
+Ввести имайл родителя";;;70980;Draft;;"[step 1] Перейти на почту Родителя котрого пригласили
+	[step 1.1] есть имайл с приглашением
+[step 2] Перейти на имайл
+[step 3] Ввести все данные валидной информацией
+[step 4] Сохарнить
+	[step 4.1] родитель зарегестрирован
+[step 5] Войти
+	[step 5.1] роль и права родителя";;;;Easy Join;Login;Singup
+91855;Успешная регистрация организации Lacrosse;;;Пользователь не авторизован. Открыта форма регистрации организации (/org-signup) через "Sign up your organization" на Sign In.;;"1. При регистрации новой организации, письмо о регистрации не приходит на почту. (При регистрации Коуча письмо пришло)
+
+2. Select Sport: если выбрать любой спорт из списка и затем снова выбрать значение ""Select sport"", то показаывается некорректная ошибка валидации ""Expected string, received null"". Решение: поправить текст ошибки или убрать занчение ""Select sport"" из выпадающего списка.
+
+3. Шаг 11-1: Имя команды не обязательно, регистрация проходит без заполнения. (Возможно тест устарел)";70897;Active;;"[step 1] 1. Открыть Organization Registration
+	[step 1.1] В  начале форма из  из 3 шагов: Admin Info → Organization → Teams
+[step 2] Открыть шаг Admin Info и нажать next
+	[step 2.1] валидация на все поля в форме
+[step 3] Заполнить First name, Last name, Email (уникальный, валидный), Phone (валидный), Password (не менее 8 символов), Confirm password (совпадает с Password).
+[step 4] Нажать Next
+	[step 4.1] Открыт Organization Registration
+	[step 4.2] есть поля
+organization name
+Program gender (Girls/Boys/Coed)
+	[step 4.3] Coed по умолчанию выбран
+[step 5] Ничего не заполнять и нажать Next
+	[step 5.1] organization name обязателен
+[step 6] Заполнить organization name и поменять генедр на любой
+[step 7] Нажать Next
+	[step 7.1] переход на шаг Teams
+[step 8] Ничего не заполнять и нажать next
+	[step 8.1] Sport обязателен
+[step 9] Раскрыть доропдаун teams
+	[step 9.1] - basketball 
+- Lacrosse 
+- Soccer
+[step 10] Выбрать Lacrose
+[step 11] Ввести имя Teams
+[step 12] Нажать save
+	[step 12.1] организация  создана
+[step 13] Войти юзером
+	[step 13.1] юзер вошел в организацию
+	[step 13.2] у юзера роль owner
+[step 14] Есть созданная Teams";;;;Register Organization;Login;Singup
+91856;Home page;;Проверка Coach Summary counts и их обновления по UC-20 (с пометками расхождений с текущей реализацией);Зайти коачем;;;71818;Draft;;"[step 1] Перейти на Home
+	[step 1.1] exp отображается Coach Summary
+	[step 1.2] exp Athletes: количество атлетов, связанных с командами/доступом коача
+	[step 1.3] exp Submitted Evaluations: количество submitted evaluations коача в этой организации
+	[step 1.4] expShared Plans (планы, которыми коач поделился с атлетами)
+	[step 1.5] exp Assigned Drills
+[step 2] Зарегистрировать команду и атлета, создать Evaluation (submit), создать и расшарить Plan атлету
+[step 3] Вернуться на Home
+	[step 3.1] exp Athletes +1
+	[step 3.2] exp Submitted Evaluations +1
+	[step 3.3] exp  Shared Plans +1 при расшаривании плана";;;;;Roles;Coach
+91857;Оценка категории подтягивает оценку на все сабскилы;;;"Открыта scorecard grid для evaluation.
+Должен быть категория с 4 саб-скилками";;;71528;Draft;;"[step 1] Поставить оценку выше 3 на категорию
+[step 2] Нажать submit на evaluation
+[step 3] Перейти в evaluation report
+[step 4] Открыть evlaution который оценили
+	[step 4.1] на  ВСЕХ subskill та же оценка что и на категории";;;;;Evaluation;CRUD evaluation
+91858;Add athlete + parent;;;Зайди админом / оунером;;;71182;Draft;;"[step 1] Перейти в athlete
+[step 2] нажать New athlete
+[step 3] Заполнить всю информаицю от атлете
+[step 4] Заполнить имайл несущестсующего родителя
+[step 5] Сохранить
+	[step 5.1] атлет зарегестрирован
+	[step 5.2] родителю пришло письмо об комплите аккаунта";;;;;Athlete;Add manual
+91859;025 Create Plan as Administrator / Owner;;;Зайти как administrator или owner;;;72600;Active;;"[step 1] Перейти в Plan, остаться на My Plans
+[step 2] Нажать New Plan
+[step 3] Заполнить name
+[step 4] Добавить drill, указать duration
+[step 5] Сохранить
+	[step 5.1] exp план сохранён и принадлежит текущему юзеру (owner плана)
+	[step 5.2] exp план отображается в My Plans";;;;;Plan;CRUD plan
+91860;014 View Plan coach;;;"Зайти коачем
+У коача должны быть свои планы, и приглашенные планы";;;71644;Active;;"[step 1] Зайти в Plans
+	[step 1.1] Есть My Plans, Invited, Prebuild plan
+[step 2] По умолчанию открыта My Plans
+	[step 2.1] Показаны все планы
+[step 3] Зайти в Invited
+	[step 3.1] показаны все Invited планы";;;;;Plan;CRUD plan
+91861;Edit organization as sysadmin;;;"Зайти sys admin
+Должна быть созданная организация с оунером";;;71957;Draft;;"[step 1] Перейти в Organization profile
+	[step 1.1] показаны все организации
+[step 2] Нажать edit на организации из прекондишн
+	[step 2.1] открылись поля 
+organization details: 
+Name
+program gender
+sport
+	[step 2.2] Admin contact 
+first name / last name 
+email 
+phone
+[step 3] Отредактировать информацию organization details:
+	[step 3.1] информация успешно отредактирована
+[step 4] Попытаться отредактировать Admin contact
+	[step 4.1] нельзя редактировать
+[step 5] Зайти как оунер организации
+	[step 5.1] информация отредактирована";;;;;Organization Profile;
+91862;Evaluation reports;;;"Коачем создать evaluation на атлета к которому привязан родитель 
+Submit evaluation";;;71826;Draft;;"[step 1] Зайти атлетом
+	[step 1.1] есть уведомление 
+Notification content
+Title: ""New evaluation available for [Athlete Name]""
+Message: ""[Coach name] submitted a new evaluation - [Scorecard template name] - for [Athlete name], on [Date]. [View Evaluation report button]""
+Deep link: Opens the athlete's evaluation report
+[step 2] Проверить Deep link
+	[step 2.1] ведет на evaluation report
+[step 3] Зайти родителем
+	[step 3.1] также есть это уведомление
+[step 4] Зайти оунером
+	[step 4.1] также есть это уведомление";;;;;Notification / email;Notification
+91863;Create Template with 2+ category;;;Пользователь авторизован как Owner или Administrator. В библиотеке скиллов уже есть хотя бы два скилла.;;;71293;Draft;;"[step 1] Открыть Scorecard Templates > New Template
+	[step 1.1] Открылась форма создания тимплейта
+[step 2] Ничего не заполнять и нажать Create
+	[step 2.1] Soccer Card name, category name, subskill name , skill обязательны
+[step 3] Заполнить поля шаблона только обязательные поля: template name
+[step 4] Добавить одну категорию: name
+[step 5] Добавить в категорию один под-скилл: name,  skill (из библиотеки скиллов)
+[step 6] Добавить в эту же категорию  еще один под-скилл: name,  skill (из библиотеки скиллов)
+[step 7] Добавить еще категорию и добавить  к ней 2-3 скилла
+[step 8] Сохранить шаблон
+	[step 8.1] Шаблон сохраняется с указанными данными.
+	[step 8.2] Порядок категорий и порядок под-скиллов внутри категорий полностью совпадает с созданием
+[step 9] Перейти в evaluation
+	[step 9.1] Шаблон сразу доступен для использования в evaluations ";;;;;Score Card Template;
+91864;Permission;;;"Owner / admin имеет все эти вкладки";;;71889;Draft;;"[step 1] Organization profile - может просматривать, редактировать ВСЕ  организации
+[step 2] Skill - CRUD
+[step 3] Drill - CRUD
+[step 4] Scorecard Templates - CRUD
+[step 5] Athlete - CRUD
+[step 6] Parents - CRUD
+[step 7] Coach - CRUD
+[step 8] Team - CRUD
+[step 9] Easy join - CRUD
+[step 10] Evaluation - CRUD
+[step 11] Evaluation report - see all  organization report
+[step 12] Plan - see all organization plan";;;;;Roles;sys admin
+91865;Create drill;;;Зайти как админ/оунер;;;74151;Draft;;"[step 1] Перейти в Drills
+[step 2] Нажать Create drills
+[step 3] Ничего не заполнять и нажать create
+	[step 3.1] Drill name и Segment обязательны
+[step 4] Заполнить все поля
+[step 5] Вставить видео URL youtube
+[step 6] Создать
+	[step 6.1] успешно
+	[step 6.2] в библиотеке отображен drill
+	[step 6.3] Drill принадлежит виду спорта организации
+	[step 6.4] Видимость дрилс - organization";;;;;Drill;Create drill
+91866;create evaluation;;;"зайти как owner/admin / coach
+Существует активный scorecard-шаблон
+Существует команда 
+СУЩЕСТВУЕТ АТЛЕТЫ В КОМАНДЕ";;;71460;Draft;;"[step 1] Открыть Evaluations → ""Create Evaluation"".
+[step 2] Открыть scorecard-шаблон.
+	[step 2.1] открылся дропдаун со всеми шаблонами
+[step 3] Выбрать scorecard-шаблон.
+[step 4] Выбрать команду также через дропдаун
+	[step 4.1] в athlete подтянулись все атлеты в команде
+	[step 4.2] создалась сетка с атлетами
+[step 5] В открывшейся сетке (scorecard grid) выставить оценку каждому атлету по каждой категории.
+[step 6] Сохранить evaluation  (НЕ нажимать submit)
+	[step 6.1] Evaluation сохраняется как редактируемый черновик.
+[step 7] Зайти атлетом / родителю которому создали оценку
+	[step 7.1] Черновик не виден атлету или родителю.";;;;;Evaluation;CRUD evaluation
+91867;Forgot email;;;;;;71831;Draft;;"[step 1] Перейти на логин
+[step 2] Нажать forgot password
+	[step 2.1] на почту должно прийти письмо  forgot password";;;;;Notification / email;Email
+91868;Forgot password несуществующий юзер;;;"Открыт экран Sign In.
+Должен быть имайл незарегестрированный на ankor к которому есть доступ";;;70944;Draft;;"[step 1] Найти и нажать на ссылку/кнопку ""Forgot password""
+	[step 1.1] открылась форма
+[step 2] Ввести невалидный имайл
+	[step 2.1] валидация
+[step 3] Ввести имайл незарегестрированного юзера, доступ к почте котрого есть
+	[step 3.1] нотификация If an account exists for that email, a reset link has been sent.
+[step 4] Проверить имайл
+	[step 4.1] имайл не пришел";;;;;Login;Sign in
+91869;Athlete по join-коду без email родителя;;;"Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.";;;70977;Draft;;"[step 1] Открыть signin и Нажать signup
+[step 2] Ничего не заполнять и нажать next
+	[step 2.1] на все поля кроме Parent email валидация
+[step 3] Заполнить role как Athlete
+[step 4] Заполнить все поля, кроме Parent email, валидными данными
+[step 5] Принять Terms of Service and Privacy Policy. 
+[step 6] Зарегестрировать атлета
+	[step 6.1] атлет зарегестрирован
+	[step 6.2] у него роль и права атлета
+	[step 6.3] атлет в той команде, как в созданном  easy join
+[step 7] Зайти оунером / коучем на easy join
+	[step 7.1] Счётчик использований (usage counter) join-кода увеличивается на 1.
+[step 8] Зайти оунером на вкладку Athlete на зарегестрированного  атлета
+	[step 8.1] информация совпадает с заполненной информацией на создании
+	[step 8.2] у атлета нет заполненного  родителя";;;;Easy Join;Login;Singup
+91870;028 Non-sysadmin roles do not see Prebuilt checkbox;;;Зайти Athlete / Coach / Administrator / Owner;;;72604;Active;;"[step 1] Перейти в New Plan
+	[step 1.1] exp нет чекбокса Make this a Prebuilt Plan";;;;;Plan;CRUD plan
+91871;020 View Plan  Owner / Admin;;;"Зайти оунером";;;71645;Active;;"[step 1] Зайти   в Plans
+	[step 1.1] Есть My Plans, Invited, Prebuild plan, Org Plans
+[step 2] По умолчанию открыта My Plans
+	[step 2.1] Показаны все планы
+[step 3] Зайти в Invited
+	[step 3.1] показаны все Invited планы
+[step 4] Зайти в Org Plans
+	[step 4.1] показаны все планы орагнизации каждого участника
+[step 5] Зайти в Prebuild plan
+	[step 5.1] показаны планы, которые создал сис админ
+[step 6] Проверить поиск по имени плана
+	[step 6.1] план находится
+[step 7] Нажать view на любом плане участника организации
+	[step 7.1] Можно только просматривать план, нельзя редактировать";;;;;Plan;CRUD plan
+91872;Parent видит отчёты привязанных к нему атлетов;;;"Пользователь авторизован как Parent, у него привязан один или несколько атлетов.
+У атлетов есть завершённые (submitted) evaluation.";;;71602;Draft;;"[step 1] Открыть Evaluation Reports
+	[step 1.1]  В списке  только завершённые отчёты привязанных к этому родителю атлетов.";;;;;Evaluation report;
+91873;Carete parent;;;Зайти owner / admin / coach;;;71252;Draft;;"[step 1] Перейти в Parent > New parent
+[step 2] Ничего не заполнять
+[step 3] Нажать create
+	[step 3.1] обязательнеы поля full name, email,  relationship, password, athletes
+[step 4] Заполнить только обязательные поля
+[step 5] Сохранить
+	[step 5.1] Родитель зарегестрирован
+	[step 5.2] у атлета появился родитель
+[step 6] Зайти зарегестрированным родителем
+	[step 6.1] юзер вошел
+	[step 6.2] у юзера права и роль родителя";;;;;Parent;Create parent from add manual
+91874;View evaluation;;;Есть созданные но не submitted evaluation;;;71567;Draft;;"[step 1] Зайти на evaluaion
+[step 2] Нажать view
+	[step 2.1] открылся репорт, есть Scorecard Team
+Evaluation ID
+	[step 2.2] Есть действия back и edit
+[step 3] Попробовать из view отредактировать
+	[step 3.1] не отредактировать
+[step 4] Нажать back
+	[step 4.1] переход назад
+[step 5] Снова зайти на репорт и нажать view
+[step 6] Нажать edit
+	[step 6.1] Открылась форма редактирования";;;;;Evaluation;CRUD evaluation
+91875;Edit user;;;Зайти как Owner, Administrator, or System Administrator;;;72062;Draft;;"[step 1] Нажать Manage Users
+[step 2] Выбрать юзера и нажать Edit
+	[step 2.1] Есть поля
+first name
+last name
+email
+phone (optional)
+role (organization role)
+active organization membership
+new password (optional)
+confirm password
+	[step 2.2] Email нельзя поменять
+[step 3] Поменять first name last name phone (optional)
+role (organization role) и new password (optional)
+confirm password
+[step 4] Сохарнить
+	[step 4.1] юзер сохранился
+[step 5] Зайти юзером со старым паролем
+	[step 5.1] неверный пароль
+[step 6] Зайти новым паролем
+	[step 6.1] юзер вошел
+	[step 6.2] роль юзера поменялась
+	[step 6.3] у юзера отображается отредактированная информация";;;;;Manage user;
+91876;Успешный вход зарегистрированного пользователя;;;"Пользователь не авторизован, открыт экран Sign In (/sign-in)
+Выбрать любого зарегестрированного пользователя, пароль у всех Test123456
+- owner - aextester+org4@gmail.com 
+- admin aextester+coach@gmail.com 
+- sys admin  - aextester+sysadmin@gmail.com
+- coach - aextester+coach3@gmail.com 
+- parent -  aextester+parentnew@gmail.com
+- athlete - aextester+athlete2@gmail.com";;;70936;Draft;;"[step 1] Заполнить поле Email валидным зарегистрированным email.
+[step 2]  Заполнить поле Password корректным паролем от этого аккаунта
+[step 3] Нажать кнопку входа Sign In
+	[step 3.1] Загружается профиль пользователя (роль, организация, связанные id parent/athlete).
+	[step 3.2] Пользователь попадает на Home-экран, соответствующий его роли";;;;;Login;Sign in
+91877;Edit evaluation;;;Есть созданные но не submitted evaluation;;;71600;Draft;;"[step 1] Зайти на evaluaion
+[step 2] Нажать edit на репорте
+	[step 2.1] открылась форма редактирования
+[step 3] Отредактировать тимпелйт, команду, поставить оценку
+[step 4] Не сохранять
+	[step 4.1] данные не сохранены
+[step 5] Снова Отредактировать тимпелйт, команду, поставить оценку
+[step 6] Нажать update
+	[step 6.1] данные сохранились";;;;;Evaluation;CRUD evaluation
+91878;015 Coach does not see Org Plans tab;;;Зайти коачем;;;72623;Active;;"[step 1] Перейти в Practice Plans
+	[step 1.1] exp нет вкладки Org Plans (Org Plans только Administrator/Owner/System Administrator)";;;;;Plan;CRUD plan
+91879;Activate from signup;;;"1.  Создать атлета через easy join 
+1. Указать имайл родителя который еще н использовался";;;71426;Draft;;"[step 1] Перейти на имайл
+	[step 1.1] Родителю на имайл пришло письмо
+[step 2] Перейти по ссылке
+	[attachment 2.1] Attachment [54797]
+	[step 2.2] открылась форма
+[step 3] Ничего не заполнять и нажать create
+	[step 3.1] Все поля обязательны
+[step 4] Заполнить first name, last name, cell phone
+[step 5] Заполнить пароль 1 символ
+	[step 5.1] валидация Password must be at least 8 characters long.
+[step 6] Заполнить пароль 8 символов
+[step 7] В Confirm password сделать отличающийся пароль
+	[step 7.1] Passwords do not match.
+[step 8] Заполнить одинаковые пароли
+[step 9] Нажать create account
+	[step 9.1] юзер зарегестрирован
+	[step 9.2] роль родителя";;;;;Parent;Activate parent
+91880;View invited plan as athlete;;;Зайти коачем и пригласить атлета;;;71717;Draft;;"[step 1] Зайти атлетом на почту
+	[step 1.1] пришел инвайт на план
+[step 2] Перейти по ссылке
+	[step 2.1] юзер перешел на план
+	[step 2.2] название, duration, дрилс и их порядок сохраняется
+[step 3] Попробовать отредактировать
+	[step 3.1] редактирование запрещено
+[step 4] Перейти в plan > invited
+	[step 4.1] план появился в инвайтед";;;;;Plan;Invite plan
+91881;001 View Plan athlete;;;"У атлета должен быть слинкован родитель 
+У атлета есть как собственные, так и инвайтед планы";;;71642;Active;;"[step 1] Зайти атлетом в Plans
+	[step 1.1] Есть My Plans, Invited,
+[step 2] По умолчанию открыта My Plans
+	[step 2.1] Показаны все планы
+[step 3] Зайти в Invited
+	[step 3.1] показаны все Invited планы";;;;;Plan;CRUD plan
+91882;Create Template;;;Пользователь авторизован как Owner или Administrator. В библиотеке скиллов уже есть хотя бы один скилл.;;;71292;Draft;;"[step 1] Открыть Scorecard Templates > New Template
+	[step 1.1] Открылась форма создания тимплейта
+[step 2] Ничего не заполнять и нажать Create
+	[step 2.1] Soccer Card name, category name, subskill name , skill обязательны
+[step 3] Заполнить поля шаблона: template name, description, active
+[step 4] Добавить одну категорию: name, description, position.
+[step 5] Добавить в категорию один под-скилл: name, description, position, rating min, rating max, skill (из библиотеки скиллов)
+[step 6] Сохранить шаблон
+	[step 6.1] Шаблон сохраняется с указанными данными.
+[step 7] Перейти в evaluation
+	[step 7.1] Шаблон сразу доступен для использования в evaluations ";;;;;Score Card Template;
+91883;032 Parent does not see Prebuilt Plans tab;;;Зайти родителем;;;72624;Active;;"[step 1] Перейти в Practice Plans
+	[step 1.1] exp нет вкладки Prebuilt Plans";;;;;Plan;CRUD plan
+91884;owner / admin view own organization;;;Зайти Owner / admin;;;71116;Outdated;;"[step 1] Перейти в Organization profile
+	[step 1.1] В профайле только 1 организация - своя
+	[step 1.2] Есть таблица с информацией 
+Organization: Organization name.
+Sport: Sport name.
+Admin (Owner): Owner full name and email.
+Teams / Athletes / Coaches: Counts for that organization.
+	[step 1.3] Есть кнопка edit
+[step 2] Проверить количество атлетов / коачей / тим
+	[step 2.1] количество совпадает";;;;;Organization Profile;
+91885;homepage;;;"Должен быть родитель у котрого привязаны 2  атлета
+Сделать оценку 2 атлетам где балл 2 
+Зайти родителем";;;71822;Draft;;"[step 1] Перейти на home page
+	[step 1.1] exp есть Workout Entry для каждого привязанного атлета
+	[step 1.2] exp Date: сегодняшняя дата (с клиентских часов)
+	[step 1.3] exp Level: заголовок группы дрилов (""Level 1"")
+	[step 1.4] exp показаны ВСЕ дрилы из Drill Mapping Primary Development Focus skills последней submitted evaluation каждого атлета, без дублей
+	[step 1.5] exp у каждого дрила Drill name (media title, если есть, иначе имя дрила)
+	[step 1.6] exp Duration показана только если больше 0 минут
+[step 2] Проверить, что родитель НЕ может логировать репы (нет контрола для этого на экране)
+	[step 2.1] exp нет доступного контрола логирования репов у родителя
+[step 3] Проверить Athlete Summary для каждого атлета
+	[step 3.1] exp  Total Evaluations
+	[step 3.2] exp  Shared Plans показывает
+	[step 3.3] exp  Assigned Drills и Last Evaluation";;;;;Roles;Parent
+91886;welcome email;;;;;;71828;Draft;;"[step 1] Когда региструрешься / регстрируешь manual на почту приходит welcome email";;;;;Notification / email;Email
+91887;Родитель нескольких атлетов может перейти к отчётам конкретного ребёнка;;Родитель должен видеть evaluation всех привязанных атлетов;"Пользователь авторизован как Parent, у него привязан один или несколько атлетов ИЗ РАЗНЫХ КОМАНД
+ у каждого есть завершённые отчёты.";;;71604;Active;;"[step 1] Открыть Evaluation Reports
+	[step 1.1]  exp В списке  только завершённые отчёты привязанных к этому родителю атлетов.
+[step 2] Перейти к отчету ребенка 1
+	[step 2.1]  exp виден детальный экран  отчета ребенка 1
+[step 3] Перейти к отчету ребенка 2
+	[step 3.1]  exp  виден детальный экран  отчета  ребенка 2";;;;;Evaluation report;
+91888;После submit генерируется персонализированный workout;;;"Draft evaluation с несколькими оценёнными атлетами готов к отправке.
+ атлета в evaluation есть минимум один скилл с рейтингом ниже 3, для которого в системе есть замапленные drills.";;;71563;Draft;;"[step 1] Submit evaluation с таким атлетом.
+[step 2] Проверить, сгенерирован ли для атлета персонализированный workout.
+[step 3] Открыть evaluation report
+	[step 3.1] Для атлета создаётся персонализированный workout на основе низкооценённых скиллов с замапленными drills.
+[step 4] Зайти атлетом
+	[step 4.1] Также в evluation report есть вкладка workout, где отображено видео из дрилс";;;;;Evaluation;Submit Evaluation
+91889;Make inactive;;;Есть хотя бы один сохранённый scorecard-шаблон. Пользователь авторизован как Owner/admin;;;71393;Draft;;"[step 1] Перейти в Scorecard Templates
+[step 2] Выбрать темплейт
+[step 3] Поменять тоггл active на inactive
+[step 4] Сохранить
+	[step 4.1] в таблице Scorecard Templates  тимплейт отображен как inactive
+[step 5] Перейти в evaluation
+[step 6] Перейти к созданию evaluation
+[step 7] Открыть дропдаун с template
+	[step 7.1] inactive template нет";;;;;Score Card Template;
+91890;016 Create plan: notes;;;Зайти как коуч;;;71641;Active;;"[step 1] Зайти в Plan и нажать +
+[step 2] Вписать имя плана
+[step 3] Нажать + и добавит drill
+[step 4] На добавленном дриллс нажать 3 дот
+	[step 4.1] открылся дропдаун 
+- edit 
+- remove
+[step 5] Нажать remove
+	[step 5.1] дрилс удалился
+[step 6] Добавить дрилс снова
+[step 7] На добавленном дриллс нажать 3 дот
+[step 8] Выбрать - edit
+	[step 8.1] открылся модал с редактированием edit и notes
+[step 9] Написать notes и отредактировать duration
+[step 10] Нажать Create
+	[step 10.1] Notes отображается и duration сохранены
+	[step 10.2] План создан";;;;;Plan;CRUD plan
+91891;Add coach manually;;;Зайти оунером / админом / коачем;;;71990;Draft;;"[step 1] Перейти в coach
+	[step 1.1] открылась таблица со всеми коачами, если есть
+[step 2] Нажать ""New coach"",
+	[step 2.1] открылась информация к заполнению
+	[step 2.2] есть поля 
+full name
+email
+password
+confirm password
+phone (optional)
+[step 3] Заполнить все поля
+[step 4] Сохранить
+	[step 4.1] коач отобразился в таблице
+	[step 4.2] а имайл пришло велком письмо
+[step 5] Зайти коачем под кредами
+	[step 5.1] юзер вошел
+	[step 5.2] роль коач";;;;;Coach;
+91892;homepage;;;Зайти атлетом, которого не оценивали;;;71821;Draft;;"[step 1] Перейти на home page
+	[step 1.1] No Workout for Today во вкладке воркаут
+	[step 1.2] Также есть элементы 
+Submitted Evaluations: Total number of submitted evaluation reports for this athlete (In Progress is not counted).
+Assigned Plans: Total number of plans to which this athlete has been invited (invitations received, not invitations sent by the signed-in user).
+Assigned Drills: Total number of unique drills mapped to the Primary Development Focus skills from this athlete’s most recently submitted evaluation (not a lifetime total of every drill they have ever received).
+Last Evaluation: Date of this athlete’s most recent submitted evaluation.
+[step 2] Зайти коачем и submit evaluation атлету с оценкой ниже 3 хотя бы по одному Primary Development Focus skill (с настроенным Drill Mapping)
+[step 3] Зайти атлетом на homepage
+	[step 3.1] exp появился Workout Entry
+	[step 3.2] exp Date: сегодняшняя дата (с клиентских часов)
+	[step 3.3] exp Level: заголовок группы дрилов (""Level 1"")
+	[step 3.4] exp показаны ВСЕ дрилы из Drill Mapping Primary Development Focus skills последней submitted evaluation (не один дрил на скилл, не только скиллы с оценкой ниже 3), без дублей
+	[step 3.5] exp у каждого дрила указано Drill name (media title, если есть, иначе имя дрила)
+	[step 3.6] exp Duration показана только если больше 0 минут";;;;;Roles;Athlete
+91893;Athlete видит свои репорты;;;Пользователь авторизован как Athlete. Для этого атлета и для других атлетов команды  есть завершённые (submitted) evaluation.;;;71601;Draft;;"[step 1] Открыть Evaluation Reports.
+	[step 1.1] В списке — только завершённые отчёты этого атлета.
+Отчёты других атлетов не отображаются.";;;;;Evaluation report;
+91894;Рейтинг категории ниже 3 раскрывает под-скиллы;;;Открыта scorecard grid для evaluation.;;;71494;Draft;;"[step 1] Поставить атлету рейтинг по категории ниже 3.
+	[step 1.1]  Система раскрывает связанные под-скиллы этой категории для детальной оценки";;;;;Evaluation;CRUD evaluation
+91895;View coach;;;"Зайти оунером / админом / коачем
+Должны быть коачи";;;72057;Draft;;"[step 1] Перейти в coach
+	[step 1.1] есть таблица с коачами с информацией 
+Name: Coach full name.+ Email: Coach email (search matches name or email).
+Phone number: 
+action view + edit
+	[step 1.2] Есть кнопки view
+	[step 1.3] Есть также new coach
+[step 2] Попробовать поиск по name
+	[step 2.1] поиск работает
+[step 3] Попробовать поиск по email
+	[step 3.1] поиск работает
+[step 4] Попробовать пагинацию
+	[step 4.1] пагинацию работает";;;;;Coach;
+91896;Workout drills come from every mapped drill on Primary Development Focus skills, no duplicates;;;Зайти коачем, submit evaluation атлету с 2+ Primary Development Focus skills, у которых есть общий (одинаковый) дрил в Drill Mapping и есть разные дрилы;;;72667;Draft;;"[step 1] Зайти атлетом на home page
+	[step 1.1] exp в Workout Entry присутствуют ВСЕ дрилы из Drill Mapping обоих skills (не по одному на скилл)
+	[step 1.2] exp дрил, общий для двух skills, отображается один раз (без дублей)";;;;;Roles;Athlete
+91897;002 View Plan Parent;;;"У атлета должен быть слинкован родитель 
+У атлета есть как собственные, так и инвайтед планы";;;71643;Active;;"[step 1] Зайти родителем  в Plans
+	[step 1.1] Есть My Plans, Invited,
+[step 2] По умолчанию открыта My Plans
+	[step 2.1] Показаны все планы
+	[step 2.2] Родитель может только просматривать, не может редактировать или удалять
+[step 3] Зайти в Invited
+	[step 3.1] показаны все Invited планы
+	[step 3.2] Родитель может только просматривать, не может редактировать или удалять";;;;;Plan;CRUD plan
+91898;Evaluation reports;;;;;;71829;Draft;;"[step 1] Когда коач/админ оценил атлета,  то атлету и слинкованому родителю приходит Evaluation reports";;;;;Notification / email;Email
+91899;active organization membership;;;"Зайти owner/admin/sys admin
+есть деактивированный юзер";;;72064;Draft;;"[step 1] Перейти в Manage Users
+[step 2] На деактивированном юзере открыть 3 вот
+	[step 2.1] есть activate кнопка
+[step 3] Включить  activate
+	[step 3.1] юзер стал активным , надпись deactivate исчезла
+[step 4] Зайти активированным вновь юзером
+	[step 4.1] юзер вошел";;;;;Manage user;
+91900;Invation coach;;;"Создать easy join code АДМИНОМ
+По коду зарегестрировать юзера";;;71825;Draft;;"[step 1] Зайти тем юзером, кто создал код
+	[step 1.1] есть нотификация 
+
+Title: ""New member joined [Team name]""
+Message: ""[Athlete/Coach name] joined [Team name] using your Easy Join code. [View profile button]""
+Deep link: Opens the new member's profile on the Athletes page ";;;;;Notification / email;Notification
+91901;Shared practice plans;;;"Отправить инвайт на палн  атлету, к которму слинкован родитель";;;71827;Draft;;"[step 1] Зайти атлетом
+	[step 1.1] пришло уведомление что пришел инвайт
+	[step 1.2] Title: ""You've been invited to a practice plan""
+Message: ""[Coach / Administrator name] shared the practice plan [Plan name] with you. [View Practice plan button]""
+Deep link: Opens the shared plan
+[step 2] Зайти родителем
+	[step 2.1] также есть уведомление";;;;;Notification / email;Notification
+91902;После submit родитель атлета получает notification и email;;;"Draft evaluation для атлета с валидным email/аккаунтом готов к отправке.
+у оцениваемого атлета есть привязанный родитель";;;71565;Draft;;"[step 1]  Submit evaluation.
+[step 2] Проверить in-app уведомление и email родителя.
+	[step 2.1] Родитель атлета получает и in-app notification, и email со ссылкой на отчёт.";;;;;Evaluation;Submit Evaluation
+91903;Permission;;;"Owner / admin имеет все эти вкладки";;;71843;Draft;;"[step 1] Organization profile - может просматривать, редактировать  только свою организацию
+[step 2] Skill - CRUD
+[step 3] Drill - CRUD
+[step 4] Scorecard Templates - CRUD
+[step 5] Athlete - CRUD
+[step 6] Parents - CRUD
+[step 7] Coach - CRUD
+[step 8] Team - CRUD
+[step 9] Easy join - CRUD
+[step 10] Evaluation - CRUD
+[step 11] Evaluation report - see all  organization report
+[step 12] Plan - see all organization plan";;;;;Roles;Owner / admin
+91904;После submit атлет получает notification и email;;;Draft evaluation для атлета с валидным email/аккаунтом готов к отправке.;;;71564;Draft;;"[step 1]  Submit evaluation.ё
+[step 2] Проверить in-app уведомление и email атлета.
+	[step 2.1] Атлет получает и in-app notification, и email со ссылкой на отчёт.";;;;;Evaluation;Submit Evaluation
+91905;shared plan;;;;;;71830;Draft;;"[step 1] Приходит тому, с кем поделились планом";;;;;Notification / email;Email
+91906;[NEW] Drill detail: play instructional video (YouTube);;Проверка воспроизведения обучающего видео на странице деталей дрила;Открыт drill detail с настроенным YouTube URL;;;72683;Draft;;"[step 1] Открыть detail дрила, у которого задан YouTube URL
+[step 2] Нажать play на видео
+	[step 2.1] exp видео воспроизводится (YouTube URL корректно встроен/открывается)";;;;;Drill;View drills
+91907;Coach/Administrator/Owner видят все завершённые отчёты организации;;;"Зайти Coach/Administrator/Owner 
+ Для атлетов есть завершённые (submitted) evaluation.";;;71603;Draft;;"[step 1] Открыть Evaluation Reports
+	[step 1.1] Список содержит все завершённые отчёты организации";;;;;Evaluation report;
+91908;Просмотр not submitted evaluation;;;В организации есть черновики evaluation, созданные разными коучами и оуенром / админом;;;71561;Draft;;"[step 1] Войти под любым Coach/Administrator/Owner.
+[step 2]  Открыть список Evaluations (drafts).
+	[step 2.1] Evaluation ID: Id of the evaluation.
+Created: When the evaluation was created.
+Team: Name of the team on the evaluation.
+Scorecard: Name of the scorecard template on the evaluation.
+Status: Evaluation status.  pending
+	[step 2.2] Отображены action view , edit , delete";;;;;Evaluation;CRUD evaluation
+91909;Invation athlete;;;"Создать easy join code КОАЧЕМ
+По коду зарегестрировать юзера";;;71824;Draft;;"[step 1] Зайти тем юзером, кто создал код
+	[step 1.1] есть нотификация 
+
+Title: ""New member joined [Team name]""
+Message: ""[Athlete/Coach name] joined [Team name] using your Easy Join code. [View profile button]""
+Deep link: Opens the new member's profile on the Athletes page ";;;;;Notification / email;Notification
+91910;Permission;;;;;;71846;Draft;;"[step 1] Skill / drill -  view only
+[step 2] Evaluation - view only
+[step 3] Evaluation report -  view only
+[step 4] Plan - CRUD only own plan";;;;;Roles;Parent
+91911;После submit генерируется evaluation report;;;Существует draft evaluation с хотя бы одним оценённым атлетом.;;;71562;Draft;;"[step 1] Открыть draft evaluation.
+[step 2] Изменить оценку одного из атлетов, не нажимая отдельно Save.
+[step 3] Нажать ""Submit"".
+	[step 3.1] Система сохраняет несохранённые изменения оценок перед отправкой.
+	[step 3.2] После submit генерируется evaluation report для каждого оценённого атлета";;;;;Evaluation;Submit Evaluation
+91912;edit parent;;;"Зайди админом / оунером
+Должен быть атлет со заполненными всеми полями и с привязанным родителем";;;71256;Draft;;"[step 1] Перейти в parent
+[step 2] Выбрать parent
+[step 3] Нажать  edit
+[step 4] Отредактировать  все поля, которые можно отредактировать
+[step 5] Сохранить
+[step 6] Снова зайти на родителя
+	[step 6.1] информация обновилась
+[step 7] Зайти родителем
+	[step 7.1] указано новое имя / информация";;;;;Parent;Create parent from add manual
+91913;Можно сделать оценку менее 3 только для 5;;;"Выбрать темплейт с 6 категориями
+Сделать evaluation для ателта с данным темплейтом 
+Открыта scorecard grid с атлетом";;;71493;Draft;;"[step 1] Открыть evlautaiom
+[step 2] Проставить атлету для 5 категорий оценку 1 и 2
+[step 3] Поставить этому атлету оценку 2 для 6 категории
+	[step 3.1] валидация, что нельзя поставить оценку ниже 3 более чем 5 категорий";;;;;Evaluation;CRUD evaluation
+91914;Forgot password;;;Открыт экран Sign In.;;;70943;Draft;;"[step 1] Найти и нажать на ссылку/кнопку ""Forgot password"".
+	[step 1.1] открылась форма заполнения имайла
+[step 2] Ввести имайл существующего юзера
+	[step 2.1] нотификация If an account exists for that email, a reset link has been sent.
+[step 3] Проверить имайл
+	[step 3.1] есть письмо о смене пароля
+[step 4] Ввести новый пароль
+	[step 4.1] успешно
+[step 5] Перейти на логин
+[step 6] Ввести старый пароль
+	[step 6.1] валидация ""Invalid login credentials.""
+[step 7] Ввести новый пароль
+	[step 7.1] успешно вошел";;;;;Login;Sign in
+91915;Edit own organization;;;Зайти Owner / admin;;;71924;Draft;;"[step 1] Перейти в Organization profile
+[step 2] Нажать edit
+	[step 2.1] открылись поля 
+organization details: 
+Name
+program gender
+sports
+	[step 2.2] Admin contact 
+first name / last name 
+email 
+phone
+[step 3] Отредактировать информацию organization details:
+	[step 3.1] информация успешно отредактирована";;;;;Organization Profile;
+91916;Invite multiple user to plan  by coach;;;Зайти коачем;;;71716;Draft;;"[step 1] Перейти в my plan
+[step 2] Создать план
+[step 3] Сохранить план
+	[step 3.1] план сохранен
+[step 4] Перейти в edit
+	[step 4.1] есть invite people
+[step 5] Нажать invite
+	[step 5.1] Открылся дропдаун с выбором пользователей
+[step 6] Выбрать  сразу 5 - 10 пользователй
+[step 7] Нажать invite
+	[step 7.1] нотификация Invites saved. Emails sent: 10 ( число приглашенных)
+[step 8] Всем приглашенном юзерам пришел инвайт на почту";;;;;Plan;Invite plan
+91917;Easy Join Codes;;;Зайти оунером / админом /  коачем;;;71847;Draft;;"[step 1] Зайти в Easy Join Codes
+	[step 1.1] показаны коды
+[step 2] Нажать New join code
+	[step 2.1] открылась форма заполнения
+	[step 2.2] team
+max uses
+expires at
+active
+disabled
+[step 3] Заполнить поля
+[step 4] Сохарнить
+	[step 4.1] код создан и отображен в таблице";;;;;Easy join;
+91918;Unchecking Prebuilt removes plan from Prebuilt everywhere;;;Зайти sys admin. Существует план sys admin, уже опубликованный как Prebuilt (все drill Public);;;72614;Active;;"[step 1] Открыть Edit на Prebuilt-плане
+[step 2] Снять чекбокс Make this a Prebuilt Plan
+[step 3] Сохранить
+[step 4] Зайти в другую организацию того же вида спорта, перейти в Prebuilt Plans
+	[step 4.1] exp плана больше нет в списке Prebuilt Plans ни для одной организации";;;;;Plan;CRUD plan
+91919;Create  skill;;;Зайти как админ/оунер;;;74217;Draft;;"[step 1] Перейти в Skill
+[step 2] Нажать Create Skill
+[step 3] Ничего не заполнять и нажать create
+	[step 3.1] Title, category и level  обязательны
+[step 4] Заполнить все поля
+[step 5] Вставить видео URL youtube
+[step 6] Создать
+	[step 6.1] успешно
+	[step 6.2] в библиотеке отображен skill
+	[step 6.3] skill принадлежит виду спорта организации
+	[step 6.4] Видимость дрилс - organization";;;;;Skill;Skill
