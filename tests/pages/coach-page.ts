@@ -88,6 +88,8 @@ export class CoachPage extends BasePage {
     await this.clickNewCoach();
     await this.fillCoachForm(params);
     await this.createButton.click();
+    // Ждем загрузки страницы списка после создания (таблица обновляется асинхронно)
+    await this.page.waitForLoadState('networkidle');
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
   }
 

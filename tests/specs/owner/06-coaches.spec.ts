@@ -59,6 +59,8 @@ test.describe('Owner Coach Tests', () => {
 
     // TC-91891 [step 4]: Сохранить
     await coachPage.createButton.click();
+    // Ждем возврата на страницу списка после создания
+    await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
 
     // TC-91891 [step 4.1] exp: коач отобразился в таблице
     // Ждать появления coach в таблице через поиск

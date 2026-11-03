@@ -92,7 +92,7 @@ export class ParentPage extends BasePage {
   /** Выбор Athlete */
   async selectAthlete(athleteName: string): Promise<void> {
     await this.athleteSelect.click();
-    await this.page.getByRole('option', { name: new RegExp(athleteName, 'i') }).first().click();
+    await this.athleteOptions.filter({ hasText: new RegExp(athleteName, 'i') }).first().click();
   }
 
   /** Нажать Create в диалоге создания */
@@ -115,6 +115,7 @@ export class ParentPage extends BasePage {
     await this.selectRelationship(params.relationship);
     await this.selectAthlete(params.athleteName);
     await this.clickCreateInDialog();
+    // Ждем загрузки страницы списка после создания
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
   }
 

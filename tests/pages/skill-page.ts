@@ -83,6 +83,9 @@ export class SkillPage extends BasePage {
   }): Promise<void> {
     await this.fillSkillForm(params);
     await this.createButton.click();
+    // Ждем загрузки страницы списка после создания
+    await this.page.waitForLoadState('networkidle');
+    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
   }
 
   /** Поиск skill по имени */

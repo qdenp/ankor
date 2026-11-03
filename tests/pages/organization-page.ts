@@ -72,6 +72,8 @@ export class OrganizationPage extends BasePage {
   /** Сохранить изменения */
   async save(): Promise<void> {
     await this.saveButton.click();
+    // Ждем загрузки страницы списка после сохранения
+    await this.page.waitForLoadState('networkidle');
   }
 
   /** Отменить редактирование */
@@ -97,9 +99,12 @@ export class OrganizationPage extends BasePage {
     return nameCell.locator('..'); // parent row
   }
 
-  /** Кликнуть Edit на строке DataGrid */
+  /** Кликнуть Edit на строке DataGrid (через More actions menu) */
   async clickEditOnRow(row: Locator): Promise<void> {
-    await row.getByRole('button', { name: /Edit|Редактировать/i }).first().click();
+    const moreActions = row.getByRole('button', { name: 'More actions' });
+    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
+    await moreActions.click();
+    await this.page.getByRole('menuitem', { name: 'Edit' }).click();
   }
 
   /** Проверка что страница загружена (heading visible) */

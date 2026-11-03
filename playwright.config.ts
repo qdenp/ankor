@@ -25,7 +25,8 @@ export default defineConfig({
   retries: 2,
 
   /* Limit workers to match number of roles (owner, coach, parent, athlete) */
-  workers: process.env.CI ? 1 : 4,
+  /* Limit workers to match number of roles (owner, coach, parent, athlete, sysadmin) */
+  workers: process.env.CI ? 1 : undefined,
 
   /* Reporter to use */
   reporter: process.env.CI
@@ -56,8 +57,54 @@ export default defineConfig({
   /* Configure browsers */
   projects: [
     {
-      name: 'chromium',
+      name: 'owner',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: [
+        'tests/specs/coach/**',
+        'tests/specs/parent/**',
+        'tests/specs/athlete/**',
+        'tests/specs/sysadmin/**',
+      ],
+    },
+    {
+      name: 'sysadmin',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: [
+        'tests/specs/owner/**',
+        'tests/specs/coach/**',
+        'tests/specs/parent/**',
+        'tests/specs/athlete/**',
+      ],
+    },
+    {
+      name: 'coach',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: [
+        'tests/specs/owner/**',
+        'tests/specs/parent/**',
+        'tests/specs/athlete/**',
+        'tests/specs/sysadmin/**',
+      ],
+    },
+    {
+      name: 'parent',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: [
+        'tests/specs/owner/**',
+        'tests/specs/coach/**',
+        'tests/specs/athlete/**',
+        'tests/specs/sysadmin/**',
+      ],
+    },
+    {
+      name: 'athlete',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: [
+        'tests/specs/owner/**',
+        'tests/specs/coach/**',
+        'tests/specs/parent/**',
+        'tests/specs/sysadmin/**',
+      ],
     },
   ],
 });
