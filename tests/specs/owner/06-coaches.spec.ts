@@ -63,8 +63,7 @@ test.describe('Owner Coach Tests', () => {
     await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
 
     // TC-91891 [step 4.1] exp: коач отобразился в таблице
-    // Ждать появления coach в таблице через поиск
-    await coachPage.searchInput.fill(COACH_EMAIL);
+    await coachPage.search(COACH_EMAIL);
     await expect(coachPage.getRowByEmail(COACH_EMAIL)).toBeVisible({ timeout: TIMEOUTS.long });
     // Очистить поиск
     await coachPage.searchInput.clear();
@@ -103,8 +102,7 @@ test.describe('Owner Coach Tests', () => {
     await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.medium });
 
     // TC-91895 [step 1.2] exp: Есть кнопки view
-    // Ждать появления coach в таблице через поиск
-    await coachPage.searchInput.fill(COACH_EMAIL);
+    await coachPage.search(COACH_EMAIL);
     await expect(coachPage.getRowByEmail(COACH_EMAIL)).toBeVisible({ timeout: TIMEOUTS.long });
     const row = coachPage.getRowByEmail(COACH_EMAIL);
     const viewButton = row.getByRole('button', { name: 'View' });
@@ -114,12 +112,12 @@ test.describe('Owner Coach Tests', () => {
     await expect(coachPage.newCoachButton).toBeVisible({ timeout: TIMEOUTS.medium });
 
     // TC-91895 [step 2]: Попробовать поиск по name
-    await coachPage.searchInput.fill('View Coach');
+    await coachPage.search('View Coach');
     // TC-91895 [step 2.1] exp: поиск работает
     await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
 
     // TC-91895 [step 3]: Попробовать поиск по email
-    await coachPage.searchInput.fill(COACH_EMAIL);
+    await coachPage.search(COACH_EMAIL);
     // TC-91895 [step 3.1] exp: поиск работает
     await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
 
@@ -153,18 +151,16 @@ test.describe('Owner Coach Tests', () => {
       confirmPassword: 'Test123456',
     });
 
-    // Ждём появления coach в таблице через поиск
-    await coachPage.searchInput.fill(COACH_EMAIL);
-    await expect(coachPage.getRowByEmail(COACH_EMAIL)).toBeVisible({ timeout: TIMEOUTS.long });
+    // Ждём загрузки таблицы
+    await coachPage.waitForLoading();
 
     // TC-91852 [step 1]: Перейти в coach
     // TC-91852 [step 1.1] exp: открылась таблица со всеми коачами
     await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.medium });
 
     // TC-91852 [step 2]: Нажать edit на выбранном юзере
-    // Заполняем search чтобы найти coach
-    await coachPage.searchInput.fill(COACH_EMAIL);
-    // Ждём загрузки результатов поиска через web-first ожидание
+    // Ищем coach
+    await coachPage.search(COACH_EMAIL);
     const row = coachPage.getRowByEmail(COACH_EMAIL);
     await expect(row).toBeVisible({ timeout: TIMEOUTS.long });
     const moreActions = row.getByRole('button', { name: 'More actions' });
@@ -193,7 +189,7 @@ test.describe('Owner Coach Tests', () => {
     // TC-91852 [step 4.1] exp: информация отредактирована
     await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
     // Ищем по уникальному имени
-    await coachPage.searchInput.fill('Edited Coach');
+    await coachPage.search('Edited Coach');
     await expect(coachPage.getRowByName('Edited Coach')).toBeVisible({ timeout: TIMEOUTS.long });
   });
 });

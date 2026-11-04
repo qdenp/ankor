@@ -102,4 +102,15 @@ export class BasePage {
     await this.logoutMenuItem.click();
     await expect(this.page).toHaveURL(/sign-in/, { timeout: TIMEOUTS.long });
   }
+
+  /**
+   * Ожидание завершения загрузки данных.
+   * Loading indicator (MUI CircularProgress) появляется при переходе на страницу
+   * и после создания/редактирования/удаления записей.
+   * НЕ появляется при поиске — данные уже в DOM.
+   */
+  async waitForLoading(): Promise<void> {
+    const loading = this.page.getByRole('progressbar', { name: /loading/i });
+    await expect(loading).toBeHidden({ timeout: TIMEOUTS.long });
+  }
 }

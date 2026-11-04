@@ -25,7 +25,7 @@ test.describe('Owner Team Tests', () => {
     });
 
     // Проверяем, что команда создалась и отображается в таблице
-    await teamPage.searchByName(teamName);
+    await teamPage.search(teamName);
     await expect(teamPage.getTeamRow(teamName)).toBeVisible({ timeout: TIMEOUTS.medium });
   });
 });

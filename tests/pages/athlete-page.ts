@@ -112,12 +112,14 @@ export class AthletePage extends BasePage {
     await this.fillAthleteForm(params);
     await this.createButton.click();
     await expect(this.newAthleteHeading).toBeHidden({ timeout: TIMEOUTS.medium });
+    // Ждём загрузки страницы списка после создания
+    await this.waitForLoading();
   }
 
-  /** Поиск Athlete по email */
-  async searchByEmail(email: string): Promise<void> {
-    await this.searchInput.fill(email);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по email (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Проверка существования Athlete по email */

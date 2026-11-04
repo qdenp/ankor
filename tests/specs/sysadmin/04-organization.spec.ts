@@ -54,7 +54,7 @@ test.describe('SysAdmin Organization Tests', () => {
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
 
-    await orgPage.searchInput.fill(newName);
+    await orgPage.search(newName);
     await orgPage.waitForDataGridLoaded();
 
     const newOrgRow = orgPage.getOrgRow(newName);
@@ -69,7 +69,7 @@ test.describe('SysAdmin Organization Tests', () => {
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
 
-    await orgPage.searchInput.fill(newName);
+    await orgPage.search(newName);
     await orgPage.waitForDataGridLoaded();
 
     const orgRowToEdit = orgPage.getOrgRow(newName);
@@ -86,7 +86,7 @@ test.describe('SysAdmin Organization Tests', () => {
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
 
-    await orgPage.searchInput.fill(originalName);
+    await orgPage.search(originalName);
     await orgPage.waitForDataGridLoaded();
 
     const revertedOrgRow = orgPage.getOrgRow(originalName);

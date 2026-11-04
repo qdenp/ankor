@@ -88,12 +88,14 @@ export class TeamPage extends BasePage {
     await this.fillTeamForm(params);
     await this.createButton.click();
     await expect(this.newTeamHeading).toBeHidden({ timeout: TIMEOUTS.long });
+    // Ждём загрузки страницы списка после создания
+    await this.waitForLoading();
   }
 
-  /** Поиск команды по имени */
-  async searchByName(name: string): Promise<void> {
-    await this.searchInput.fill(name);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по имени (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Получить локатор строки команды в таблице */

@@ -88,10 +88,10 @@ export class SkillPage extends BasePage {
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
   }
 
-  /** Поиск skill по имени */
-  async searchByName(name: string): Promise<void> {
-    await this.searchInput.fill(name);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по имени (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Проверка что skill появился в списке (skills — articles, не rows) */

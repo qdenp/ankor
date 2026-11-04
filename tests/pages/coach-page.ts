@@ -93,30 +93,17 @@ export class CoachPage extends BasePage {
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
   }
 
-  /** Поиск Coach по email */
-  async searchByEmail(email: string): Promise<void> {
-    await this.searchInput.fill(email);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
-  }
-
-  /** Поиск Coach по имени */
-  async searchByName(name: string): Promise<void> {
-    await this.searchInput.fill(name);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по email или имени (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Проверка существования Coach по email */
   async isCoachExists(email: string): Promise<boolean> {
-    await this.searchInput.fill(email);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.search(email);
     const rows = this.coachRows.filter({ hasText: email, exact: false });
     return await rows.count() > 0;
-  }
-
-  /** Применить поиск коуча по идентификатору (email или имя) */
-  async applyCoachSearch(identifier: string): Promise<void> {
-    await this.searchInput.fill(identifier);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
   }
 
   /** Получить локатор строки коуча в таблице (после применения поиска) */
@@ -167,35 +154,7 @@ export class CoachPage extends BasePage {
     const saveButton = this.page.getByRole('button', { name: 'Save' });
     await expect(saveButton).toBeVisible({ timeout: TIMEOUTS.medium });
     await saveButton.click();
-  }
-
-  /** Просмотр Coach через More actions */
-  async viewCoach(email: string): Promise<void> {
-    await this.applyCoachSearch(email);
-    const row = this.getCoachRow(email);
-    await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
-    const moreActions = row.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
-    await moreActions.click();
-    await expect(this.page.getByRole('menuitem', { name: 'View' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await this.page.getByRole('menuitem', { name: 'View' }).click();
-    await expect(this.page.getByRole('heading', { name: /Coach/i })).toBeVisible({ timeout: TIMEOUTS.long });
-  }
-
-  /** Удалить coach через More actions */
-  async deleteCoach(email: string): Promise<void> {
-    await this.applyCoachSearch(email);
-    const row = this.getCoachRow(email);
-    await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
-    const moreActions = row.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
-    await moreActions.click();
-    await expect(this.page.getByRole('menuitem', { name: 'Delete' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await this.page.getByRole('menuitem', { name: 'Delete' }).click();
-    // Confirm delete
-    const confirmButton = this.page.getByRole('button', { name: /Delete|Confirm|Yes/i }).first();
-    await expect(confirmButton).toBeVisible({ timeout: TIMEOUTS.medium });
-    await confirmButton.click();
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
+    // Ждём загрузки страницы списка после редактирования
+    await this.waitForLoading();
   }
 }

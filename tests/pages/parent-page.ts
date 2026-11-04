@@ -115,14 +115,14 @@ export class ParentPage extends BasePage {
     await this.selectRelationship(params.relationship);
     await this.selectAthlete(params.athleteName);
     await this.clickCreateInDialog();
-    // Ждем загрузки страницы списка после создания
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
+    // Ждём загрузки страницы списка после создания
+    await this.waitForLoading();
   }
 
-  /** Поиск Parent по email */
-  async searchByEmail(email: string): Promise<void> {
-    await this.searchInput.fill(email);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по email (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Проверка существования Parent по email */
@@ -161,5 +161,7 @@ export class ParentPage extends BasePage {
 
     // Сохранить
     await this.saveButton.click();
+    // Ждём загрузки страницы списка после редактирования
+    await this.waitForLoading();
   }
 }

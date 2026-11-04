@@ -43,7 +43,7 @@ test.describe('Owner Parent Tests', () => {
     await parentPage.clickCreateInDialog();
 
     // Родитель в списке (search ищет по имени, не по email)
-    await parentPage.searchInput.fill('TestParent');
+    await parentPage.search('TestParent');
     await expect(parentPage.getParentRow('TestParent')).toBeVisible({ timeout: TIMEOUTS.long });
 
     // --- Шаг 5.2: у атлета появился родитель ---
@@ -88,7 +88,7 @@ test.describe('Owner Parent Tests', () => {
     await expect(parentPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
 
     // --- Шаг 6: проверить что информация обновилась ---
-    await parentPage.searchInput.fill(newFirstName);
+    await parentPage.search(newFirstName);
     await expect(parentPage.getParentRow(newFirstName)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 });

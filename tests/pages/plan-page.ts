@@ -234,10 +234,10 @@ export class PlanPage extends BasePage {
     await expect(this.myPlansTab).toBeVisible();
   }
 
-  /** Поиск плана по имени */
-  async searchByName(name: string): Promise<void> {
-    await this.searchInput.fill(name);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по имени (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Получить локатор карточки плана в My Plans — robust selection by role */

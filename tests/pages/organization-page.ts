@@ -86,10 +86,10 @@ export class OrganizationPage extends BasePage {
     await expect(this.firstDataRow).toBeVisible({ timeout: TIMEOUTS.long });
   }
 
-  /** Поиск организации по имени */
-  async searchByName(name: string): Promise<void> {
-    await this.searchInput.fill(name);
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+  /** Поиск по имени (клиентская фильтрация, Enter не нужен) */
+  async search(text: string): Promise<void> {
+    await this.searchInput.click();
+    await this.searchInput.fill(text);
   }
 
   /** Получить строку организации по имени (robust search for MUI DataGrid) */

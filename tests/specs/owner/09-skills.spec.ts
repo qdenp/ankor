@@ -50,7 +50,7 @@ test.describe('Owner Skill Tests', () => {
 
     // --- Шаг 6.1: успешно ---
     // --- Шаг 6.2: в библиотеке отображен skill ---
-    await skillPage.searchInput.fill(skillName);
+    await skillPage.search(skillName);
     await expect(skillPage.getSkillCard(skillName)).toBeVisible({ timeout: TIMEOUTS.long });
 
     // --- Шаг 6.3: skill принадлежит виду спорта организации ---

@@ -32,7 +32,7 @@ test.describe('Owner Plan Tests', () => {
     await planPage.savePlanAndReturnToMyPlans();
 
     // Проверяем, что план создан и отображается — используем поиск
-    await planPage.searchInput.fill(planName);
+    await planPage.search(planName);
     await expect(planPage.searchInput).toHaveValue(planName);
     await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long });
   });
@@ -92,7 +92,7 @@ test.describe('Owner Plan Tests', () => {
     await planPage.savePlanAndReturnToMyPlans();
 
     // Проверяем, что план создан
-    await planPage.searchInput.fill(planName);
+    await planPage.search(planName);
     await expect(planPage.searchInput).toHaveValue(planName);
     await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long });
   });
@@ -146,7 +146,7 @@ test.describe('Sysadmin Plan Tests', () => {
     await planPage.savePlanAndReturnToMyPlans();
 
     // Приглашаем пользователей
-    await planPage.searchInput.fill(planName);
+    await planPage.search(planName);
     await expect(planPage.searchInput).toHaveValue(planName);
     
     const planCard = planPage.getPlanCard(planName);
