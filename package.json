@@ -10,7 +10,7 @@
     "test:coach": "playwright test --project=coach",
     "test:parent": "playwright test --project=parent",
     "test:athlete": "playwright test --project=athlete",
-    "test:all": "npx playwright test --project=owner --project=sysadmin --project=coach --project=parent --project=athlete"
+    "test:all": "npx concurrently \"npm run test:owner\" \"npm run test:sysadmin\" \"npm run test:coach\" \"npm run test:parent\" \"npm run test:athlete\""
   },
   "keywords": [],
   "author": "",
@@ -18,6 +18,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
+    "concurrently": "^9.1.2",
     "dotenv": "^18.0.9",
     "playwright": "^1.64.1"
   }
