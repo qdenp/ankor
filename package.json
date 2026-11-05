@@ -10,7 +10,7 @@
     "test:coach": "playwright test --project=coach",
     "test:parent": "playwright test --project=parent",
     "test:athlete": "playwright test --project=athlete",
-    "test:all": "npx playwright test --project=owner --project=sysadmin --project=coach --project=parent --project=athlete --workers=1"
+    "test:all": "npx playwright test --project=owner --project=sysadmin --project=coach --project=parent --project=athlete --workers=5"
   },
   "keywords": [],
   "author": "",
