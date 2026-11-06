@@ -30,27 +30,31 @@ test.describe('SysAdmin Organization Tests', () => {
   // 91861: Edit organization as SysAdmin
   test('@TC-91861 sysadmin can edit organization name and revert', async ({ page }) => {
     const orgPage = new OrganizationPage(page);
+    const targetEmail = 'dtimokhin+aiorg01@aexsoft.com';
 
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
 
-    // Wait for first data row (data-rowindex="0") to appear
-    const firstDataRow = orgPage.firstDataRow;
-    await expect(firstDataRow, 'First data row should be visible').toBeVisible({ timeout: TIMEOUTS.long });
+    // Find the specific organization by email (robust identity)
+    const targetOrgRow = orgPage.getOrgRowByEmail(targetEmail);
+    await expect(targetOrgRow, `Organization row with email "${targetEmail}" should be visible`).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // Click Edit on the first organization row
-    await orgPage.clickEditOnRow(firstDataRow);
+    // Get current name from the row
+    const originalName = await orgPage.getOrgNameFromRow(targetOrgRow);
+
+    // Click Edit on the target organization row
+    await orgPage.clickEditOnRow(targetOrgRow);
     await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
 
-    // Save original name
-    const originalName = await orgPage.nameInput.inputValue();
+    // Verify the input shows the current name
+    await expect(orgPage.nameInput).toHaveValue(originalName);
 
     // Edit organization
     const newName = `Test Org ${Date.now()}`;
     await orgPage.fillOrgForm({ name: newName });
     await orgPage.save();
 
-    // After save, go back to list and verify name changed by clicking edit again
+    // After save, go back to list and verify name changed
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
 
@@ -65,7 +69,7 @@ test.describe('SysAdmin Organization Tests', () => {
     await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
     await expect(orgPage.nameInput, 'Name input should show new name').toHaveValue(newName);
 
-    // Revert cleanup: go back to list, search by new name, edit, revert
+    // Revert cleanup: go back to list, search by new name, edit, revert to original
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
 

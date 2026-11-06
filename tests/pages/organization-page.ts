@@ -99,6 +99,18 @@ export class OrganizationPage extends BasePage {
     return nameCell.locator('..'); // parent row
   }
 
+  /** Получить строку организации по email (для надёжной идентификации) */
+  getOrgRowByEmail(email: string): Locator {
+    // Email находится в колонке Admin, ищем по тексту во всей строке
+    return this.page.locator('[role="row"]').filter({ hasText: email }).first();
+  }
+
+  /** Получить имя организации из строки таблицы */
+  async getOrgNameFromRow(row: Locator): Promise<string> {
+    const nameCell = row.locator('[role="gridcell"][data-field="name"]');
+    return await nameCell.textContent();
+  }
+
   /** Кликнуть Edit на строке DataGrid (через More actions menu) */
   async clickEditOnRow(row: Locator): Promise<void> {
     const moreActions = row.getByRole('button', { name: 'More actions' });

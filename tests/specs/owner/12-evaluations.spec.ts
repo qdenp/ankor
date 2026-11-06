@@ -5,7 +5,7 @@ import { TIMEOUTS } from '../../config';
 test.describe('Owner Evaluation Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
-  const TEMPLATE_NAME = 'Default Template for Evaluation';
+  const TEMPLATE_NAME = '!Default Template for Evaluation';
   const TEAM_NAME = 'Team01';
 
   test.beforeEach(async ({ page, loginAs }) => {

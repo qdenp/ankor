@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:owner": "playwright test --project=owner",
-    "test:sysadmin": "playwright test --project=sysadmin",
-    "test:coach": "playwright test --project=coach",
-    "test:parent": "playwright test --project=parent",
-    "test:athlete": "playwright test --project=athlete",
+    "test:owner": "playwright test --project=owner --workers 1",
+    "test:sysadmin": "playwright test --project=sysadmin --workers 1",
+    "test:coach": "playwright test --project=coach --workers 1",
+    "test:parent": "playwright test --project=parent --workers 1",
+    "test:athlete": "playwright test --project=athlete --workers 1",
     "test:all": "npx concurrently \"npm run test:owner\" \"npm run test:sysadmin\" \"npm run test:coach\" \"npm run test:parent\" \"npm run test:athlete\""
   },
   "keywords": [],

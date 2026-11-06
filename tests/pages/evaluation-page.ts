@@ -40,6 +40,9 @@ export class EvaluationPage extends BasePage {
   // Table
   readonly tableRows: ReturnType<this['page']['getByRole']>;
 
+  // Create button (visible/hidden check)
+  readonly createButton: ReturnType<this['page']['getByRole']>;
+
   constructor(page: Page) {
     super(page);
 
@@ -89,6 +92,9 @@ export class EvaluationPage extends BasePage {
 
     // Table
     this.tableRows = page.getByRole('row');
+
+    // Create button (visible/hidden check)
+    this.createButton = page.getByRole('button', { name: /Create|New/i });
   }
 
   /** Переход на страницу Evaluations через левое меню */

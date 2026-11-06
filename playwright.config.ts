@@ -2,7 +2,6 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright configuration for Ankor Athletics App
- * @see https://playwright.dev/docs/configuration
  */
 export default defineConfig({
   testDir: './tests/specs',
@@ -24,8 +23,12 @@ export default defineConfig({
   /* Retry on flaky tests (network errors, timing issues) */
   retries: 2,
 
-  /* Limit workers to match number of roles (owner, coach, parent, athlete) */
-  /* Limit workers to match number of roles (owner, coach, parent, athlete, sysadmin) */
+  // ⚠️ НЕ МЕНЯЙ ЭТОТ ФАЙЛ — workers задаются через CLI (npm run test:*), а не здесь.
+  // Каждая роль запускается отдельно: "playwright test --project=owner --workers 1"
+  // Это гарантирует строго 1 воркер на роль (тесты внутри serial идут последовательно).
+  // Параллельность между ролями обеспечивается concurrently в test:all.
+  // Глобальное ограничение workers = количеству ролей — неправильно: роли добавляются,
+  // а запуск может быть только части ролей. Ограничение задаётся на уровне CLI.
   workers: process.env.CI ? 1 : undefined,
 
   /* Reporter to use */

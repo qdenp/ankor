@@ -21,16 +21,16 @@
 ### 2. Roles (13 тестов)
 - 91830 — Home page (System Administrator) ✅ (13-plans.spec.ts)
 - 91835 — Drill/skill visibility (sys admin) ❌
-- 91836 — Permission (Athlete) ❌
-- 91839 — Home page (Owner/admin) ❌
-- 91849 — Permission (Coach) ❌
-- 91856 — Home page (Coach Summary) ❌
-- 91864 — Permission (sys admin) ❌
-- 91885 — Home page (Parent) ❌
-- 91892 — Home page (Athlete) ❌
+- 91836 — Permission (Athlete) ✅ (01-permissions.spec.ts)
+- 91839 — Home page (Owner/admin) ✅
+- 91849 — Permission (Coach) ✅
+- 91856 — Home page (Coach Summary) ✅
+- 91864 — Permission (sys admin) ✅
+- 91885 — Home page (Parent) ✅
+- 91892 — Home page (Athlete) ✅
 - 91896 — Workout drills no duplicates (Athlete) ❌
-- 91903 — Permission (Owner/admin) ❌
-- 91910 — Permission (Parent) ❌
+- 91903 — Permission (Owner/admin) ✅
+- 91910 — Permission (Parent) ✅
 
 ### 3. Plan (17 тестов)
 - 91831 — Parent cannot create plan ✅ (13-practice-plans.spec.ts)
@@ -145,7 +145,7 @@
 
 ## Статус покрытия
 
-### ✅ Завершено (38 тест-кейсов)
+### ✅ Завершено (46 тест-кейсов)
 - 91876 — Успешный вход (01-signin.spec.ts)
 - 91848 — Create team (08-teams.spec.ts)
 - 91884 — Owner/admin view own organization (04-organization.spec.ts)
@@ -187,6 +187,15 @@
 - 91873 — Create parent (07-parents.spec.ts)
 - 91912 — Edit parent (07-parents.spec.ts)
 - 91919 — Create skill (09-skills.spec.ts)
+- 91836 — Permission (Athlete) (01-permissions.spec.ts)
+- 91903 — Permission (Owner/admin) (01-permissions.spec.ts)
+- 91910 — Permission (Parent) (parent/01-permissions.spec.ts)
+- 91849 — Permission (Coach) (coach/01-permissions.spec.ts)
+- 91864 — Permission (Sys admin) (sysadmin/01-permissions.spec.ts)
+- 91839 — Home page (Owner/admin) (owner/02-homepage.spec.ts)
+- 91856 — Home page (Coach Summary) (coach/02-homepage.spec.ts)
+- 91885 — Home page (Parent) (parent/03-homepage.spec.ts)
+- 91892 — Home page (Athlete) (athlete/03-homepage.spec.ts)
 
 ### ⏭️ Пропускаем (4 тест-кейса)
 - 91868 — Forgot password (проверка почты)
@@ -198,6 +207,6 @@
 
 ## Итого
 - Всего тест-кейсов: 91
-- ✅ Завершено: 44 (48.4%)
+- ✅ Завершено: 52 (57.1%)
 - ⏭️ Пропускаем: 5 (5.5%)
-- ❌ Не покрыто: 42 (46.2%)
+- ❌ Не покрыто: 34 (37.4%)
