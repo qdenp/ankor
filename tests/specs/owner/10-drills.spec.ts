@@ -2,11 +2,15 @@ import { test, expect } from '../../fixtures';
 import { DrillPage } from '../../pages/drill-page';
 import { TIMEOUTS } from '../../config';
 
+/**
+ * Module-level переменные — доступны всем тестам в файле.
+ * TC-91865 генерирует уникальное имя и сохраняет сюда, остальные тесты используют.
+ */
+let DRILL_NAME: string;
+const SEGMENT = 'Shooting';
+
 test.describe('Owner Drill Tests', () => {
   test.describe.configure({ mode: 'serial' });
-
-  const DRILL_NAME = 'Test Drill for Create';
-  const SEGMENT = 'Shooting';
 
   test.beforeEach(async ({ page, loginAs }) => {
     await loginAs('owner');
@@ -21,6 +25,9 @@ test.describe('Owner Drill Tests', () => {
    */
   test('should create drill with all fields', async ({ page }) => {
     const drillPage = new DrillPage(page);
+
+    // Генерируем уникальное имя для drill
+    DRILL_NAME = `Test Drill ${Date.now()}`;
 
     // TC-91865 [step 1]: Перейти в Drills
     await drillPage.goto();
@@ -80,7 +87,7 @@ test.describe('Owner Drill Tests', () => {
     await expect(drillPage.maxAgeInput).toBeVisible({ timeout: TIMEOUTS.medium });
     await expect(drillPage.youtubeUrlInput).toBeVisible({ timeout: TIMEOUTS.medium });
 
-    // Заполнить и создать drill
+    // Заполнить и создать drill — используем DRILL_NAME из TC-91865
     await drillPage.fillName(DRILL_NAME);
     await drillPage.fillDescription('Test drill for permissions');
     await drillPage.selectSegment(SEGMENT);
@@ -105,7 +112,7 @@ test.describe('Owner Drill Tests', () => {
   test('should view drill detail with YouTube video', async ({ page }) => {
     const drillPage = new DrillPage(page);
 
-    // Создать drill с YouTube URL
+    // Создать drill с YouTube URL — используем DRILL_NAME из TC-91865
     await drillPage.goto();
     await drillPage.clickNewDrill();
     await drillPage.fillName(DRILL_NAME);

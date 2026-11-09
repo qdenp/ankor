@@ -34,7 +34,7 @@ export default defineConfig({
   /* Reporter to use */
   reporter: process.env.CI
     ? [['html', { outputFolder: 'reports/html' }]]
-    : [['html', { outputFolder: 'reports/html' }], ['list']],
+    : [['line', { outputFile: 'test-output.log' }], ['list'], ['html', { outputFolder: 'reports/html' }]],
 
   /* Shared settings for all projects */
   use: {

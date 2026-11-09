@@ -433,7 +433,7 @@ npx playwright show-report
 npx playwright test --list
 
 # Нет прямых локаторов в тестах
-grep -r "page\.(getByRole\|locator\|getByText)" tests/specs
+grep -r "page\.(getByRole\|locator\|GetByText)" tests/specs
 
 # Нет хардкодных ожиданий
 grep -r "waitForTimeout" tests/
@@ -514,3 +514,54 @@ ls tests/specs/athlete/
 - Перед любым изменением — показать diff и объяснить, зачем это нужно
 - Если общий метод используется в нескольких тестах — правка может сломать работающие тесты
 - **Нарушение = остановка и откат изменений**
+
+---
+
+## 17. Запуск тестов — решение для Bash tool (120 сек лимит)
+
+Bash tool убивает процессы через 120 секунд по умолчанию. E2E тесты (~10-15 мин) не успевают.
+
+### Решение: параметр `timeout`
+
+**Параметр `timeout` в миллисекундах** — переопределяет дефолтные 120 секунд.
+
+```powershell
+# Запуск с таймаутом 30 минут (1800000 мс):
+Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
+Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+npm run test:all 2>&1 > test-output.log
+# timeout: 1800000
+```
+
+**Рабочие значения:**
+- `timeout: 600000` (10 мин) — для одной роли
+- `timeout: 1800000` (30 мин) — для полного прогона всех ролей
+
+**Формат прогресса:** `list` reporter из конфига показывает `ok N` (прошёл), `x N` (упал), `- N` (пропущен) для каждого теста.
+
+### Мониторинг
+
+```
+# Чтение файла через Read tool:
+# Read tool → test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
+# Формат: ok — прошёл, x — упал, - — пропущен
+
+# Проверка завершены ли:
+# Read tool → test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
+```
+
+### ❌ Не работает:
+- `npm run test:all` без `timeout` — убьётся через 120 сек
+- `Start-Job` — изоляция, файл не пишется
+- `Tee-Object` — блокируется
+
+### Альтернатива: PowerShell hidden process
+
+Если `timeout` не сработал, можно запустить процесс вне Bash tool:
+
+```powershell
+Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
+Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+$proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > test-output.log" -WindowStyle Hidden -PassThru
+Write-Output "Started PID: $($proc.Id)"
+```

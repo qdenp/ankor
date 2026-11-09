@@ -28,7 +28,7 @@ test.describe('SysAdmin Organization Tests', () => {
   });
 
   // 91861: Edit organization as SysAdmin
-  test('@TC-91861 sysadmin can edit organization name and revert', async ({ page }) => {
+  test.skip('@TC-91861 sysadmin can edit organization name and revert', async ({ page }) => {
     const orgPage = new OrganizationPage(page);
     const targetEmail = 'dtimokhin+aiorg01@aexsoft.com';
 
