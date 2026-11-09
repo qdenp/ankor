@@ -35,6 +35,10 @@ export class PlanPage extends BasePage {
   readonly addDrillConfirmButton: ReturnType<this['page']['getByRole']>;
   readonly doneButton: ReturnType<this['page']['getByRole']>;
 
+  // Drill edit dialog
+  readonly drillSaveButton: ReturnType<this['page']['getByRole']>;
+  readonly drillEditSaveButton: ReturnType<this['page']['getByRole']>;
+
   // Actions
   readonly inviteButton: ReturnType<this['page']['getByRole']>;
   readonly duplicateButton: ReturnType<this['page']['getByRole']>;
@@ -93,6 +97,7 @@ export class PlanPage extends BasePage {
 
     // Drill edit dialog
     this.drillSaveButton = page.getByRole('button', { name: /save|create/i }).first();
+    this.drillEditSaveButton = page.getByRole('button', { name: 'Done' });
 
     // Toast / success notification
     this.toast = page.getByRole('status').or(page.getByRole('alert')).first();
@@ -169,12 +174,19 @@ export class PlanPage extends BasePage {
   async editDrill(params: { notes?: string; duration?: string }): Promise<void> {
     await this.drillMenuButton.click();
     await this.editDrillOption.click();
+    await expect(this.drillNotesInput).toBeVisible({ timeout: TIMEOUTS.medium });
     if (params.notes) {
       await this.drillNotesInput.fill(params.notes);
     }
     if (params.duration) {
       await this.drillDurationInput.fill(params.duration);
     }
+  }
+
+  /** Сохранить изменения drill */
+  async saveDrillEdit(): Promise<void> {
+    await this.drillEditSaveButton.click();
+    await expect(this.segmentsHeading).toBeVisible({ timeout: TIMEOUTS.short });
   }
 
   /** Удалить drill */

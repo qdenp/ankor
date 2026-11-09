@@ -62,50 +62,6 @@ test.describe('Owner Plan Tests', () => {
 
     await planPage.cancelButton.click();
   });
-
-  // 91890: Create plan: notes - TODO: fix drill menu button selector
-  test.skip('@TC-91890 should create plan with drill notes', async ({ page }) => {
-    const planPage = new PlanPage(page);
-
-    await planPage.goto();
-    await planPage.goToMyPlans();
-
-    const planName = `Test Plan Notes ${Date.now()}`;
-    await planPage.clickNewPlan();
-    await planPage.fillPlanForm({ name: planName });
-
-    // Добавляем drill
-    await planPage.addDrillButton.click();
-    await expect(planPage.addDrillsHeading).toBeVisible({ timeout: TIMEOUTS.medium });
-    await planPage.addDrillConfirmButton.click();
-    await planPage.doneButton.click();
-    await expect(planPage.segmentsHeading).toBeVisible({ timeout: TIMEOUTS.short });
-
-    // Редактируем drill - добавляем notes
-    await planPage.drillMenuButton.click();
-    await planPage.editDrillOption.click();
-    await planPage.drillNotesInput.fill('Test drill notes');
-    await planPage.drillDurationInput.fill('15');
-    await planPage.drillSaveButton.click();
-
-    // Сохраняем план
-    await planPage.savePlanAndReturnToMyPlans();
-
-    // Проверяем, что план создан
-    await planPage.search(planName);
-    await expect(planPage.searchInput).toHaveValue(planName);
-    await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long });
-  });
-
-  // 91840: Athlete cannot edit invited plan - TODO: requires athlete role
-  test.skip('@TC-91840 athlete cannot edit invited plan', async ({ page }) => {
-    // Требует athlete ролью - будет в athlete/13-plans.spec.ts
-  });
-
-  // 91897: View Plan Parent - TODO: requires parent role
-  test.skip('@TC-91897 parent can view plans', async ({ page }) => {
-    // Требует parent ролью - будет в parent/13-plans.spec.ts
-  });
 });
 
 // Tab visibility tests via factory

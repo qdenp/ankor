@@ -46,7 +46,7 @@ export class OrganizationPage extends BasePage {
   async goto(): Promise<void> {
     // Use direct URL for reliability
     await this.page.goto('/settings/organization', { waitUntil: 'domcontentloaded' });
-    await this.page.waitForLoadState('networkidle');
+    await this.waitForLoading();
     // Wait for edit button to be visible (profile view has edit button)
     await expect(this.editButton).toBeVisible({ timeout: TIMEOUTS.long });
   }
@@ -72,8 +72,8 @@ export class OrganizationPage extends BasePage {
   /** Сохранить изменения */
   async save(): Promise<void> {
     await this.saveButton.click();
-    // Ждем загрузки страницы списка после сохранения
-    await this.page.waitForLoadState('networkidle');
+    // Ждем исчезновения спиннеров загрузки после сохранения
+    await this.waitForLoading();
   }
 
   /** Отменить редактирование */

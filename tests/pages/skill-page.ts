@@ -83,8 +83,8 @@ export class SkillPage extends BasePage {
   }): Promise<void> {
     await this.fillSkillForm(params);
     await this.createButton.click();
-    // Ждем загрузки страницы списка после создания
-    await this.page.waitForLoadState('networkidle');
+    // Ждем исчезновения спиннеров загрузки после создания
+    await this.waitForLoading();
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
   }
 

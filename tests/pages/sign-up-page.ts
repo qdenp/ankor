@@ -67,8 +67,8 @@ export class SignUpPage extends BasePage {
 
   /** Переход на страницу регистрации */
   async goto(): Promise<void> {
-    await super.goto(PAGES.signUp);
-    await this.waitForLoadState();
+    await this.page.goto(PAGES.signUp);
+    await this.page.waitForLoadState('networkidle');
   }
 
   /** Переход на страницу регистрации с easy join code */

@@ -84,12 +84,13 @@ export class BasePage {
 
   /** Ожидание загрузки страницы */
   async waitForLoadState(): Promise<void> {
-    await this.page.waitForLoadState('networkidle');
+    await this.waitForLoading();
   }
 
   /** Обновление страницы */
   async reload(): Promise<void> {
-    await this.page.reload({ waitUntil: 'networkidle' });
+    await this.page.reload();
+    await this.waitForLoading();
   }
 
   /** Выбор элемента в выпадающем списке */

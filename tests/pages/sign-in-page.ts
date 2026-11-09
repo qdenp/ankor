@@ -39,8 +39,11 @@ export class SignInPage extends BasePage {
 
   /** Переход на страницу входа */
   async goto(): Promise<void> {
-    await super.goto(PAGES.signIn);
-    await this.waitForLoadState();
+    await this.page.goto(PAGES.signIn);
+    // Ждём загрузки состояния страницы (React отрендерит форму)
+    // НЕ используем waitForLoading() — на sign-in нет спиннеров загрузки данных,
+    // но есть статичные элементы с классом .MuiCircularProgress-root (SVG-иконки MUI).
+    await this.page.waitForLoadState('networkidle');
   }
 
   /** Заполнение поля email */

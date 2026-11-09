@@ -35,9 +35,9 @@
 ### 3. Plan (17 тестов)
 - 91831 — Parent cannot create plan ✅ (13-practice-plans.spec.ts)
 - 91838 — Prebuilt checkbox (sys admin) ✅ (13-plans.spec.ts)
-- 91840 — Athlete cannot edit invited plan ❌
+- 91840 — Athlete cannot edit invited plan ✅
 - 91843 — Non-sysadmin no Prebuilt checkbox ✅ (13-plans.spec.ts)
-- 91844 — Athlete and Parent do not see Org Plans tab ❌
+- 91844 — Athlete and Parent do not see Org Plans tab ✅
 - 91847 — Athlete cannot duplicate plan ✅ (13-practice-plans.spec.ts)
 - 91853 — Duplicate creates copy ✅ (13-practice-plans.spec.ts)
 - 91859 — Create Plan as Administrator/Owner ✅ (13-practice-plans.spec.ts)
@@ -48,8 +48,8 @@
 - 91880 — View invited plan as athlete ❌
 - 91881 — View Plan athlete ✅ (13-practice-plans.spec.ts)
 - 91883 — Parent no Prebuilt Plans tab ✅ (13-practice-plans.spec.ts)
-- 91890 — Create plan: notes ❌ (требует создания плана coach'ом перед тестом)
-- 91897 — View Plan Parent ✅ (13-practice-plans.spec.ts)
+- 91890 — Create plan: notes ✅ (coach/13-plans.spec.ts)
+- 91897 — View Plan Parent ✅ (parent/13-plans.spec.ts)
 - 91916 — Invite multiple users to plan ✅ (13-plans.spec.ts)
 - 91918 — Unchecking Prebuilt removes plan ✅ (13-plans.spec.ts)
 
@@ -105,8 +105,8 @@
 - 91858 — Add athlete + parent ❌
 
 ### 11. Coach (3 теста)
-- 91852 — Edit coach ❌
-- 91891 — Add coach manually ❌
+- 91852 — Edit coach ✅ (06-coaches.spec.ts)
+- 91891 — Add coach manually ✅ (06-coaches.spec.ts)
 - 91895 — View coach ❌
 
 ### 12. Manage user (3 теста)
@@ -158,7 +158,10 @@
 - 91878 — Coach no Org Plans tab (13-practice-plans.spec.ts)
 - 91881 — View Plan athlete (13-practice-plans.spec.ts)
 - 91883 — Parent no Prebuilt Plans tab (13-practice-plans.spec.ts)
-- 91897 — View Plan Parent (13-practice-plans.spec.ts)
+- 91897 — View Plan Parent (parent/13-plans.spec.ts)
+- 91890 — Create plan: notes (coach/13-plans.spec.ts)
+- 91840 — Athlete cannot edit invited plan (athlete/13-plans.spec.ts)
+- 91844 — Athlete and Parent do not see Org Plans tab (athlete/13-plans.spec.ts, parent/13-plans.spec.ts)
 - 91830 — Home page (System Administrator) (13-plans.spec.ts)
 - 91838 — Prebuilt checkbox (sys admin) (13-plans.spec.ts)
 - 91843 — Non-sysadmin no Prebuilt checkbox (13-plans.spec.ts)
@@ -203,10 +206,10 @@
 - 91902 — После submit родитель получает notification и email (проверка email)
 - 91904 — После submit атлет получает notification и email (проверка email)
 
-### ❌ Не покрыто (49 тест-кейсов)
+### ❌ Не покрыто (27 тест-кейсов)
 
 ## Итого
 - Всего тест-кейсов: 91
-- ✅ Завершено: 52 (57.1%)
+- ✅ Завершено: 59 (64.8%)
 - ⏭️ Пропускаем: 5 (5.5%)
-- ❌ Не покрыто: 34 (37.4%)
+- ❌ Не покрыто: 27 (29.7%)
