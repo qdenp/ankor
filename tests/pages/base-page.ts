@@ -30,6 +30,7 @@ export class BasePage {
   readonly navEasyJoin: ReturnType<this['page']['getByRole']>;
   readonly navNotifications: ReturnType<this['page']['getByRole']>;
   readonly navPlans: ReturnType<this['page']['getByRole']>;
+  readonly navHome: ReturnType<this['page']['getByRole']>;
 
   constructor(page: Page) {
     this.page = page;
@@ -64,6 +65,8 @@ export class BasePage {
     this.navEasyJoin = page.getByRole('link', { name: /easy.*join/i, exact: false });
     this.navNotifications = page.getByRole('link', { name: /notification/i, exact: false });
     this.navPlans = page.getByRole('link', { name: /Plans/i, exact: false });
+    // Home есть в меню у любого авторизованного пользователя — признак, что сессия рабочая
+    this.navHome = page.getByRole('link', { name: 'Home', exact: true });
   }
 
   /** Переход на корневую страницу приложения */

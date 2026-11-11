@@ -99,11 +99,15 @@ export const test = base.extend<AuthFixture, { browser: Browser }>({
       // Если кэш валиден — восстанавливаем сессию из storageState
       if (isTokenValid(storagePath)) {
         await restoreAuthFromCache(page, storagePath);
-        if (!page.url().includes('/sign-in')) {
-          return; // Сессия восстановлена успешно
+        // Приложению нужно ~3–4 с, чтобы решить судьбу сессии: показать меню
+        // или (если токен отозван на сервере) уйти на /sign-in. Проверка URL
+        // сразу после reload срабатывает раньше и принимает отозванную сессию за рабочую.
+        const homeLink = new BasePage(page).navHome;
+        await expect(homeLink.or(signInPage.welcomeHeading)).toBeVisible({ timeout: TIMEOUTS.long });
+        if (await homeLink.isVisible()) {
+          return; // Сессия восстановлена
         }
-        // Токен ревокан на сервере — приложение редиректит на sign-in.
-        // В этом случае кэш недействителен — делаем UI-логин.
+        // Токен отозван — кэш недействителен, делаем UI-логин.
       }
 
       // UI-логин: гарантируем, что мы на странице входа.
@@ -118,6 +122,7 @@ export const test = base.extend<AuthFixture, { browser: Browser }>({
       }
       await signInPage.login(credentials.email, credentials.password);
       await expect(page).not.toHaveURL(/sign-in/, { timeout: TIMEOUTS.long });
+      await expect(new BasePage(page).navHome).toBeVisible({ timeout: TIMEOUTS.long });
 
       // Обновляем кэш свежим состоянием
       const state = await page.context().storageState();
