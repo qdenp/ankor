@@ -21,11 +21,10 @@
 
 ## Этап 0. Безопасность (немедленно)
 
-- [ ] **0.1 Перевыпустить токен TestOps.** В [.gigacode_vsc/gigacode.jsonc](.gigacode_vsc/gigacode.jsonc) открытым текстом лежит `api-token atopat_…`, и файл не игнорируется git.
-  - Перевыпустить токен в TestOps.
-  - Передавать его через переменную окружения, а не хранить в файле.
-  - Добавить `.gigacode_vsc/gigacode.jsonc` в `.gitignore`.
-  - **Готово, когда:** `git check-ignore .gigacode_vsc/gigacode.jsonc` возвращает путь, старый токен отозван.
+- [x] **0.1 Убрать токен TestOps из [.gigacode_vsc/gigacode.jsonc](.gigacode_vsc/gigacode.jsonc).**
+  - Сделано: токен перенесён в пользовательскую переменную окружения `TESTOPS_AUTH_HEADER`, конфиг ссылается на `${TESTOPS_AUTH_HEADER}`. Файл без секрета закоммичен как общий конфиг MCP.
+  - Решение: токен оставлен прежним, не перевыпускался (в git он не попадал).
+  - Инструкция по настройке — в [testops-integration.md](.gigacode_vsc/skills/testops-integration.md).
 - [ ] **0.2 Добавить артефакты прогонов в `.gitignore`:** `allure-report/`, `allure-results/`, `allure-results.zip`, `test-output.log`, `test-*.log`.
 - [ ] **0.3 Перестать игнорировать `package-lock.json`.** Сейчас он в `.gitignore`, и сборки с `^`-версиями невоспроизводимы. Убрать его из `.gitignore` и закоммитить lock-файл.
 
