@@ -32,7 +32,7 @@
 
 ## Этап 1. Критичные баги инфраструктуры и данных
 
-- [ ] **1.1 Перенести тесты sysadmin из папки owner.**
+- [x] **1.1 Перенести тесты sysadmin из папки owner.** Сделано: блок перенесён без изменений в `tests/specs/sysadmin/13-plans.spec.ts`, `npm run test:sysadmin` — 6 passed, 1 skipped (TC-71957, skip был и раньше).
   - **Где:** блок `Sysadmin Plan Tests` в [tests/specs/owner/13-plans.spec.ts:71-180](tests/specs/owner/13-plans.spec.ts#L71-L180).
   - **Проблема:** блок логинится как sysadmin внутри проекта owner. При `test:all` он идёт параллельно с проектом sysadmin, и оба процесса пишут в `tests/.auth/sysadmin.json`.
   - **Что сделать:** перенести блок в `tests/specs/sysadmin/13-plans.spec.ts`.
