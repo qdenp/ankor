@@ -99,8 +99,8 @@
 ### Шаг 2: Ревью по чек-листам
 
 **Использовать 3 чек-листа:**
-- `test-reliability.md` — 16 паттернов надежности (race conditions, weak assertions, fragile selectors, inline locators, hardcoded values, missing cleanup, test order dependency, missing await on expect, non-retrying assertions, stale elements, type coercion, conditional assertions, discarded returns)
-- `test-antipatterns.md` — 10 анти-паттернов эффективности (hard waits, Promise.all, sequential logins, redundant logins, redundant setup, missing waitForResponse, missing await on fire-and-forget, asserting on Locator, sleep in hooks, shared mutable state)
+- `test-reliability.md` — 17 паттернов надёжности (race conditions, fragile selectors, weak assertions, assertion-title mismatch, inline locators, hardcoded values, missing cleanup, test order dependency, missing error messages, stale elements, non-retrying assertions, overly broad scope, missing await on expect, conditional assertions, type coercion, discarded returns, missing data load wait)
+- `test-antipatterns.md` — 11 анти-паттернов эффективности (hard waits, double-wait chains, broken Promise.all, unnecessary wrappers, redundant logins, redundant setup/cleanup, missing waitForResponse, missing await on fire-and-forget, asserting on Locator, waits in shared hooks, shared mutable state)
 - `test-pom-review.md` — 6 проверок PO (hidden waits, missing await, fragile selectors, error swallowing, isVisible wrappers, complex methods)
 
 **Workflow:**
@@ -153,7 +153,7 @@
 
 ### Шаг 6: Повторный запуск
 ```bash
-npm run test:owner   # или test:coach / test:parent / test:athlete / test:all
+npm run test:owner   # или test:sysadmin / test:coach / test:parent / test:athlete / test:all
 ```
 Убедиться, что все правки не сломали проходящий тест.
 

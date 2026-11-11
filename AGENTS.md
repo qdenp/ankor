@@ -37,7 +37,7 @@ npm run test:all 2>&1 > test-output.log
 
 **Обязательно очищать ПЕРЕД запуском тестов и ПОСЛЕ генерации Allure отчёта:**
 
-```bash
+```powershell
 # Перед запуском тестов:
 Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
 Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
@@ -106,48 +106,9 @@ Write-Output "Started PID: $($proc.Id)"
 - ❌ Пропущенный todo item → СТОП
 - ❌ Скилл 04 не запущен → СЦЕНАРИЙ НЕ ЗАВЕРШЁН
 
-### Команды проверки дублей (из 01-test-scenario-analyst):
-```bash
-# Поиск по методам PO:
-grep -r "createAthlete" tests/specs/
-grep -r "createCoach" tests/specs/
-grep -r "createParent" tests/specs/
-grep -r "createPlan" tests/specs/
-grep -r "getAthleteRow\|getCoachRow\|getParentRow\|getPlanRow" tests/specs/
-
-# Список существующих тестов по ролям:
-ls tests/specs/owner/
-ls tests/specs/coach/
-ls tests/specs/parent/
-ls tests/specs/athlete/
-```
-
-### Формат плана для утверждения (01-test-scenario-analyst):
-```
-## Тестовый сценарий: [Название]
-
-**Роль:** [owner/coach/parent/athlete/sysadmin]
-**Файл:** [NN-topic.spec.ts]
-**Связанный PO:** [page-object.ts]
-
-### Предварительные условия
-- Пользователь авторизован как [роль]
-- [Любые необходимые настройки данных]
-
-### Шаги теста
-1. Перейти на [страницу/маршрут]
-2. [Действие через PO метод]
-3. [Действие через PO метод]
-...
-
-### Ассерты (web-first, ТОЛЬКО через PO)
-- await expect(po.getRow(name)).toBeVisible({ timeout: TIMEOUTS.long })
-- await expect(page).toHaveURL(/expected-route/)
-
-- [Новые методы PO / новый тестовый файл / расширение существующего]
-
-**Утверждаете ли вы этот план?**
-```
+### Где детали
+- Команды проверки дублей и формат плана для утверждения — в `01-test-scenario-analyst.md` (шаги 2 и 4).
+- Пошаговый чеклист старта и запреты — в `.gigacode_vsc/agent/workflow.md`.
 
 ---
 
@@ -231,8 +192,9 @@ export class AthletePage extends BasePage {
   async createAthlete(params: {...}): Promise<void> { ... }
   
   // Robust row lookup — multiple strategies
+  // Строка в name — подстрока без учёта регистра. Не строить new RegExp из данных: "+" в email — квантификатор
   getAthleteRow(email: string): Locator {
-    const byRole = this.page.getByRole('row', { name: new RegExp(email, 'i') });
+    const byRole = this.page.getByRole('row', { name: email });
     const byCell = this.page.locator('tr', { hasText: email }).first();
     const byText = this.page.getByText(email, { exact: false }).first();
     return byRole.or(byCell).or(byText).first();
@@ -248,7 +210,7 @@ readonly tableRows = page.getByRole('row');
 
 // Метод:
 getRow(name: string): Locator {
-  const byRole = this.page.getByRole('row', { name: new RegExp(name, 'i') });
+  const byRole = this.page.getByRole('row', { name });
   const byCell = this.page.locator('tr', { hasText: name }).first();
   const byText = this.page.getByText(name, { exact: false }).first();
   return byRole.or(byCell).or(byText).first();
@@ -322,21 +284,25 @@ test('@TC-91859 should create plan and see in My Plans', () => { ... });
 ```
 tests/specs/
 ├── owner/     ← тесты Owner/Admin
+├── sysadmin/  ← тесты System Administrator
 ├── coach/     ← тесты Coach
 ├── parent/    ← тесты Parent
 └── athlete/   ← тесты Athlete
 ```
+
+Тест лежит в папке той роли, под которой логинится. Проект Playwright определяется папкой: `loginAs('sysadmin')` в `owner/` выполнится в проекте owner, параллельно с проектом sysadmin, и оба будут писать в один `tests/.auth/sysadmin.json`.
 
 ### Запуск тестов
 
 **Каждая роль запускается на отдельном воркере — не пересекаются.**
 
 ```bash
-# Запустить все 4 роли параллельно (каждая на своём воркере)
+# Запустить все 5 ролей параллельно (каждая на своём воркере)
 npm run test:all
 
 # Запустить только одну роль
 npm run test:owner
+npm run test:sysadmin
 npm run test:coach
 npm run test:parent
 npm run test:athlete
@@ -370,7 +336,8 @@ test.describe('Owner Plan Tests', () => {
 
 ### ⚠️ Logout в конце serial-последовательности
 
-- Supabase ревокает JWT-токен при logout — токен становится невалидным на сервере
+- Supabase отзывает сессию при logout — токен становится невалидным на сервере
+- Проверять вход другого пользователя (например, только что созданного) — в отдельном контексте `browser.newContext({ baseURL })`, а не через logout текущей роли (пример — `owner/07-parents.spec.ts`)
 - Параллельные тесты с тем же email могут потерять сессию
 - **Правило:** тесты logout должны идти последними в serial-последовательности
 
@@ -400,12 +367,12 @@ test.describe('Owner Auth Tests', () => {
 ### tests/fixtures.ts — per-role storageState кэш
 
 - Кэш: `tests/.auth/{role}.json` (каждая роль — свой файл: owner, sysadmin, coach, parent, athlete)
-- `isTokenValid(storagePath)` — проверяет `exp` JWT в storageState (токен не истёк)
-- `restoreAuthFromCache(page, storagePath)` — восстанавливает cookies + localStorage в существующий контекст `page`, затем `reload`
-- `loginAs(role)` — если кэш валиден → восстанавливает сессию из файла; иначе UI-логин с `clearCookies()` + fallback очистки `localStorage` при редиректе на dashboard (старый отозванный токен в localStorage может редиректить на dashboard вместо sign-in)
-- `logout()` — удаляет **только файл кэша той роли, которая была залогинена** (отслеживается через модульную переменную `currentRole`). Кэши других ролей не трогаются — они живут на своих воркерех.
+- `isTokenValid(storagePath)` — проверяет `exp` access-токена в storageState (токен не истёк). Access-токен живёт час, после этого — UI-логин.
+- `restoreAuthFromCache(page, storagePath)` — кладёт cookies + localStorage в контекст `page` и открывает `/` через `goto('/')`. Именно `goto`, а не `reload`: к этому моменту приложение уже увело пустой браузер на `/sign-in`, и `reload` рендерит страницу входа, которая мелькает и сбивает проверку.
+- `loginAs(role)` — если кэш валиден → восстанавливает сессию и ждёт ссылку **Home** в меню (`BasePage.navHome`) или заголовок страницы входа. Приложению нужно ~3–4 с, чтобы решить судьбу сессии; отозванный на сервере токен уводит на `/sign-in` → UI-логин. При UI-логине кэш пишется только после появления Home.
+- `logout()` — удаляет **только файл кэша той роли, которая была залогинена** (отслеживается через модульную переменную `currentRole`). Кэши других ролей не трогаются — они живут на своих воркерах.
 - `currentRole` — устанавливается в `loginAs(role)`, сбрасывается в `logout()`. Нужно для корректной инвалидации кэша только своей роли.
-- Тесты sign-in/sign-up используют `test.use({ storageState: undefined })` для сброса кэша и чистого браузера.
+- Тесты sign-in/sign-up объявляют `test.use({ storageState: undefined })`, но сейчас это ничего не меняет: storageState в конфиге не задан, браузер теста и так чистый (REVIEW-PLAN 3.9).
 
 ### tests/pages/base-page.ts — селекторы профиля и логаута
 
@@ -416,15 +383,16 @@ test.describe('Owner Auth Tests', () => {
 - `logoutMenuItem` — `getByRole('menuitem', { name: /log out/i })` (совпадает с `<h6>Log Out</h6>` внутри `<li role="menuitem">`)
 - `openProfileMenu()` — ждёт `profileButton`visible, кликает, затем ждёт `logoutMenuItem`visible. Убран сломанный fallback, где `click()` вызывался без проверки `isVisible()`.
 
-### Результаты проверки
-
-- 42 passed, 0 failed, 4 flaky (пройдены на ретрае), logout стабилен 9/9 прогонов
-- Полный прогон без logout-тестов: ~3.9 мин (было ~5.8 мин)
-
 ## 10. Создание тестовых данных
 
+### Ограничение стенда
+- **Удалять можно только Teams.** Пользователей любых ролей удалить нельзя — только деактивировать через Manage Users (после этого они пропадают из своих списков).
+- Поэтому новые записи создаёт **только тест, который проверяет само создание**. Остальные тесты (view, edit, invite, права, валидация) переиспользуют созданную им сущность (REVIEW-PLAN 3.12).
+- Проверять правки инфраструктуры — на спеках, которые ничего не создают (`*-homepage`, `*-permissions`).
 
-- Пользователи создаются через `00-create-users.spec.ts` перед основными тестами
+### Основные тестовые пользователи
+- Пользователи ролей из `.env` уже созданы на стенде; `00-create-users.spec.ts` выключен (`describe.skip`) и нужен только для разворачивания нового стенда
+- Тесты не должны менять этих пользователей (имя, email, связи) — на них держатся тесты ролей
 - Каждый email может быть использован только один раз — повторная попытка создаст ошибку
 - Порядок создания: Athlete → Coach → Parent (так как Parent требует Athlete)
 - Для создания пользователей используем:
@@ -457,19 +425,21 @@ test.describe('Owner Auth Tests', () => {
 
 ```
 tests/
-├── config.ts           # URL, константы, credentials
-├── fixtures.ts         # Базовые фикстуры (login, roles)
-├── pages/              # Page Objects
+├── config.ts           # URL, константы, credentials (из .env.d333afta2q6llv)
+├── fixtures.ts         # Фикстуры: loginAs(role), logout(), кэш сессий
+├── .auth/              # Кэш сессий по ролям (gitignored)
+├── factories/          # Генераторы однотипных тестов (plan-tabs.factory.ts)
+├── pages/              # Page Objects (base-page.ts + по одному на раздел)
 │   ├── base-page.ts
 │   ├── sign-in-page.ts
-│   ├── sign-up-page.ts
+│   ├── athlete-page.ts
 │   └── ...
-└── specs/              # Тесты
-    ├── 00-create-users.spec.ts   # Создание тестовых пользователей
-    ├── 01-signin.spec.ts         # Авторизация
-    ├── 02-signup.spec.ts         # Регистрация
-    ├── 03-organization.spec.ts   # CRUD организаций
-    └── ...
+└── specs/              # Тесты по папкам ролей
+    ├── owner/          # 00-create-users, 01-signin, 04-organization, 06-coaches … 13-plans
+    ├── sysadmin/       # 01-permissions, 04-organization, 13-plans
+    ├── coach/
+    ├── parent/
+    └── athlete/
 ```
 
 ## 15. Команды для запуска
@@ -477,17 +447,24 @@ tests/
 ### ВАЖНО: всегда используй npm скрипты для запуска тестов
 
 ```bash
-# Все тесты (4 роли параллельно, каждая на своём воркере)
+# Все тесты (5 ролей параллельно, каждая на своём воркере)
 npm run test:all
 
 # Одна роль
 npm run test:owner
+npm run test:sysadmin
 npm run test:coach
 npm run test:parent
 npm run test:athlete
 
-# Один тест
-npx playwright test tests/specs/owner/01-signin.spec.ts
+# Один тест по названию (-- обязателен, иначе npm заберёт --grep себе)
+npm run test:owner -- --grep "should edit parent"
+
+# Один файл
+npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner
+
+# Проверка типов
+npm run typecheck
 
 # Show report
 npx playwright show-report
@@ -500,27 +477,20 @@ npx playwright show-report
 Автоматические проверки перед коммитом:
 
 ```bash
-# Тесты компилируются
+# Типы без ошибок
+npm run typecheck
+
+# Тесты находятся (нет ошибок загрузки)
 npx playwright test --list
 
-# Нет прямых локаторов в тестах
-grep -r "page\.(getByRole\|locator\|GetByText)" tests/specs
+# Нет прямых локаторов в тестах (должно быть пусто)
+grep -rnE "page\.(getByRole|getByText|locator|keyboard)" tests/specs
 
-# Нет хардкодных ожиданий
-grep -r "waitForTimeout" tests/
+# Нет хардкодных ожиданий (должно быть пусто)
+grep -rn "waitForTimeout(" tests/
 
-# Нет глушения ошибок
-grep -r "\.catch(() =>" tests/
+# Нет глушения ошибок (должно быть пусто)
+grep -rn "\.catch(() =>" tests/
 ```
 
-Добавить в `package.json` scripts:
-```json
-{
-  "scripts": {
-    "lint:tests": "grep -r \"page\\.(getByRole|locator|getByText)\" tests/specs && exit 1 || exit 0",
-    "lint:waits": "grep -r \"waitForTimeout\" tests/ && exit 1 || exit 0",
-    "lint:catches": "grep -r \"\\.catch(() =>\" tests/ && exit 1 || exit 0",
-    "pre-commit": "npm run lint:tests && npm run lint:waits && npm run lint:catches"
-  }
-}
-```
+Команды выше — для Git Bash. Как npm-скрипты они на Windows не работают: npm запускает скрипты через `cmd.exe`, где нет `grep`. Для автоматизации — ESLint (`eslint-plugin-playwright`) или скрипт на Node (REVIEW-PLAN 4.6).

@@ -20,8 +20,12 @@ athlete-page.ts      — Athletes CRUD, search, table rows
 coach-page.ts        — Coaches CRUD
 parent-page.ts       — Parents CRUD
 plan-page.ts         — Practice Plans CRUD, tabs, drills
-organization-page.ts — Organizations CRUD
+organization-page.ts — Organization profile, список организаций (sysadmin)
 team-page.ts         — Teams CRUD
+skill-page.ts        — Skills: создание, поиск, карточки
+drill-page.ts        — Drills: создание, детальная страница, YouTube
+scorecard-template-page.ts — Scorecard Templates: создание, категории, деактивация
+evaluation-page.ts   — Evaluations и Evaluation Reports: создание, оценки, удаление
 sign-in-page.ts      — Login flow
 sign-up-page.ts      — Registration flow
 home-page.ts         — Home/dashboard
@@ -78,7 +82,7 @@ base-page.ts         — Base class, shared methods (logout, navigation, wrapper
 ```
 
 ### Шаг 5: Проверка по существующим паттернам
-- Сравнить с похожими тестами в той же папке ролей (`tests/specs/owner/`, `coach/`, `parent/`, `athlete/`)
+- Сравнить с похожими тестами в той же папке ролей (`tests/specs/owner/`, `sysadmin/`, `coach/`, `parent/`, `athlete/`)
 - Убедиться в согласованности соглашений о наименовании
 - Проверить корректность использования фикстур (`loginAs`, `logout`)
 - Проверить, настроен ли serial mode при необходимости

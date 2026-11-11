@@ -20,7 +20,7 @@ test.describe('Owner Coach Tests', () => {
    * [step 3] Заполнить все поля
    * [step 4] Сохранить
    *   [step 4.1] коач отобразился в таблице
-   *   [step 4.2] а имайл пришло велком письмо (пропускаем — проверка email)
+   *   [step 4.2] на email пришло приветственное письмо (пропускаем — проверка email)
    *
    * @TC-91895 View coach
    * TC-91895 [step 1-4]: Verify coach table, search, pagination

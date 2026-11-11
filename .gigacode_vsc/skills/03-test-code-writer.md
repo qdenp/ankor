@@ -52,9 +52,9 @@ npx playwright test tests/specs/{role}/{file}.spec.ts --list
 Убедиться, что тесты обнаружены и нет ошибок компиляции.
 
 ```bash
-npm run test:{role}   # owner, coach, parent, athlete, или all
+npm run test:{role}   # owner, sysadmin, coach, parent, athlete, или all
 ```
-Запустить тестовый файл через npm script (AGENTS.md §13).
+Запустить тестовый файл через npm script (AGENTS.md §15).
 
 ### Шаг 5: Анализ результатов и рефакторинг
 
@@ -86,8 +86,9 @@ npm run test:{role}   # owner, coach, parent, athlete, или all
 
 ### Шаг 6: Повторный запуск после исправления
 ```bash
-npm run test:{role} --grep "название теста"
+npm run test:{role} -- --grep "название теста"
 ```
+`--` обязателен: без него npm заберёт `--grep` себе и запустит все тесты роли.
 Перезапустить конкретный упавший тест для проверки исправления.
 
 ### Шаг 7: Финальная проверка
@@ -169,7 +170,7 @@ readonly createButton = page.getByRole('button', { name: 'Create' });
 ### Поиск строк в таблице (Надёжный паттерн)
 ```ts
 getAthleteRow(email: string): Locator {
-  return this.athleteRows.filter({ hasText: email, exact: false }).first();
+  return this.athleteRows.filter({ hasText: email }).first(); // строка в hasText — подстрока без учёта регистра
 }
 ```
 

@@ -1,6 +1,6 @@
 # test-reliability.md — Quality Checklist для Ankor
 
-Полный чек-лист из 16 паттернов надежности. Используется в **04-test-review-and-fixes.md** (Шаг 2) для cold review.
+Полный чек-лист из 17 паттернов надёжности. Используется в **04-test-review-and-fixes.md** (Шаг 2) для cold review.
 
 Каждый пункт: severity + code example (bad/good) + fix + tie-break rules.
 
@@ -49,7 +49,7 @@ expect(await label.textContent()).toBe('Updated');
 
 **Стабильные альтернативы:**
 - `page.getByRole('button', { name: 'Submit' })` — accessibility-based
-- `page.getByTestId('appointment-card')` — явный test hook
+- `page.getByTestId('plan-card')` — явный test hook
 - `page.getByText('exact static text')` — если текст стабилен
 - `page.locator('[data-testid="value"]')` — тестовый атрибут
 
@@ -110,13 +110,13 @@ await test.step('Fill form and submit', async () => {
 
 **Что искать:** Title говорит "verify X", ассерты проверяют Y. X остается непротестированным.
 
-**Пример:** Test titled "Verify requestor caller components during a video call" но ассертит только коннект.
+**Пример из проекта:** тест `should generate report and workout after submit` (12-evaluations) проверяет только появление оценки в таблице — ни report, ни workout не проверяются.
 
 **Аннотация:**
 ```ts
-// MEDIUM: Title says "verify caller components" but no assertions check components
-// FIX: Add assertions for the specific components named in the test title
-test("AUTO-112 - [Caller] Verify requestor caller components during a video call",
+// MEDIUM: Title says "generate report and workout" but assertions only check the evaluation row
+// FIX: Add assertions for the report and workout named in the test title
+test('should generate report and workout after submit', async ({ page }) => {
 ```
 
 ---
@@ -127,8 +127,8 @@ test("AUTO-112 - [Caller] Verify requestor caller components during a video call
 
 **BAD:**
 ```ts
-await page.locator('.cdk-overlay-container .mat-dialog-actions button').click();
-await page.locator('//div[@class="call-status"]').textContent();
+await page.locator('.MuiDialog-root .MuiDialogActions-root button').click();
+await page.locator('input[type="number"]').first().fill('2');
 ```
 
 **FIX:** Перенести в соответствующий PO как публичный locator property.
@@ -141,7 +141,7 @@ await page.locator('//div[@class="call-status"]').textContent();
 ```ts
 // MEDIUM: Inline selector — should be in a page object for reuse and maintenance
 // FIX: Move to the appropriate page object as a public Locator property
-await page.locator('.cdk-overlay-container .mat-dialog-actions button').click();
+await page.locator('.MuiDialog-root .MuiDialogActions-root button').click();
 ```
 
 ---
@@ -154,7 +154,7 @@ await page.locator('.cdk-overlay-container .mat-dialog-actions button').click();
 - Email адреса как строковые литералы
 - API URLs не через `PAGES` или `BASE_URL`
 - User IDs / entity IDs как raw числа
-- Даты, которые устареют (appointments на конкретную дату)
+- Даты, которые устареют (например, ожидаемая дата последней оценки)
 
 **Не флажить:**
 - Assertion expected values статичные ("Active", "Completed")
@@ -176,16 +176,18 @@ await loginPage.emailInput.fill('owner@test.com');
 **Проверить:**
 - `beforeAll` создает данные, нет cleanup в `afterAll`
 - Тест меняет настройку, не ревертит
-- Тест создает appointment/plan — не отменяет
-- `afterEach` без `page.close()` для созданных контекстов
+- Тест создаёт team — не удаляет
+- `afterEach` без `close()` для созданных вручную контекстов (`browser.newContext()`)
+
+**Ограничение стенда:** удалять можно только Teams. Пользователей любых ролей удалить нельзя — только деактивировать через Manage Users. Для них «cleanup» = не создавать лишних: новых создаёт только тест создания, остальные переиспользуют (REVIEW-PLAN 3.12).
 
 **Best practice в проекте:** Cleanup в `beforeEach` (не `afterEach`) — тест начинает чисто даже если предыдущий упал. Но создание БЕЗ ЛЮБОГО cleanup path — проблема.
 
 **Аннотация:**
 ```ts
-// HIGH: Creates plan via UI but no cleanup — pollutes next run
-// FIX: Add cancelPlan in beforeEach or afterAll for this data
-const response = await createAppointment(request, token, data);
+// HIGH: Creates team via UI but never deletes it — pollutes the stand
+// FIX: Delete the created team at the end of the test (afterEach / finally)
+await teamPage.createTeam({ name: teamName, active: true });
 ```
 
 ---
@@ -195,19 +197,18 @@ const response = await createAppointment(request, token, data);
 **Что искать:** Тесты проходят только после конкретного другого теста. Требуют `--workers 1` и порядок файлов.
 
 **Признаки:**
-- Тест читает из `temp-files/` значение, записанное ДРУГИМ тестом (не своим `beforeAll`)
+- Тест использует переменную модуля, которую заполняет только другой тест (например, `DRILL_NAME` в `10-drills.spec.ts`): при запуске одного теста через `--grep` переменная `undefined`
 - Тест предполагает состояние приложения, оставленное предыдущим тестом
-- `getReadValue()` для ключа, который никто в ЭТОМ спеке не писал
 - Комментарии "must run after X" или "depends on Y running first"
 
 **Не флажить:**
-- `getReadValue()` для ключей, написанных `beforeAll` в ТОМ ЖЕ спеке — это intended pattern
+- Переиспользование сущности из теста создания, если тест явно проверяет её наличие и падает с понятным сообщением, а в перспективе берёт её из хранилища прошлого прогона (REVIEW-PLAN 3.12)
 
 **Аннотация:**
 ```ts
-// CRITICAL: Reads value written by a different spec — fails if run independently
-// FIX: Create this data in beforeAll using UI helpers instead of cross-spec dependency
-const appointmentId = getReadValue("appointmentId", "profile-data-other-spec.txt");
+// CRITICAL: DRILL_NAME is set only by another test — undefined when this test runs alone
+// FIX: Assert the dependency with a clear message, or load the entity saved by the create test
+await drillPage.fillName(DRILL_NAME);
 ```
 
 ---
@@ -224,7 +225,7 @@ await expect(element).toBeVisible();
 
 **GOOD:**
 ```ts
-expect(response.status(), "Expected appointment creation to return 200").toBe(200);
+expect(response.status(), "Expected plan creation to return 200").toBe(200);
 await expect(element, "Expected success banner after form submit").toBeVisible();
 ```
 
@@ -306,7 +307,7 @@ expect(await element.textContent()).toBe('Expected');
 ```ts
 // LOW: Test covers 3 unrelated features — hard to pinpoint failure
 // FIX: Split into separate tests for each feature, sharing setup via beforeEach
-test("AUTO-XXX - Verify scheduling, billing, AND notifications",
+test('should create, view and edit a coach', async ({ page }) => {
 ```
 
 ---
@@ -318,8 +319,8 @@ test("AUTO-XXX - Verify scheduling, billing, AND notifications",
 **BAD:**
 ```ts
 expect(element).toBeVisible();
-expect(callerPage.muteButton).toBeVisible();
-expect.soft(element).toHaveText('Connected');
+expect(planPage.myPlansTab).toBeVisible();
+expect.soft(element).toHaveText('Saved');
 
 // ОЧЕНЬ ПЛОХО — внутри if/ternary, еще более скрыто
 if (expect(element).toBeVisible()) {  // Всегда truthy!
@@ -328,14 +329,14 @@ if (expect(element).toBeVisible()) {  // Всегда truthy!
 **GOOD:**
 ```ts
 await expect(element).toBeVisible();
-await expect(callerPage.muteButton).toBeVisible();
-await expect.soft(element).toHaveText('Connected');
+await expect(planPage.myPlansTab).toBeVisible();
+await expect.soft(element).toHaveText('Saved');
 ```
 
 **Различие:**
 - #13: `expect(locator).toBeVisible()` — нет `await` на самом ассерте
-- #11 (antipatterns): `page.reload()` — нет `await` на Playwright API call
-- #2 (reliability): `expect(await locator.textContent()).toBe()` — есть `await` но wrong pattern
+- antipatterns #8: `page.reload()` — нет `await` на вызове Playwright API
+- reliability #1 / #11: `expect(await locator.textContent()).toBe()` — `await` есть, но паттерн неверный (single-shot)
 
 **Аннотация:**
 ```ts
@@ -514,15 +515,15 @@ await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();
 
 ## Tie-Break Rules
 
-- **#2 vs #11:** Если `expect(await locator.textContent())` сразу после действия → **#2 (Race condition)**. Если standalone → **#11 (Non-retrying)**.
+- **#1 vs #11:** Если `expect(await locator.textContent())` сразу после действия → **#1 (Race condition)**. Если standalone → **#11 (Non-retrying)**.
 - **#3 vs #4:** Weak assertions + не match title → **#4 (Assertion-title mismatch)**. Только слабые ассерты → **#3**.
-- **#1 vs #5:** Fragile selector inline в спеке → **#5 (Inline locator)**. В PO → **#1 (Fragile selector)**.
-- **#13 vs #2 vs #11:** Нет `await` на expect() → **#13**. Есть `await` на expect но wrong pattern → **#2** или **#11** по контексту.
+- **#2 vs #5:** Fragile selector inline в спеке → **#5 (Inline locator)**. В PO → **#2 (Fragile selector)**.
+- **#13 vs #1 vs #11:** Нет `await` на expect() → **#13**. Есть `await`, но неверный паттерн → **#1** или **#11** по контексту.
 - **#14 vs #3:** Assertion в conditional → **#14**. Без conditional но shallow → **#3**.
 - **#15 vs #11:** Wrong type comparison (string vs boolean) → **#15**. Wrong pattern (non-retrying) → **#11**.
 - **#16 vs #13:** Нет `expect()` совсем, просто standalone call → **#16**. Есть `expect()` но нет `await` → **#13**.
 
-**Master rule:** Нет `await` на любом ассерте с Playwright matcher → **CRITICAL**, перекрывает все категории. Это самая влияющая баг: ассерт буквально не выполняется.
+**Master rule:** Нет `await` на любом ассерте с Playwright matcher → **CRITICAL**, перекрывает все категории. Это самый влиятельный баг: ассерт буквально не выполняется.
 
 **Никогда не double-annotate одну строку. Выбирай самый специфичный.**
 
@@ -531,7 +532,7 @@ await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();
 ## Использование в 04-test-review-and-fixes.md
 
 1. Открыть тест + используемые PO
-2. Пройти по пунктам 1-16
+2. Пройти по пунктам 1-17
 3. Каждое нарушение → inline annotation `// SEVERITY: ...` + `// FIX: ...`
 4. Обновить summary block в начале файла
 5. Cap: 20 аннотаций за запуск. Overflow → в chat report

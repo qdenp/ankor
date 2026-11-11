@@ -30,6 +30,7 @@ grep -r "getAthleteRow\|getCoachRow\|getParentRow\|getPlanRow" tests/specs/
 
 # Список существующих тестов по ролям:
 ls tests/specs/owner/
+ls tests/specs/sysadmin/
 ls tests/specs/coach/
 ls tests/specs/parent/
 ls tests/specs/athlete/

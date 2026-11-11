@@ -14,9 +14,9 @@
 
 **Что искать:** `page.waitForTimeout(ms)` или эквивалентные hard waits зарытые внутри PO методов. Callers не знают про hidden delay, он множится во всех тестах вызывающих метод.
 
-**В проекте (base-page.ts):**
-- Lines 82-84: `waitForElement` — принимает `timeout`, делает `waitFor({ state: 'visible', timeout })`
-- Lines 87-89: `waitForElementGone` — принимает `timeout`, делает `waitFor({ state: 'hidden', timeout })`
+**В проекте (`base-page.ts`):**
+- `waitForElement` — принимает `timeout`, делает `waitFor({ state: 'visible', timeout })`
+- `waitForElementGone` — принимает `timeout`, делает `waitFor({ state: 'hidden', timeout })`
 
 Эти методы скрывают ожидание. Callers думают что это быстрая проверка, а внутри — wait.
 
@@ -69,7 +69,7 @@ async closeDialog() {
 }
 ```
 
-**В проекте:** Проверить все методы в `base-page.ts` и конкретных PO. Особенно `clickButton`, `fillInput`, `selectOption`, `click`, `clickLink`, `click` (line 97-99).
+**В проекте:** Проверить все методы в `base-page.ts` и конкретных PO. Особенно обёртки `selectOption`, `click` и методы с несколькими действиями подряд (`createScorecard`, `deleteEvaluation`, `fillAthleteForm`).
 
 **Аннотация:**
 ```ts
@@ -90,11 +90,16 @@ this.closeButton.click();
 - Class-based селекторы только для стилей: `.mat-button-wrapper`
 - Index-based: `.locator('button').nth(2)` в конструкторе
 
-**В проекте (base-page.ts line 19):**
+**В проекте (`base-page.ts`, `profileButton`):**
 ```ts
-this.profileButton = page.locator('[role="button"]:has(svg), [role="button"]:has(img), [role="button"]:has(.MuiAvatar-root)').first();
+this.profileButton = page
+  .getByRole('button', { name: /profile|user|account|username/i })
+  .or(page.locator('[role="button"]:has(svg)'))
+  .or(page.locator('[role="button"]:has(img)'))
+  .or(page.locator('[role="button"]:has(.MuiAvatar-root)'))
+  .first();
 ```
-Сложный селектор с `:has()` и `.first()` — флажить как потенциально хрупкий. Лучше: `page.getByRole('button', { name: 'User menu' })` или `data-testid`.
+Цепочка с `:has(svg)` и `.first()` совпадает с любой кнопкой-иконкой — флажить как потенциально хрупкий. Кнопка профиля называется именем пользователя (например, `Parent User`), поэтому лучше привязка к имени из `CREDENTIALS` или `data-testid`.
 
 **Стабильные альтернативы:**
 - `page.getByRole('button', { name: 'Submit' })` — accessibility-based
@@ -109,9 +114,9 @@ this.profileButton = page.locator('[role="button"]:has(svg), [role="button"]:has
 
 **Аннотация:**
 ```ts
-// HIGH: Complex :has() selector with .first() — breaks if DOM structure changes
-// FIX: Use getByRole, getByTestId, or data-attribute selector
-this.profileButton = page.locator('[role="button"]:has(svg), [role="button"]:has(img), [role="button"]:has(.MuiAvatar-root)').first();
+// HIGH: :has(svg) fallback with .first() matches any icon button — breaks if DOM structure changes
+// FIX: Use getByRole with the user's name, getByTestId, or data-attribute selector
+.or(page.locator('[role="button"]:has(svg)'))
 ```
 
 ---
@@ -120,13 +125,13 @@ this.profileButton = page.locator('[role="button"]:has(svg), [role="button"]:has
 
 **Что искать:** `try/catch` блоки ловящие ошибки и возвращающие дефолтное значение (false, null, empty string) вместо проброса ошибки. Это скрывает реальные фейлы — тест проходит но фича сломана.
 
-**В проекте (base-page.ts lines 77-79):**
+**В проекте (`athlete-page.ts`, аналогично `isCoachExists` / `isParentExists`):**
 ```ts
-async isVisible(locator: Locator): Promise<boolean> {
-    return locator.isVisible();
+async isAthleteExists(email: string): Promise<boolean> {
+    return await this.athleteRows.filter({ hasText: email }).first().isVisible({ timeout: TIMEOUTS.short });
 }
 ```
-Возвращает `boolean` вместо ассерта. Caller делает `if (await po.isVisible(...))` — если элемент не виден, тест продолжается без фейла, баг скрыт.
+Возвращает `boolean` вместо ассерта. Caller делает `if (!await po.isAthleteExists(...))` — если таблица ещё не загрузилась, тест решает «не существует» и идёт по другой ветке, баг скрыт.
 
 **BAD pattern:**
 ```ts
@@ -148,7 +153,7 @@ await expect(locator).toBeVisible();
 await expect(locator).not.toBeVisible();
 ```
 
-**Различие от #1:** Если метод Имеет И hard wait И error swallowing → **#4 (error swallowing)** — hidden failure хуже hidden wait.
+**Различие от #1:** Если метод имеет и hard wait, и error swallowing → **#4 (error swallowing)** — hidden failure хуже hidden wait.
 
 **Не флажить:**
 - try/catch логирующий ошибку и re-throwing
@@ -158,7 +163,7 @@ await expect(locator).not.toBeVisible();
 ```ts
 // HIGH: Method returns boolean instead of asserting — hides real failures from callers
 // FIX: Remove method; callers should use await expect(locator).toBeVisible() / not.toBeVisible()
-async isVisible(locator: Locator): Promise<boolean> {
+async isAthleteExists(email: string): Promise<boolean> {
 ```
 
 ---
@@ -167,11 +172,11 @@ async isVisible(locator: Locator): Promise<boolean> {
 
 **Что искать:** Методы названные `isVisible`, `isPresent`, `isDisplayed`, `elementExists` которые внутри используют `waitForTimeout` или `waitFor` с таймаутом перед проверкой видимости. Имя говорит "quick check", но секретно ждет.
 
-**В проекте (base-page.ts):**
-- Lines 77-79: `isVisible` — просто `locator.isVisible()` без wait (но возвращает boolean — см. #4)
-- Lines 82-84: `waitForElement` — именуется как wait, но callers могут не ожидать wait
-- Lines 92-94: `getText` — возвращает `textContent()`, скрывает что элемент может быть stale
-- Lines 101-104: `getCount` — возвращает `count()`, скрывает что список может быть пустым
+**В проекте:**
+- `isAthleteExists` / `isParentExists` — `isVisible({ timeout })`: имя говорит «быстрая проверка», но ждёт до `TIMEOUTS.short` (и возвращает boolean — см. #4)
+- `base-page.ts` `waitForElement` — именуется как wait, но callers могут не ожидать wait
+- `base-page.ts` `getText` — возвращает `textContent()` один раз, без авто-ретрая
+- `base-page.ts` `getCount` — возвращает `count()` один раз, скрывает, что список мог ещё не загрузиться
 
 **Паттерн:**
 ```ts
@@ -211,30 +216,27 @@ async waitForElement(locator: Locator, timeout?: number): Promise<void> {
 - Метод включает assertions (`expect()`) — PO должен expose state, не ассертить
 - Имя метода не четко описывает что делает
 
-**В проекте (base-page.ts lines 107-125): `openProfileMenu` — 18 строк, 3 фоллбека, сложная логика:**
+**В проекте (`scorecard-template-page.ts`): `fillFirstCategory` / `addAndFillCategory` — ~40 строк, ветвление по количеству опций, логика продублирована в двух методах:**
 ```ts
-async openProfileMenu(): Promise<void> {
-    // Try primary profile button (avatar in header)
-    if (await this.profileButton.isVisible({ timeout: 3000 })) {
-        await this.profileButton.click({ timeout: TIMEOUTS.medium });
-    } else {
-        // Fallback: button with avatar/icon in header area
-        let fallbackButton = this.page.locator('header [role="button"]:has(svg), header [role="button"]:has(img), header [role="button"]:has(.MuiAvatar-root)').first();
-        if (await fallbackButton.isVisible({ timeout: 3000 })) {
-            await fallbackButton.click({ timeout: TIMEOUTS.medium });
-        } else {
-            // Fallback 2: any button in header with aria-haspopup or aria-expanded (menu trigger)
-            fallbackButton = this.page.locator('header [role="button"][aria-haspopup="true"], header [role="button"][aria-expanded]').first();
-            await fallbackButton.click({ timeout: TIMEOUTS.medium });
-        }
-    }
-    
-    // Wait for dropdown menu
-    await expect(this.logoutMenuItem).toBeVisible({ timeout: TIMEOUTS.medium });
+await videoSelect.click();
+await expect(this.page.getByRole('option').first()).toBeVisible({ timeout: TIMEOUTS.medium });
+
+const options = this.page.getByRole('option');
+const optionCount = await options.count();
+
+if (optionCount > 0) {
+  if (params.videoName) {
+    await options.filter({ hasText: params.videoName }).first().click();
+  } else {
+    await options.first().click();
+  }
+} else {
+  // Мёртвая ветка: выше уже дождались, что опция есть
+  await this.page.keyboard.press('Escape');
 }
 ```
 
-**FIX:** Разбить на меньшие single-purpose методы. Вынести фоллбеки в отдельные приватные методы.
+**FIX:** Разбить на меньшие single-purpose методы (`fillCategory(index, …)`, `selectLinkedVideo(name?)`), убрать недостижимую ветку и дублирование.
 
 **Не флажить:**
 - Методы выполняющие single multi-step UI interaction (заполнение формы с 5 полями)
@@ -242,9 +244,9 @@ async openProfileMenu(): Promise<void> {
 
 **Аннотация:**
 ```ts
-// MEDIUM: Method does multiple fallbacks + click + wait + assert — too many responsibilities
-// FIX: Split into smaller methods; move assertions to the spec; extract fallback logic
-async openProfileMenu(): Promise<void> {
+// MEDIUM: Method fills category + skill + video with branching duplicated in addAndFillCategory
+// FIX: Split into smaller methods; remove the unreachable branch and the duplication
+async fillFirstCategory(params: {
 ```
 
 ---
@@ -303,13 +305,17 @@ async openProfileMenu(): Promise<void> {
 ## Файлы для ревью в проекте
 
 ```
-tests/pages/base-page.ts           ← highest priority (found issues: #1, #2, #3, #4, #5, #6)
+tests/pages/base-page.ts           ← highest priority: наследуется всеми PO
 tests/pages/athlete-page.ts
 tests/pages/coach-page.ts
 tests/pages/parent-page.ts
 tests/pages/plan-page.ts
 tests/pages/organization-page.ts
 tests/pages/team-page.ts
+tests/pages/skill-page.ts
+tests/pages/drill-page.ts
+tests/pages/scorecard-template-page.ts
+tests/pages/evaluation-page.ts
 tests/pages/sign-in-page.ts
 tests/pages/sign-up-page.ts
 tests/pages/home-page.ts

@@ -1,64 +1,23 @@
 # test-antipatterns.md — Anti-Pattern Checklist для Ankor
 
-Адаптирован из e2e-spec-antipatterns. **Убраны 4 API-специфичных пункта** (нет API в проекте): #1, #15, #16, #17.
-Осталось **10 актуальных анти-паттернов** эффективности.
+Адаптирован из e2e-spec-antipatterns. Убраны пункты, неприменимые к проекту: API-специфичные (в проекте нет API-слоя) и multi-user (звонки, параллельные логины — `loginAs` работает с одной общей `page` теста).
+Осталось **11 анти-паттернов** эффективности.
 
 Используется в **04-test-review-and-fixes.md** (Шаг 2) для cold review.
 
 ---
 
-## 1. Call Placed Before All Participants Logged In (SEVERITY: HIGH)
+## 1. Hard-Coded `waitForTimeout()` / `sleep()` (SEVERITY: HIGH)
 
-**Что искать:** Тесты где User A логинится, инициирует действие, ПОТОМ User B логинится — действие висит в ожидании пока второй аутентифицируется.
+**Что искать:** Любое использование `page.waitForTimeout(ms)`. Почти всегда заменяется на ожидание элемента или ответа сервера.
 
-**В проекте:** Релевантно если появятся multi-role тесты (owner создает, coach видит и т.д.)
-
-**BAD:**
-```ts
-await test.step('Owner creates plan', async () => {
-    ownerPage = await loginAs('owner');
-    await ownerPage.createPlan({ name: 'Plan' });
-});
-await test.step('Coach views plan', async () => {
-    coachPage = await loginAs('coach');  // Plan создался, но coach не был готов
-    await coachPage.viewPlan();
-});
-```
-
-**GOOD:**
-```ts
-await test.step('Login all participants', async () => {
-    ownerPage = await loginAs('owner');
-    coachPage = await loginAs('coach');
-});
-await test.step('Owner creates plan', async () => {
-    await ownerPage.createPlan({ name: 'Plan' });
-});
-await test.step('Coach views plan', async () => {
-    await coachPage.viewPlan();
-});
-```
-
-**Аннотация:**
-```ts
-// HIGH: Action placed before all participants logged in — action sits waiting
-// FIX: Move all loginAs calls before the action
-await ownerPage.createPlan({ name: 'Plan' });
-```
-
----
-
-## 2. Hard-Coded `waitForTimeout()` / `sleep()` (SEVERITY: HIGH)
-
-**Что искать:** Любое использование `page.waitForTimeout(ms)`, `page.waitForTimeout()` в любом месте. Почти всегда заменяется на element-based или response-based waits.
-
-**В проекте:** Уже есть в `13-plans.spec.ts` lines 38, 102, 145, 186 — `waitForTimeout(2000)`, `waitForTimeout(5000)`.
+**В проекте:** сейчас нет (проверка: `grep -rn "waitForTimeout(" tests/`). Если появится — сразу флажить.
 
 **Частые замены:**
 - `waitForTimeout(5000)` после click → `await expect(element).toBeVisible()`
 - `waitForTimeout(10000)` после reload → `await page.waitForLoadState('domcontentloaded')` затем `await expect(element).toBeVisible()`
-- `waitForTimeout(5000)` ждя API → `await page.waitForResponse(res => res.url().includes('/api/endpoint'))`
-- `waitForTimeout(3000)` после закрытия диалога → `await page.locator('.dialog').waitFor({ state: 'hidden' })`
+- `waitForTimeout(5000)` в ожидании API → `await page.waitForResponse(res => res.url().includes('/api/endpoint'))`
+- `waitForTimeout(3000)` после закрытия диалога → `await expect(dialog).toBeHidden()`
 
 **Частный случай: Async Dropdown Options**
 - `waitForTimeout(500)` после `click()` на combobox → `await expect(page.getByRole('option').first()).toBeVisible()`
@@ -88,35 +47,41 @@ await page.waitForTimeout(2000);
 
 ---
 
-## 3. Double-Wait Chains (SEVERITY: MEDIUM)
+## 2. Double-Wait Chains (SEVERITY: MEDIUM)
 
-**Что искать:** Два последовательных `waitFor()` на одном элементе где второй подразумевает первый.
+**Что искать:** Два последовательных ожидания одного элемента, где второе подразумевает первое.
 
 **BAD:**
 ```ts
 await element.waitFor({ state: 'attached' });
 await element.waitFor({ state: 'visible' });
+
+// Или: явное ожидание перед действием, которое и так ждёт (actionability)
+await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
+await moreActions.click();
 ```
 
 **GOOD:**
 ```ts
 await element.waitFor({ state: 'visible' });
+
+await moreActions.click(); // click сам ждёт visible + enabled
 ```
 
-**Где проверять:** Методы в PO (`clickButton`, `fillInput`, `selectOption` в `base-page.ts`), любые PO методы.
+**Где проверять:** Методы PO (`openEditCoach`, `openEditParent`, `deleteEvaluation` и т.п.), методы `base-page.ts`.
 
 **Аннотация:**
 ```ts
-// MEDIUM: Double-wait — visible implies attached, first wait is redundant
-// FIX: Remove this line, keep only waitFor({ state: 'visible' })
-await element.waitFor({ state: 'attached' });
+// MEDIUM: Double-wait — click() already waits for visibility
+// FIX: Remove the expect(...).toBeVisible() line before click()
+await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
 ```
 
 ---
 
-## 4. Broken Promise.all / Promise.race (SEVERITY: CRITICAL)
+## 3. Broken Promise.all / Promise.race (SEVERITY: CRITICAL)
 
-**Что искать:** `Promise.all()` или `Promise.race()` без `await`, или с лишними паттернами внутри.
+**Что искать:** `Promise.all()` или `Promise.race()` без `await`, или с `await` внутри массива.
 
 **BAD:**
 ```ts
@@ -128,7 +93,7 @@ Promise.all([
 await page.goto(result);  // Unreliable — Promise.all не контролирует flow
 ```
 
-`await` внутри массива означает что `result` ассайнится ДО запуска `Promise.all`, делая его бессмысленным. `waitForTimeout` выполняется detached без эффекта на main flow.
+`await` внутри массива означает, что `result` присваивается ДО запуска `Promise.all`, делая его бессмысленным. `waitForTimeout` выполняется detached без эффекта на main flow.
 
 **GOOD:**
 ```ts
@@ -147,98 +112,74 @@ Promise.all([
 
 ---
 
-## 5. Unnecessary Wrapper Method Usage (SEVERITY: LOW)
+## 4. Unnecessary Wrapper Method Usage (SEVERITY: LOW)
 
-**Что искать:** Вызовы wrapper-методов из `base-page.ts` которые не добавляют ценности над прямыми Playwright locator methods.
+**Что искать:** Вызовы wrapper-методов из `base-page.ts`, которые не добавляют ценности над прямыми методами Playwright.
 
-**В проекте:** `base-page.ts` имеет: `clickButton`, `fillInput`, `getText`, `getValue`, `click`, `getCount`, `isVisible`, `waitForElement`, `waitForElementGone`.
+**В проекте (`base-page.ts`):** `click`, `getText`, `getCount`, `waitForElement`, `waitForElementGone`.
 
 **Флажить только если тест уже рефакторится. Не предлагать массовую миграцию рабочих wrapper вызовов.**
 
-- `basePage.clickButton(locator)` → `await locator.click()`
-- `basePage.fillInput(locator, value)` → `await locator.clear(); await locator.fill(value)`
-- `basePage.getText(locator)` → `await locator.textContent()`
-- `basePage.getValue(locator)` → `await locator.inputValue()`
-- `basePage.isVisible(locator)` → `await expect(locator).toBeVisible()` (вместо boolean возврата)
+- `basePage.click(locator)` → `await locator.click()`
+- `basePage.getText(locator)` → `await expect(locator).toHaveText(...)` (вместо чтения текста)
 - `basePage.getCount(locator)` → `await expect(locator).toHaveCount(N)`
+- `basePage.waitForElement(locator)` → `await expect(locator).toBeVisible()`
+- `basePage.waitForElementGone(locator)` → `await expect(locator).toBeHidden()`
 
 **Аннотация:**
 ```ts
-// LOW: clickButton wrapper — await locator.click() does the same thing
+// LOW: click wrapper — await locator.click() does the same thing
 // FIX: Replace with direct locator.click()
-await basePage.clickButton(someLocator);
+await basePage.click(someLocator);
 ```
 
 ---
 
-## 6. Sequential Logins That Could Be Parallel (SEVERITY: MEDIUM)
+## 5. Redundant Logins in Same Test (SEVERITY: MEDIUM)
 
-**Что искать:** Множественные `loginAs()` вызовы выполняемые последовательно когда нет зависимости между ними.
-
-**В проекте:** `loginAs` fixture создает свой контекст через UI — можно параллелить.
+**Что искать:** Повторный `loginAs()` той же роли в одном тесте (или в `beforeEach` + в теле теста). Второй вызов лишний: сессия уже есть.
 
 **BAD:**
 ```ts
-ownerPage = await loginAs('owner');
-coachPage = await loginAs('coach');
-parentPage = await loginAs('parent');
-```
+test.beforeEach(async ({ loginAs }) => { await loginAs('owner'); });
 
-**GOOD:**
-```ts
-[ownerPage, coachPage, parentPage] = await Promise.all([
-    loginAs('owner'),
-    loginAs('coach'),
-    loginAs('parent'),
-]);
+test('should create team', async ({ loginAs, page }) => {
+    await loginAs('owner');  // уже залогинен в beforeEach
+    ...
+});
 ```
-
-**Caveat:** Только если `loginAs` создает независимые контексты (что оно делает). Если контекст shared — должны быть sequential.
 
 **Аннотация:**
 ```ts
-// MEDIUM: 3 sequential logins — each creates own context, could run in parallel
-// FIX: Use Promise.all([loginAs(...), loginAs(...), ...])
-ownerPage = await loginAs('owner');
+// MEDIUM: Same role already logged in by beforeEach
+// FIX: Remove the repeated loginAs('owner') call
+await loginAs('owner');
 ```
 
 ---
 
-## 7. Redundant Logins in Same Test (SEVERITY: MEDIUM)
+## 6. Redundant Setup / Cleanup Calls (SEVERITY: LOW)
 
-**Что искать:** Те же credentials в нескольких `loginAs()` вызовах в одном тесте. Второй логин wasted — переиспользовать существующую страницу.
+**Что искать:** `beforeEach`/`afterEach`, которые чистят или готовят данные для всех тестов файла, хотя нужны не всем.
+
+**В проекте:** `12-evaluations.spec.ts` — `afterEach` удаляет все оценки шаблона после каждого теста, включая тест, который ничего не сохраняет (`should block rating above 5`).
+
+**Только флажить если:** Вызов явно лишний для конкретных тестов. Не флажить, если тесты действительно нуждаются в чистом состоянии.
 
 **Аннотация:**
 ```ts
-// MEDIUM: Same user already logged in at line X — reuse existing page variable
-// FIX: Use the ownerPage from the earlier login instead of logging in again
-ownerPage = await loginAs('owner');
+// LOW: Deletes all evaluations after every test — not all tests create one
+// FIX: Clean up only in tests that save an evaluation
+await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
 ```
 
 ---
 
-## 8. Redundant Setup Calls (SEVERITY: LOW)
+## 7. Missing `waitForResponse()` for API-Triggered UI Updates (SEVERITY: MEDIUM)
 
-**Что искать:** `beforeEach` хуки которые cancel/delete все данные независимо от того нужен ли тесту clean slate.
+**Что искать:** После клика, вызывающего запрос к серверу, тест ждёт по таймеру (`waitForTimeout`) вместо реального ответа.
 
-**В проекте:** `beforeEach` с `loginAs` — это нормально. Но если бы было `cancelAllPlans()` перед каждым тестом — флажить для тестов которые создают свои планы.
-
-**Только флажить если:** Cancel call явно лишний для конкретных тестов. Не флажить если тесты genuinely нуждаются в clean state.
-
-**Аннотация:**
-```ts
-// LOW: Cancels all plans before every test — not all tests need this
-// FIX: Move to only the tests that require a clean plan slate
-await cancelAllPlans(request, token);
-```
-
----
-
-## 9. Missing `waitForResponse()` for API-Triggered UI Updates (SEVERITY: MEDIUM)
-
-**Что искать:** После клика триггерящего API call, тест использует `waitForTimeout` вместо ожидания реального ответа.
-
-**В проекте:** Есть network calls при создании планов, пользователей, команд. Используют `waitForLoadState('networkidle')` + `waitForTimeout` — можно улучшить.
+**В проекте:** Запросы идут при создании планов, пользователей, команд. Сейчас тесты ждут UI-состояния (закрытие диалога, heading списка) — это допустимо. `waitForResponse` нужен, только если UI-признака нет.
 
 **GOOD:**
 ```ts
@@ -258,11 +199,11 @@ await page.waitForTimeout(5000);
 
 ---
 
-## 10. Missing `await` on Fire-and-Forget Calls (SEVERITY: CRITICAL)
+## 8. Missing `await` on Fire-and-Forget Calls (SEVERITY: CRITICAL)
 
-**Что искать:** Async Playwright API calls без `await`. Call fires но execution продолжается без ожидания. Silent failure — действие может или не может произойти перед следующей строкой.
+**Что искать:** Async вызовы Playwright без `await`. Вызов стартует, но выполнение идёт дальше, не дожидаясь результата. Действие может произойти, а может и не успеть до следующей строки.
 
-**Частые паттерны в проекте:**
+**Частые паттерны:**
 ```ts
 // BAD — page reloads но тест не ждет
 page.reload();
@@ -285,7 +226,7 @@ await page.close();
 await page.goto(url);
 ```
 
-**Различие с reliability #13:** Этот пункт — missing `await` на `page.*` и `locator.*` методах. Reliability #13 — missing `await` именно на `expect()` assertions с Playwright matchers.
+**Различие с reliability #13:** Этот пункт — missing `await` на методах `page.*` и `locator.*`. Reliability #13 — missing `await` именно на `expect()` с Playwright matchers.
 
 **Не флажить:**
 - Намеренно fire-and-forget (крайне редко — если сомневаешься, флажь)
@@ -300,15 +241,15 @@ page.reload();
 
 ---
 
-## 11. Asserting on Locator/Promise Object (SEVERITY: CRITICAL)
+## 9. Asserting on Locator/Promise Object (SEVERITY: CRITICAL)
 
-**Что искать:** `expect(locator).toBeTruthy()` или `expect(locator).toBeDefined()` где `locator` — Playwright `Locator` объект. Locator всегда truthy/defined — ассерт всегда проходит независимо от наличия элемента в DOM.
+**Что искать:** `expect(locator).toBeTruthy()` или `expect(locator).toBeDefined()`, где `locator` — объект `Locator`. Locator всегда truthy/defined — ассерт проходит независимо от наличия элемента в DOM.
 
 **BAD:**
 ```ts
 // BAD — Locator object is ALWAYS truthy, это no-op assertion
 expect(athletePage.newAthleteButton).toBeTruthy();
-expect(planPage.saveButton).toBeTruthy();
+expect(planPage.prebuiltCheckbox).toBeTruthy();
 
 // BAD — тоже no-op с soft assertion (тихо всегда проходит)
 expect.soft(planPage.searchInput).toBeTruthy();
@@ -318,13 +259,13 @@ expect.soft(planPage.searchInput).toBeTruthy();
 ```ts
 // GOOD — проверяем реальную видимость в DOM
 await expect(athletePage.newAthleteButton).toBeVisible();
-await expect(planPage.saveButton).toBeVisible();
+await expect(planPage.prebuiltCheckbox).toBeVisible();
 
 // GOOD — soft version
 await expect.soft(planPage.searchInput).toBeVisible();
 ```
 
-**Различие от reliability #3 (Weak assertions):** `expect(locator).toBeTruthy()` — не weak assertion, это **no-op assertion**. Не тестирует ничего. Классифицировать как #11, не #3.
+**Различие от reliability #3 (Weak assertions):** `expect(locator).toBeTruthy()` — не слабый ассерт, а **no-op**. Не тестирует ничего. Классифицировать как #9, не reliability #3.
 
 **Аннотация:**
 ```ts
@@ -335,101 +276,100 @@ expect(athletePage.newAthleteButton).toBeTruthy();
 
 ---
 
-## 12. Sleep Wrappers in Shared Hooks (SEVERITY: HIGH)
+## 10. Waits in Shared Hooks (SEVERITY: HIGH)
 
-**Что искать:** `sleepBefore(n)` или `waitForTimeout(ms)` внутри `afterEach`, `beforeEach`, `afterAll` хуков. Хук выполняется для каждого теста — delay множится. 5s sleep в `afterEach` × 20 тестов = 100s dead time за прогон.
+**Что искать:** `waitForTimeout(ms)` внутри `beforeEach`, `afterEach`, `beforeAll`, `afterAll`. Хук выполняется для каждого теста — задержка умножается. 5 с в `afterEach` × 20 тестов = 100 с простоя за прогон.
 
 **В проекте:** Пока нет, но если добавят в `beforeEach` / `afterEach` — сразу флажить.
 
 **BAD:**
 ```ts
-test.afterEach(async () => {
-    await sleepBefore(5);
-    await page.close();
+test.afterEach(async ({ page }) => {
+    await page.waitForTimeout(5000);
+    await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
 });
 ```
 
 **GOOD:**
 ```ts
 test.afterEach(async () => {
-    await page.close();
+    await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
 });
 ```
 
-**Различие от #2:** Если wait в shared hook (общий код) → **#12** (multiplied impact). Если в теле теста (single-use) → **#2**.
+**Различие от #1:** Если wait в shared hook (общий код) → **#10** (умноженный эффект). Если в теле теста (single-use) → **#1**.
 
 **Не флажить:**
-- `sleepBefore()` в хуке с комментарием почему нужно (rate limiting)
-- Waits genuinely needed для state cleanup (но suger event-based alternatives)
+- Wait в хуке с комментарием, почему он нужен (rate limiting)
+- Ожидания, действительно нужные для очистки состояния (но предложить event-based альтернативы)
 
 **Аннотация:**
 ```ts
-// HIGH: sleepBefore(5) in afterEach — 5s × N tests = Ns dead time per run
-// FIX: Remove sleep; if needed, wait for specific page/API state before close
-await sleepBefore(5);
+// HIGH: 5s wait in afterEach — 5s × N tests = Ns dead time per run
+// FIX: Remove wait; if needed, wait for specific page/API state
+await page.waitForTimeout(5000);
 ```
 
 ---
 
-## 13. Shared Mutable Module-Scoped State (SEVERITY: HIGH)
+## 11. Shared Mutable Module-Scoped State (SEVERITY: HIGH)
 
-**Что искать:** `let page: Page` или `let context: BrowserContext` объявленные на уровне `test.describe` и перезаписываемые внутри отдельных тестов. Если тест падает mid-execution, переменная может держать stale state утекающий в следующий тест `afterEach`.
+**Что искать:** `let page: Page` или `let context: BrowserContext` на уровне `test.describe`/модуля, перезаписываемые внутри отдельных тестов. Если тест падает посреди выполнения, переменная хранит устаревшее состояние, которое утекает в следующий тест или `afterEach`.
 
 **BAD:**
 ```ts
 test.describe("Suite", () => {
-    let page: Page;
+    let extraPage: Page;
 
     test("Test A", async ({ browser }) => {
-        page = await loginAs('owner');  // Assigns to shared var
-        // ... если это крашнется, page может быть в broken state
+        extraPage = await browser.newPage();  // Assigns to shared var
+        // ... если это упадёт, extraPage может быть в broken state
     });
 
     test("Test B", async ({ browser }) => {
-        page = await loginAs('coach');  // Overwrites shared var
+        extraPage = await browser.newPage();  // Overwrites shared var
     });
 
     test.afterEach(async () => {
-        await page.close();  // Закрывает какой-то page — может быть stale из Test A
+        await extraPage.close();  // Закрывает какую-то page — может быть stale из Test A
     });
 });
 ```
 
 **GOOD:**
 ```ts
-test("Test A", async ({ browser }) => {
-    const page = await loginAs('owner');
+test("Test A", async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ baseURL });
     try {
         // test logic
     } finally {
-        await page.close();
+        await context.close();
     }
 });
 ```
 
 **Не флажить:**
-- Переменные на describe scope но записываемые только в `beforeAll` (не per-test) — intended pattern для shared setup
-- Переменные намеренно shared (например, token используемый всеми тестами)
+- Переменные на describe scope, записываемые только в `beforeAll` (не per-test) — intended pattern для shared setup
+- Данные сущности, созданной тестом создания и переиспользуемой следующими тестами serial-серии (например, `createdParent` в `07-parents.spec.ts`) — это намеренный паттерн, см. REVIEW-PLAN 3.12
 
 **Аннотация:**
 ```ts
 // HIGH: Shared mutable page variable — if test fails, afterEach closes stale page
 // FIX: Scope page inside each test or use try/finally for cleanup
-let page: Page;
+let extraPage: Page;
 ```
 
 ---
 
 ## Tie-Break Rules
 
-- **#2 vs #9:** Если `waitForTimeout` прямо после click/action триггерящего API call → **#9 (Missing waitForResponse)**. Если после reload, navigation, или non-API action → **#2 (Hard-coded wait)**.
-- **#6 vs #1:** Если sequential logins И action происходит между ними → **#1 (Call before participants ready)** — higher severity. Только #6 если все логины до любого action но все равно sequential.
-- **#4 vs #10:** Standalone missing `await` на Playwright call → **#10**. Missing `await` внутри `Promise.all` → **#4**.
-- **#11 vs weak assertions:** `expect(locator).toBeTruthy()` → **#11** (no-op). Shallow но correct matcher (e.g., `.toBeVisible()` когда `.toHaveText()` лучше) → reliability **#3**.
-- **#12 vs #2:** Sleep/wait в shared hook → **#12** (multiplied). Sleep/wait в test body → **#2**.
-- **#13 vs test isolation:** Variable reassignment at describe scope → **#13**. Data pollution между тестами → reliability **#7**.
+- **#1 vs #7:** Если `waitForTimeout` прямо после click/action, вызывающего запрос к серверу → **#7 (Missing waitForResponse)**. Если после reload, навигации или действия без запроса → **#1 (Hard-coded wait)**.
+- **#3 vs #8:** Standalone missing `await` на вызове Playwright → **#8**. Missing `await` у `Promise.all` → **#3**.
+- **#9 vs weak assertions:** `expect(locator).toBeTruthy()` → **#9** (no-op). Слабый, но корректный matcher (например, `.toBeVisible()`, когда лучше `.toHaveText()`) → reliability **#3**.
+- **#10 vs #1:** Wait в shared hook → **#10** (умноженный). Wait в теле теста → **#1**.
+- **#11 vs test isolation:** Переприсваивание переменной на describe scope → **#11**. Загрязнение данных между тестами → reliability **#7**.
 
-**Master rule:** Нет `await` на любом ассерте с Playwright matcher → CRITICAL, перекрывает всё. Это single most impactful bug: ассерт буквально не выполняется.
+**Master rule:** Нет `await` на любом ассерте с Playwright matcher → CRITICAL, перекрывает всё. Это самый влиятельный баг: ассерт буквально не выполняется.
 
 **Никогда не double-annotate одну строку за overlapping категории. Выбирай самый специфичный.**
 
@@ -437,4 +377,4 @@ let page: Page;
 
 ## Использование в 04-test-review-and-fixes.md
 
-То же что и для reliability: проходить по 1-13, ставить inline annotations, обновлять summary block, cap 20, idempotent.
+То же, что и для reliability: проходить по 1-11, ставить inline annotations, обновлять summary block, cap 20, idempotent.

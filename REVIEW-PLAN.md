@@ -223,24 +223,24 @@
   | 10 | Локаторы в методах PO | AGENTS запрещает, параметризованные локаторы без этого невозможны | Разрешить параметризованные локаторы в методах |
   | 11 | Паттерн `getRow` | AGENTS §4 рекомендует `.or(getByText)` | Заменить паттерн (см. 2.13) |
 
-- [ ] **4.2 Удалить вредный совет** в [test-antipatterns.md](.gigacode_vsc/skills/test-antipatterns.md) #6 (`Promise.all` над `loginAs`): `loginAs` работает с одной общей `page` и вызов сломает сессию. Удалить и #1 про «звонки».
-- [ ] **4.3 Удалить чужие и устаревшие примеры:**
+- [x] **4.2 Удалить вредный совет** (сделано: удалены #1 и #6, остальные пункты перенумерованы 1–11) в [test-antipatterns.md](.gigacode_vsc/skills/test-antipatterns.md) #6 (`Promise.all` над `loginAs`): `loginAs` работает с одной общей `page` и вызов сломает сессию. Удалить и #1 про «звонки».
+- [x] **4.3 Удалить чужие и устаревшие примеры:** (сделано: примеры заменены на примеры из проекта)
   - `AUTO-112`, `getReadValue`, `temp-files`, `cdk-overlay`/`mat-dialog`, appointments, video call.
   - «waitForTimeout в 13-plans.spec.ts lines 38, 102…».
   - Несуществующие методы BasePage: `clickButton`, `fillInput`, `isVisible`, `getValue`.
   - Старый код `openProfileMenu` и номера строк base-page в [test-pom-review.md](.gigacode_vsc/skills/test-pom-review.md).
-- [ ] **4.4 Исправить нумерацию:**
+- [x] **4.4 Исправить нумерацию:** (сделано, включая скиллы 01, 02 и workflow.md)
   - Tie-break правила в [test-reliability.md](.gigacode_vsc/skills/test-reliability.md) сдвинуты на единицу (race — это #1, fragile — #2).
   - Счётчики: реально 17 надёжностных паттернов и 13 антипаттернов, в тексте 16 и 10.
   - Список антипаттернов в скилле 04 привести к содержимому файла.
   - Раздел использования в reliability: «пройти 1–17».
   - В workflow.md исправить имя `test-harvester.md` → `05-test-harvester.md`.
-- [ ] **4.5 Обновить AGENTS.md:**
+- [x] **4.5 Обновить AGENTS.md:** (сделано; §9 описывает фикстуру после 1.2, §10 — ограничение стенда)
   - §7, §15: добавить sysadmin (5 ролей) и `npm run test:sysadmin`.
   - §14: заменить устаревшую структуру на реальную (папки ролей, factories).
   - §9: удалить исторический лог «42 passed…».
   - §1: убрать дубли с workflow.md и скиллом 01 (оставить ссылки).
-- [ ] **4.6 Починить команды:**
+- [~] **4.6 Починить команды:** (команды исправлены; npm-скрипты lint не добавлены — на Windows нужен ESLint или Node-скрипт, отдельная задача)
   - §16: lint-grep не работает — `(` литерал в BRE, `GetByText` с заглавной G. Использовать `grep -rE "page\.(getByRole|locator|getByText)"`.
   - На Windows npm запускает скрипты через cmd без `grep`. Lint-скрипты лучше сделать на Node или ESLint (`eslint-plugin-playwright`) и реально добавить в `package.json`.
   - Скилл 03, шаг 6: `npm run test:owner -- --grep "…"` (нужен `--`).
@@ -249,7 +249,7 @@
   - 01–03 читать сразу.
   - Чек-листы reliability, antipatterns и pom-review читать только на шаге 04.
   - Для простых сценариев объединить утверждения 01 и 02 в одно.
-- [ ] **4.8 Исправить опечатки и стиль:**
+- [~] **4.8 Исправить опечатки и стиль:** (в скиллах, AGENTS.md и 06-coaches исправлено; `origen` в `fixtures.ts` 🔒 — в пакете на одобрение; единое написание и тон — вместе с 4.1)
   - **Опечатки:**
     - `origen` → origin ([fixtures.ts:38,44,52](tests/fixtures.ts#L38)) 🔒.
     - `воркерех` → воркерах; `ревокан`/`ревокал` → отозван.

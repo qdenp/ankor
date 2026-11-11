@@ -35,10 +35,12 @@ glob(".gigacode_vsc/skills/**")
 - `02-test-step-planner.md` — Детальная таблица шагов с PO методами
 - `03-test-code-writer.md` — Написание кода, запуск, рефакторинг до PASS
 - `04-test-review-and-fixes.md` — Финальный ревью, правки, отдача результата
-- `test-reliability.md` — Чек-лист надёжности (16 паттернов)
-- `test-antipatterns.md` — Чек-лист анти-паттернов (10 паттернов)
+- `05-test-harvester.md` — Анализ и улучшение
+- `test-reliability.md` — Чек-лист надёжности (17 паттернов)
+- `test-antipatterns.md` — Чек-лист анти-паттернов (11 паттернов)
 - `test-pom-review.md` — Чек-лист PO (6 проверок)
-- `test-harvester.md` — Анализ и улучшение
+- `testops-integration.md` — TestOps: поиск тест-кейсов, настройка токена
+- `06-SKIP-…`, `07-SKIP-…` — заготовки, сейчас не используются
 
 ### Шаг 2: Создать todo list
 Создать todo list с КАЖДЫМ шагом цепочки:
