@@ -226,7 +226,7 @@ export class PlanPage extends BasePage {
   /** Получить карточку плана по имени — robust selection by role */
   getPlanCard(name: string): Locator {
     // Use getByRole for stable selection by accessible name
-    return this.page.getByRole('article', { name: new RegExp(name, 'i') }).first();
+    return this.page.getByRole('article', { name }).first();
   }
 
   /** Добавить первый drill к плану (открыть диалог, добавить первый доступный, закрыть) */
@@ -255,6 +255,6 @@ export class PlanPage extends BasePage {
   /** Получить локатор карточки плана в My Plans — robust selection by role */
   getPlanRow(name: string): Locator {
     // Use getByRole for stable selection by accessible name
-    return this.page.getByRole('article', { name: new RegExp(name, 'i') }).first();
+    return this.page.getByRole('article', { name }).first();
   }
 }

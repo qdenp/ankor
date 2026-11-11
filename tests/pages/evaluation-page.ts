@@ -211,7 +211,7 @@ export class EvaluationPage extends BasePage {
   /** Проверить что evaluation report существует в таблице */
   async verifyReportExists(templateName: string): Promise<void> {
     // Report row should contain the template name
-    const reportRow = this.page.getByRole('row', { name: new RegExp(templateName, 'i'), exact: false });
+    const reportRow = this.page.getByRole('row', { name: templateName });
     await expect(reportRow).toBeVisible({ timeout: TIMEOUTS.long });
   }
 
@@ -234,7 +234,7 @@ export class EvaluationPage extends BasePage {
    * Ищет по имени шаблона или имени команды (имя скилла не отображается в таблице).
    */
   getRow(templateOrTeam: string): Locator {
-    const byRole = this.page.getByRole('row', { name: new RegExp(templateOrTeam, 'i') });
+    const byRole = this.page.getByRole('row', { name: templateOrTeam });
     const byCell = this.page.locator('tr', { hasText: templateOrTeam }).first();
     const byText = this.page.getByText(templateOrTeam, { exact: false }).first();
     return byRole.or(byCell).or(byText).first();
@@ -266,7 +266,7 @@ export class EvaluationPage extends BasePage {
   async deleteAllByTemplate(templateName: string): Promise<void> {
     let remaining = true;
     while (remaining) {
-      const rows = this.page.getByRole('row', { name: new RegExp(templateName, 'i') });
+      const rows = this.page.getByRole('row', { name: templateName });
       const count = await rows.count();
       if (count === 0) {
         remaining = false;

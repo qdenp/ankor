@@ -156,7 +156,7 @@ export class DrillPage extends BasePage {
 
   /** Получить локатор строки дрила в таблице */
   getRow(drillName: string): Locator {
-    const byRole = this.page.getByRole('row', { name: new RegExp(drillName, 'i') });
+    const byRole = this.page.getByRole('row', { name: drillName });
     const byCell = this.page.locator('tr', { hasText: drillName }).first();
     const byText = this.page.getByText(drillName, { exact: false }).first();
     return byRole.or(byCell).or(byText).first();

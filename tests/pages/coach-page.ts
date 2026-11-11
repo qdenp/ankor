@@ -107,7 +107,8 @@ export class CoachPage extends BasePage {
 
   /** Получить локатор строки коуча в таблице (после применения поиска) */
   getCoachRow(identifier: string): Locator {
-    return this.page.getByRole('row', { name: new RegExp(identifier, 'i'), exact: false }).first();
+    // Строка в name — подстрока без учёта регистра; спецсимволы (+ в email) не интерпретируются
+    return this.page.getByRole('row', { name: identifier }).first();
   }
 
   /** Получить локатор строки коуча по email */

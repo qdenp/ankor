@@ -86,13 +86,13 @@ export class ParentPage extends BasePage {
   /** Выбор Relationship */
   async selectRelationship(relationship: string): Promise<void> {
     await this.relationshipSelect.click();
-    await this.relationshipOptions.filter({ hasText: new RegExp(relationship, 'i') }).first().click();
+    await this.relationshipOptions.filter({ hasText: relationship }).first().click();
   }
 
   /** Выбор Athlete */
   async selectAthlete(athleteName: string): Promise<void> {
     await this.athleteSelect.click();
-    await this.athleteOptions.filter({ hasText: new RegExp(athleteName, 'i') }).first().click();
+    await this.athleteOptions.filter({ hasText: athleteName }).first().click();
   }
 
   /** Нажать Create в диалоге создания */

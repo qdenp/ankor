@@ -92,7 +92,8 @@ export class AthletePage extends BasePage {
     await this.teamSelect.click();
     await this.page.getByRole('option', { name: params.team }).click();
     await this.genderSelect.click();
-    await this.page.getByRole('option', { name: new RegExp(params.gender, 'i') }).first().click();
+    // exact: подстрока 'Male' совпала бы и с 'Female'
+    await this.page.getByRole('option', { name: params.gender, exact: true }).click();
     await this.passwordInput.fill(params.password);
     await this.confirmPasswordInput.fill(params.confirmPassword);
   }

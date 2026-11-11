@@ -36,8 +36,8 @@ export class OrganizationPage extends BasePage {
     // MUI DataGrid rows
     this.orgRows = page.getByRole('row');
     this.firstDataRow = page.locator('[role="row"][data-rowindex="0"]').first();
-    this.orgRowByName = (name: string) => page.getByRole('row', { name: new RegExp(name, 'i') });
-    this.orgRowEditButton = (name: string) => page.getByRole('row', { name: new RegExp(name, 'i') }).getByRole('button', { name: /Edit|Редактировать/i });
+    this.orgRowByName = (name: string) => page.getByRole('row', { name });
+    this.orgRowEditButton = (name: string) => page.getByRole('row', { name }).getByRole('button', { name: /Edit|Редактировать/i });
     // DataGrid column headers - use data-field attribute for reliability
     this.orgHeaderOrganization = page.locator('[role="columnheader"][data-field="name"]');
   }

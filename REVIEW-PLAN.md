@@ -62,7 +62,7 @@
   - **Строка 67:** `parentEmail = 'dtimokhin+parent'` — это префикс, под него попадает основной пользователь parent из `.env`. Нужно передать email, созданный в первом тесте, через переменную describe (или искать по уникальному имени).
   - **Готово, когда:** тест не трогает пользователя `CREDENTIALS.parent`, и после файла `owner.json` остаётся валидным.
 
-- [ ] **1.4 Экранировать спецсимволы в `new RegExp(...)`.**
+- [x] **1.4 Экранировать спецсимволы в `new RegExp(...)`.** Сделано без хелпера: `new RegExp(x, 'i')` заменён строкой в `name`/`hasText` (Playwright и так ищет подстроку без учёта регистра, но не интерпретирует `+`, `.`, `(`). Пол в `fillAthleteForm` — `exact: true` (`Male` совпадал с `Female`). Проверено спеком только на чтение: `getCoachRow(<email с +>)` находит строку, старая RegExp — 0 строк; регрессия permissions/homepage всех ролей зелёная.
   - **Проблема:** все email вида `dtimokhin+…`, а `+` в регулярке — квантификатор. Поэтому `getCoachRow(CREDENTIALS.coach.email)` никогда не находит строку.
   - **Затронутые места:** [coach-page.ts:110](tests/pages/coach-page.ts#L110), `getRow` в drill / evaluation / scorecard, `getPlanCard` / `getPlanRow`, [organization-page.ts:39-40](tests/pages/organization-page.ts#L39-L40), `verifyReportExists`, `deleteAllByTemplate`.
   - **Что сделать:** добавить хелпер `escapeRegExp()` или перейти на `filter({ hasText })`.
