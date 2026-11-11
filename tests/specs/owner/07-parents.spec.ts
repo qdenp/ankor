@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures';
 import { ParentPage } from '../../pages/parent-page';
-import { BasePage } from '../../pages/base-page';
 import { SignInPage } from '../../pages/sign-in-page';
+import { HomePage } from '../../pages/home-page';
 import { TIMEOUTS } from '../../config';
 
 /**
@@ -11,15 +11,25 @@ import { TIMEOUTS } from '../../config';
 test.describe('Owner Parent Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
+  /**
+   * Родитель, созданный в первом тесте. Второй тест редактирует именно его.
+   * Уникальное имя нужно, потому что поиск в таблице Parents работает только по имени, не по email.
+   */
+  let createdParent: { firstName: string; email: string; password: string } | undefined;
+
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
   });
 
   /** @TC-71252 Create parent from add manual */
-  test('should validate empty form, create parent and login as parent', async ({ page }) => {
+  test('should validate empty form, create parent and login as parent', async ({ page, browser, baseURL }) => {
     const parentPage = new ParentPage(page);
     const timestamp = Date.now();
-    const newParentEmail = `dtimokhin+parent${timestamp}@aexsoft.com`;
+    const parent = {
+      firstName: `TestParent${timestamp}`,
+      email: `dtimokhin+parent${timestamp}@aexsoft.com`,
+      password: '7952Qaz!',
+    };
 
     // --- Шаг 1-3: пустая форма → валидация ---
     await parentPage.goto();
@@ -31,11 +41,11 @@ test.describe('Owner Parent Tests', () => {
 
     // --- Шаг 4-5: заполнить и создать ---
     await parentPage.fillParentForm({
-      firstName: 'TestParent',
+      firstName: parent.firstName,
       lastName: 'User',
-      email: newParentEmail,
-      password: '7952Qaz!',
-      confirmPassword: '7952Qaz!',
+      email: parent.email,
+      password: parent.password,
+      confirmPassword: parent.password,
     });
     await parentPage.selectRelationship('Mother');
     await parentPage.selectAthlete('Athlete User');
@@ -43,45 +53,51 @@ test.describe('Owner Parent Tests', () => {
     await parentPage.clickCreateInDialog();
 
     // Родитель в списке (search ищет по имени, не по email)
-    await parentPage.search('TestParent');
-    await expect(parentPage.getParentRow('TestParent')).toBeVisible({ timeout: TIMEOUTS.long });
-
-    // --- Шаг 5.2: у атлета появился родитель ---
-    await parentPage.goto();
-    await expect(parentPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
+    await parentPage.search(parent.firstName);
+    await expect(parentPage.getParentRow(parent.firstName)).toBeVisible({ timeout: TIMEOUTS.long });
+    createdParent = parent;
 
     // --- Шаг 6-8: логин как созданный parent ---
-    const basePage = new BasePage(page);
-    await basePage.logout();
-    const signInPage = new SignInPage(page);
-    await signInPage.login(newParentEmail, '7952Qaz!');
-    await expect(page).not.toHaveURL(/sign-in/, { timeout: TIMEOUTS.long });
-    await expect(page.getByText('Owner')).toBeHidden({ timeout: TIMEOUTS.medium });
+    // В отдельном контексте браузера: сессия owner в основном контексте не трогается,
+    // logout owner не нужен (он отзывает токен owner на сервере для всех следующих тестов).
+    const parentContext = await browser.newContext({ baseURL });
+    try {
+      const parentTab = await parentContext.newPage();
+      const signInPage = new SignInPage(parentTab);
+      const parentHome = new HomePage(parentTab);
+
+      await signInPage.goto();
+      await signInPage.login(parent.email, parent.password);
+
+      // Вошли (есть меню) и именно как parent: дашборд родителя, без карточек owner
+      await expect(parentHome.navHome, 'New parent should be logged in').toBeVisible({ timeout: TIMEOUTS.long });
+      await expect(parentHome.sessionSummaryHeading, 'Parent dashboard should be shown').toBeVisible({ timeout: TIMEOUTS.long });
+      await expect(parentHome.totalAthletesCard, 'Owner dashboard cards should not be shown').toBeHidden();
+    } finally {
+      await parentContext.close();
+    }
   });
 
   /** @TC-71256 Edit parent */
   test('should edit parent and verify changes', async ({ page }) => {
+    expect(createdParent, 'Requires the parent created by the previous test (serial mode)').toBeDefined();
+    const parent = createdParent!;
     const parentPage = new ParentPage(page);
 
-    // Используем parent, созданный в TC-71252 (уникальный email)
-    const parentEmail = 'dtimokhin+parent';
-
-    // --- Шаг 1-2: найти parent по email ---
+    // --- Шаг 1-2: найти созданного parent по уникальному имени ---
     await parentPage.goto();
-    await expect(parentPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
-    const row = parentPage.getParentRow(parentEmail);
-    await expect(row).toBeVisible({ timeout: TIMEOUTS.long });
+    await parentPage.search(parent.firstName);
+    await expect(parentPage.getParentRow(parent.firstName)).toBeVisible({ timeout: TIMEOUTS.long });
 
     // --- Шаг 3: открыть edit ---
-    await parentPage.openEditParent(parentEmail);
+    await parentPage.openEditParent(parent.firstName);
 
     // --- Шаг 4-5: отредактировать и сохранить ---
-    const newFirstName = 'EditedParent';
-    const newLastName = 'EditedUser';
-
+    // Новое имя тоже уникально, иначе проверка найдёт родителей, отредактированных прошлыми прогонами
+    const newFirstName = `Edited${parent.firstName}`;
     await parentPage.editParent({
       firstName: newFirstName,
-      lastName: newLastName,
+      lastName: 'EditedUser',
     });
 
     // Сохранение прошло → heading списка виден
