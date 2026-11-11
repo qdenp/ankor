@@ -1,6 +1,7 @@
 # Dependencies
+# package-lock.json коммитится: он фиксирует точные версии зависимостей.
+# Чужие lock-файлы игнорируем, менеджер пакетов в проекте — npm.
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -31,3 +32,11 @@ Thumbs.db
 # Test output
 coverage/
 .nyc_output/
+
+# Allure: сырые результаты, сгенерированный отчёт и архив для TestOps
+allure-results/
+allure-report/
+allure-results.zip
+
+# Логи прогонов (npm run test:* > test-output.log и т.п.)
+*.log

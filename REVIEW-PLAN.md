@@ -25,8 +25,8 @@
   - Сделано: токен перенесён в пользовательскую переменную окружения `TESTOPS_AUTH_HEADER`, конфиг ссылается на `${TESTOPS_AUTH_HEADER}`. Файл без секрета закоммичен как общий конфиг MCP.
   - Решение: токен оставлен прежним, не перевыпускался (в git он не попадал).
   - Инструкция по настройке — в [testops-integration.md](.gigacode_vsc/skills/testops-integration.md).
-- [ ] **0.2 Добавить артефакты прогонов в `.gitignore`:** `allure-report/`, `allure-results/`, `allure-results.zip`, `test-output.log`, `test-*.log`.
-- [ ] **0.3 Перестать игнорировать `package-lock.json`.** Сейчас он в `.gitignore`, и сборки с `^`-версиями невоспроизводимы. Убрать его из `.gitignore` и закоммитить lock-файл.
+- [x] **0.2 Добавить артефакты прогонов в `.gitignore`:** `allure-results/`, `allure-report/`, `allure-results.zip`, `*.log`.
+- [x] **0.3 Перестать игнорировать `package-lock.json`.** Убран из `.gitignore`, lock-файл закоммичен (`npm ls` подтвердил, что он совпадает с `node_modules`).
 
 ---
 
