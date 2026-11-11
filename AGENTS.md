@@ -252,8 +252,8 @@ test('@TC-91859 should create plan and see in My Plans', () => { ... });
 | № | Пункт меню | Файл |
 |---|------------|------|
 | 00 | Подготовка | `00-create-users.spec.ts` |
-| 01 | Авторизация | `01-signin.spec.ts` |
-| 02 | Логин под ролью | `02-auth.spec.ts` |
+| 01 | Авторизация (страница входа) | `01-signin.spec.ts` |
+| 02 | Home (главная страница роли) | `02-homepage.spec.ts` |
 | 03 | Регистрация | `03-signup.spec.ts` |
 | 04 | Organizations | `04-organization.spec.ts` |
 | 05 | Athletes | `05-athletes.spec.ts` |
@@ -264,12 +264,15 @@ test('@TC-91859 should create plan and see in My Plans', () => { ... });
 | 10 | Drills | `10-drills.spec.ts` |
 | 11 | Scorecard Templates | `11-scorecard-templates.spec.ts` |
 | 12 | Evaluations | `12-evaluations.spec.ts` |
-| 13 | Practice Plans | `13-practice-plans.spec.ts` |
+| 13 | Practice Plans | `13-plans.spec.ts` |
 | 14 | Easy Join | `14-easy-join.spec.ts` |
 | 15 | Manage Users | `15-manage-users.spec.ts` |
 | 16 | Notifications | `16-notifications.spec.ts` |
+| 90 | Права роли (сквозная проверка разделов) | `90-permissions.spec.ts` |
+| 99 | Логин и logout под ролью | `99-auth.spec.ts` |
 
 **Правила:**
+- ✅ `99-auth` — всегда последний файл роли: logout отзывает сессию, и всё, что идёт после него, логинится заново (§8)
 - ✅ Нумерация одинаковая для всех ролей
 - ✅ Каждая роль содержит только те файлы, которые ей доступны
 - ✅ Файлы с одной ролью в одной папке идут последовательно (`serial`)
@@ -308,7 +311,7 @@ npm run test:parent
 npm run test:athlete
 
 # Один тест
-npx playwright test tests/specs/owner/01-signin.spec.ts
+npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner --workers 1
 ```
 
 **Важно:** внутри каждой роли тесты идут последовательно (через `serial`), между ролями — параллельно.
@@ -460,8 +463,10 @@ npm run test:athlete
 # Один тест по названию (-- обязателен, иначе npm заберёт --grep себе)
 npm run test:owner -- --grep "should edit parent"
 
-# Один файл
-npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner
+# Один или несколько файлов — обязательно --project и --workers 1
+# (в конфиге fullyParallel: true; без --workers 1 тесты пойдут параллельно,
+#  и logout из 99-auth отзовёт сессию посреди соседнего теста)
+npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner --workers 1
 
 # Проверка типов
 npm run typecheck

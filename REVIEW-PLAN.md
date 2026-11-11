@@ -108,11 +108,11 @@
 
 Каждый пункт — тест, который может пройти, ничего не проверив.
 
-- [ ] **2.1** [parent/01-permissions.spec.ts:68](tests/specs/parent/01-permissions.spec.ts#L68): регулярка `/sign-in|dashboard|practice-plans/` совпадает с самим `/practice-plans/new`. Нужно проверять `not.toHaveURL(/practice-plans\/new/)` или отсутствие формы.
+- [ ] **2.1** [parent/90-permissions.spec.ts:68](tests/specs/parent/90-permissions.spec.ts#L68): регулярка `/sign-in|dashboard|practice-plans/` совпадает с самим `/practice-plans/new`. Нужно проверять `not.toHaveURL(/practice-plans\/new/)` или отсутствие формы.
 - [ ] **2.2** [plan-tabs.factory.ts:27](tests/factories/plan-tabs.factory.ts#L27): `test.skip(true, …)` выключает тесты вкладок у **всех** ролей.
   - Пропускать только athlete, через параметр фабрики.
   - Убрать дубли с явными тестами: owner `@TC-71645`, parent `@TC-71643`/`@TC-72622`, athlete `@TC-72622`.
-- [ ] **2.3** [athlete/01-permissions.spec.ts:25](tests/specs/athlete/01-permissions.spec.ts#L25): весь блок прав пропущен. Пропускать только шаг Plan, остальные шаги включить.
+- [ ] **2.3** [athlete/90-permissions.spec.ts:25](tests/specs/athlete/90-permissions.spec.ts#L25): весь блок прав пропущен. Пропускать только шаг Plan, остальные шаги включить.
 - [ ] **2.4** [athlete/13-plans.spec.ts:27](tests/specs/athlete/13-plans.spec.ts#L27): при пустой вкладке Invited ассерт проходит всегда. Сначала проверить, что карточка есть (предусловие: план, на который приглашён атлет).
 - [ ] **2.5** [coach/13-plans.spec.ts:35,56](tests/specs/coach/13-plans.spec.ts#L35):
   - После remove проверять `Segments (0)`.
@@ -146,7 +146,7 @@
 ## Этап 3. Page Objects и спеки: привести к правилам
 
 - [ ] **3.1 Убрать прямые локаторы из спеков (28 мест).**
-  - **Где больше всего:** 12-evaluations (44, 103–111, 198–217), 06-coaches (105, 132–136), 13-plans, 10-drills, 07-parents:59, coach/01-permissions:80.
+  - **Где больше всего:** 12-evaluations (44, 103–111, 198–217), 06-coaches (105, 132–136), 13-plans, 10-drills, 07-parents:59, coach/90-permissions:80.
   - **Что сделать:** использовать уже существующие `openEditCoach()`, `getRatingInput()`, `getRatingCell()` и добавить недостающие методы.
   - **Готово, когда:** `grep -rnE "page\.(getByRole|locator|getByText|keyboard)" tests/specs` пуст.
 - [ ] **3.2 Удалить `HomePage.logout()`.** Он перекрывает `BasePage.logout()`, а его локатор `/logout/` не находит «Log Out». Удалить вместе с `userProfile`/`logoutButton`.
@@ -159,10 +159,10 @@
   - **🔒** в `config.ts`: `DATA_TEST`, `ROLES`, `EVALUATION`, `BASE_URL`.
   - Неиспользуемые методы PO: `isAthleteExists`/`isCoachExists`/`isParentExists` (возвращают boolean — антипаттерн), `getText`, `getCount`, `waitForElement*`, `getUrl`, `getPathname`.
   - Тест `00-create-users` перевести на фикстуру `loginAs` или явно задокументировать как ручной.
-- [ ] **3.7 Привести нумерацию файлов к таблице §6:**
-  - **owner:** развести `01-permissions`/`01-signin` и `02-auth`/`02-homepage`.
+- [x] **3.7 Привести нумерацию файлов к таблице §6:** Сделано: `02-homepage` у всех ролей, `90-permissions`, `99-auth` (logout последним); таблица AGENTS.md обновлена (`13-plans`, 90, 99). Найдено: без `--workers 1` (`fullyParallel: true`) тесты одного запуска идут параллельно и logout рвёт соседние — во все команды запуска файлов добавлен `--workers 1`.
+  - **owner:** развести `90-permissions`/`01-signin` и `99-auth`/`02-homepage`.
   - **coach:** `02-homepage` → `03-homepage`, как у athlete/parent.
-  - Logout-тесты (`02-auth`) должны идти последними в серии роли: переименовать, например, в `99-logout.spec.ts`.
+  - Logout-тесты (`99-auth`) должны идти последними в серии роли: переименовать, например, в `99-logout.spec.ts`.
 - [ ] **3.8 Единый формат ID тест-кейсов.**
   - Перейти на `test('…', { tag: '@TC-XXXXX' }, …)`.
   - Заменить allure_id (`91XXX`) на test_case_id в 06-coaches, 10-drills, 12-evaluations — их запрещает workflow.md.
@@ -175,7 +175,7 @@
   - **Teams:** созданные командами удалять в `afterEach`/`finally`.
   - **Пользователи:** при необходимости деактивировать созданных через Manage Users. Накопленных (~140 тестовых родителей у owner на 2026-11-11) — деактивировать разово.
   - **Уточнить:** можно ли удалять drills, plans, skills, scorecard templates и evaluations (в коде есть удаление evaluations).
-  - **При проверке правок** использовать спеки, которые ничего не создают (`02-homepage`, `01-permissions`).
+  - **При проверке правок** использовать спеки, которые ничего не создают (`02-homepage`, `90-permissions`).
 
 - [ ] **3.12 Убрать лишние создания и переиспользовать сущности между прогонами.**
   - **Принцип:** запись создаёт только тест, который проверяет само создание. Остальные тесты (view, edit, invite, права, валидация) берут сущность, созданную этим тестом.

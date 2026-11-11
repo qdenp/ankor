@@ -2,7 +2,8 @@ import { test, expect } from '../../fixtures';
 import { TIMEOUTS } from '../../config';
 
 /**
- * 01a — Auth tests for Owner role.
+ * 99 — Auth tests for Owner role (login + logout).
+ * Номер 99: logout отзывает сессию роли, поэтому файл обязан идти последним в серии роли (AGENTS.md §8).
  * Owner tests run sequentially within the role.
  */
 test.describe('Owner Auth Tests', () => {

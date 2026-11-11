@@ -2,7 +2,8 @@ import { test, expect } from '../../fixtures';
 import { TIMEOUTS } from '../../config';
 
 /**
- * 01a — Auth tests for Coach role.
+ * 99 — Auth tests for Coach role (login + logout).
+ * Номер 99: logout отзывает сессию роли, поэтому файл обязан идти последним в серии роли (AGENTS.md §8).
  * Coach tests run sequentially within the role.
  */
 test.describe('Coach Auth Tests', () => {

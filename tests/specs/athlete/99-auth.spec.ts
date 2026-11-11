@@ -2,7 +2,8 @@ import { test, expect } from '../../fixtures';
 import { TIMEOUTS } from '../../config';
 
 /**
- * 01a — Auth tests for Athlete role.
+ * 99 — Auth tests for Athlete role (login + logout).
+ * Номер 99: logout отзывает сессию роли, поэтому файл обязан идти последним в серии роли (AGENTS.md §8).
  * Athlete tests run sequentially within the role.
  */
 test.describe('Athlete Auth Tests', () => {
