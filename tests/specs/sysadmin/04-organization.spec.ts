@@ -28,7 +28,11 @@ test.describe('SysAdmin Organization Tests', () => {
   });
 
   // 71957: Edit organization as SysAdmin
-  test.skip('@TC-71957 sysadmin can edit organization name and revert', async ({ page }) => {
+  // Выключен в 5c316fe как flaky: "organization not found". Вероятная причина — getOrgRowByEmail
+  // ищет строку только на первой странице DataGrid, без поиска; организация может уйти на другую страницу.
+  test.skip('@TC-71957 sysadmin can edit organization name and revert', {
+    annotation: { type: 'skip', description: 'Flaky: organization row not found on the first DataGrid page (5c316fe). Fix: locate the org via search before editing.' },
+  }, async ({ page }) => {
     const orgPage = new OrganizationPage(page);
     const targetEmail = 'dtimokhin+aiorg01@aexsoft.com';
 

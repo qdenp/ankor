@@ -139,7 +139,7 @@
   - Первый тест проверяет только «не sign-in» — проверять профиль.
   - Откат имени перенести в `afterEach`/`finally`.
 - [ ] **2.13** `getRow = byRole.or(byCell).or(getByText(name))` (drill, evaluation, scorecard): ветка `getByText` находит имя в toast и заголовках. Убрать её. Строка таблицы — только `getByRole('row')` с фильтром.
-- [ ] **2.14** [sysadmin/04-organization.spec.ts:31](tests/specs/sysadmin/04-organization.spec.ts#L31): у `test.skip` нет причины — добавить её. Тест `@TC-71922` проверяет только загрузку страницы, а обещает «все организации».
+- [x] **2.14** (причина skip добавлена аннотацией, видна в отчётах; остальная часть пункта — в этапе 2) [sysadmin/04-organization.spec.ts:31](tests/specs/sysadmin/04-organization.spec.ts#L31): у `test.skip` нет причины — добавить её. Тест `@TC-71922` проверяет только загрузку страницы, а обещает «все организации».
 
 ---
 
