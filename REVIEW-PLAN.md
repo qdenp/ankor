@@ -151,7 +151,7 @@
   - **Готово, когда:** `grep -rnE "page\.(getByRole|locator|getByText|keyboard)" tests/specs` пуст.
 - [ ] **3.2 Удалить `HomePage.logout()`.** Он перекрывает `BasePage.logout()`, а его локатор `/logout/` не находит «Log Out». Удалить вместе с `userProfile`/`logoutButton`.
 - [ ] **3.3 Разделить кнопки в PlanPage.** `createButton` сейчас ищет `'Save'`. Объявить отдельные `saveButton`/`createButton`. `getPlanCard` и `getPlanRow` одинаковы — оставить один метод.
-- [ ] **3.4 SignUpPage.**
+- [x] **3.4 SignUpPage.** Сделано: PO не соответствовал реальной форме (выдуманные шаги Next/Back, поиск по плейсхолдерам-примерам `Jose`/`••••••••`). Локаторы переписаны по подписям полей (каждый находит ровно 1 элемент); удалены `registerAthlete` (выдуманный сценарий) и `gotoWithCode` (`?code=` не заполняет Join code). Отправка формы не проверялась — она создаёт пользователя.
   - `passwordInput` (`/password/`) найдёт и «Confirm password» → strict mode violation.
   - `gotoWithCode` переходит на страницу дважды.
 - [ ] **3.5 Убрать спекулятивные русские варианты из регулярок** (`Редактировать`, `Сохранить`, `Отмена`, `Далее`, `Назад`, `Вход`, `выйти`). UI английский.

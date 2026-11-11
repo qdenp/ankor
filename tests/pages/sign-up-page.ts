@@ -3,66 +3,64 @@ import { BasePage } from './base-page';
 import { PAGES } from '../config';
 
 /**
- * Page Object для страницы регистрации (Sign Up).
+ * Page Object для страницы регистрации (Sign Up, /sign-up).
+ * Реальная структура (одна форма, без шагов):
+ * - heading "Create account"
+ * - Join code, Role (combobox), Email, Phone number, Parent email, Gender (combobox),
+ *   First name, Last name, Graduation year, Position (combobox), Password, Confirm password
+ * - checkbox "I agree to the Terms of Service and Privacy Policy"
+ * - button "Create account", link "Sign in"
+ *
+ * Поля находятся по подписям: плейсхолдеры здесь — примеры значений ("Jose", "••••••••").
+ * Подписи начинаются с названия поля ("Email *"), поэтому регулярки с ^:
+ * /^Email/ не совпадает с "Parent email", /^Password/ — с "Confirm password" и "Show password".
  */
 export class SignUpPage extends BasePage {
-  readonly roleHeading: ReturnType<this['page']['getByRole']>;
-  readonly nextButton: ReturnType<this['page']['getByRole']>;
-  readonly backButton: ReturnType<this['page']['getByRole']>;
-  readonly submitButton: ReturnType<this['page']['getByRole']>;
-  readonly signInLink: ReturnType<this['page']['getByRole']>;
+  readonly heading: Locator;
+  readonly submitButton: Locator;
+  readonly signInLink: Locator;
 
-  // Step 1: Role selection
-  readonly roleOption: (roleName: string) => Locator;
-
-  // Step 2: Personal info
-  readonly firstNameInput: ReturnType<this['page']['getByPlaceholder']>;
-  readonly lastNameInput: ReturnType<this['page']['getByPlaceholder']>;
-  readonly emailInput: ReturnType<this['page']['getByPlaceholder']>;
-  readonly passwordInput: ReturnType<this['page']['getByPlaceholder']>;
-  readonly confirmPasswordInput: ReturnType<this['page']['getByPlaceholder']>;
-  readonly parentEmailInput: ReturnType<this['page']['getByPlaceholder']>;
-  readonly athleteBirthdateInput: ReturnType<this['page']['getByPlaceholder']>;
+  // Fields
+  readonly joinCodeInput: Locator;
+  readonly roleSelect: Locator;
+  readonly emailInput: Locator;
+  readonly phoneInput: Locator;
+  readonly parentEmailInput: Locator;
+  readonly genderSelect: Locator;
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly graduationYearInput: Locator;
+  readonly positionSelect: Locator;
+  readonly passwordInput: Locator;
+  readonly confirmPasswordInput: Locator;
 
   // Terms & Conditions
-  readonly termsCheckbox: ReturnType<this['page']['getByRole']>;
-  readonly termsLink: ReturnType<this['page']['getByRole']>;
-
-  // Validation
-  readonly validationMessage: ReturnType<this['page']['getByRole']>;
-  readonly errorMessage: ReturnType<this['page']['getByText']>;
+  readonly termsCheckbox: Locator;
+  readonly termsLink: Locator;
 
   constructor(page: Page) {
     super(page);
 
-    this.roleHeading = page.getByRole('heading', { name: /select your role|Choose your role/i });
-    this.nextButton = page.getByRole('button', { name: /next|Далее/i });
-    this.backButton = page.getByRole('button', { name: /back|Назад/i });
-    this.submitButton = page.getByRole('button', { name: /create.*account|Sign up|Register/i });
-    this.signInLink = page.getByRole('link', { name: /sign in|Sign In|Вход/i });
+    this.heading = page.getByRole('heading', { name: 'Create account' });
+    this.submitButton = page.getByRole('button', { name: 'Create account', exact: true });
+    this.signInLink = page.getByRole('link', { name: 'Sign in', exact: true });
 
-    // Role options
-    this.roleOption = (roleName: string) =>
-      page.getByRole('option', { name: roleName, exact: true }).or(
-        page.getByRole('button', { name: roleName, exact: true })
-      );
+    this.joinCodeInput = page.getByRole('textbox', { name: /^Join code/ });
+    this.roleSelect = page.getByRole('combobox', { name: /^Role/ });
+    this.emailInput = page.getByRole('textbox', { name: /^Email/ });
+    this.phoneInput = page.getByRole('textbox', { name: /^Phone number/ });
+    this.parentEmailInput = page.getByRole('textbox', { name: /^Parent email/ });
+    this.genderSelect = page.getByRole('combobox', { name: /^Gender/ });
+    this.firstNameInput = page.getByRole('textbox', { name: /^First name/ });
+    this.lastNameInput = page.getByRole('textbox', { name: /^Last name/ });
+    this.graduationYearInput = page.getByRole('spinbutton', { name: /^Graduation year/ });
+    this.positionSelect = page.getByRole('combobox', { name: /^Position/ });
+    // У полей пароля нет роли textbox — ищем по подписи
+    this.passwordInput = page.getByLabel(/^Password/);
+    this.confirmPasswordInput = page.getByLabel(/^Confirm password/);
 
-    // Form fields
-    this.firstNameInput = page.getByPlaceholder(/first.*name|Имя/i);
-    this.lastNameInput = page.getByPlaceholder(/last.*name|Фамилия/i);
-    this.emailInput = page.getByPlaceholder(/email|E-mail/i);
-    this.passwordInput = page.getByPlaceholder(/password|Пароль/i);
-    this.confirmPasswordInput = page.getByPlaceholder(/confirm.*password|Повторите.*пароль/i);
-    this.parentEmailInput = page.getByPlaceholder(/parent.*email|email.*parent/i);
-    this.athleteBirthdateInput = page.getByPlaceholder(/birth.*date|Дата.*рождения/i);
-
-    // Terms
-    this.termsCheckbox = page.getByRole('checkbox', { name: /terms|privacy|услов|политик/i });
-    this.termsLink = page.getByRole('link', { name: /terms of service|privacy policy/i });
-
-    // Validation
-    this.validationMessage = page.getByRole('alert');
-    this.errorMessage = page.getByText(/invalid|error|неверн|ошибк|required|обязател/i);
+    this.termsCheckbox = page.getByRole('checkbox', { name: /Terms of Service/ });
+    this.termsLink = page.getByRole('link', { name: 'Terms of Service' });
   }
 
   /** Переход на страницу регистрации */
@@ -71,18 +69,10 @@ export class SignUpPage extends BasePage {
     await this.page.waitForLoadState('networkidle');
   }
 
-  /** Переход на страницу регистрации с easy join code */
-  async gotoWithCode(code: string): Promise<void> {
-    await this.goto();
-    // URL может содержать code как параметр
-    await this.page.goto(`${PAGES.signUp}?code=${code}`);
-    await this.waitForLoadState();
-  }
-
-  /** Выбор роли */
+  /** Выбор роли в выпадающем списке Role */
   async selectRole(roleName: string): Promise<void> {
-    const option = this.roleOption(roleName);
-    await option.click();
+    await this.roleSelect.click();
+    await this.page.getByRole('option', { name: roleName, exact: true }).click();
   }
 
   /** Заполнение персональных данных */
@@ -93,7 +83,6 @@ export class SignUpPage extends BasePage {
     password: string;
     confirmPassword: string;
     parentEmail?: string;
-    birthdate?: string;
   }): Promise<void> {
     await this.firstNameInput.fill(params.firstName);
     await this.lastNameInput.fill(params.lastName);
@@ -104,9 +93,6 @@ export class SignUpPage extends BasePage {
     if (params.parentEmail) {
       await this.parentEmailInput.fill(params.parentEmail);
     }
-    if (params.birthdate) {
-      await this.athleteBirthdateInput.fill(params.birthdate);
-    }
   }
 
   /** Принятие условий использования */
@@ -114,37 +100,13 @@ export class SignUpPage extends BasePage {
     await this.termsCheckbox.check();
   }
 
-  /** Отправка формы регистрации */
+  /** Отправка формы регистрации (создаёт пользователя — пользователей нельзя удалить, только деактивировать) */
   async submitRegistration(): Promise<void> {
     await this.submitButton.click();
-  }
-
-  /** Полная регистрация атлета */
-  async registerAthlete(params: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    parentEmail: string;
-    birthdate: string;
-  }): Promise<void> {
-    await this.selectRole('Athlete');
-    await this.nextButton.click();
-    await this.fillPersonalInfo({
-      ...params,
-      confirmPassword: params.password,
-    });
-    await this.acceptTerms();
-    await this.submitRegistration();
   }
 
   /** Переход на страницу входа */
   async goToSignIn(): Promise<void> {
     await this.signInLink.click();
-  }
-
-  /** Нажатие кнопки назад */
-  async goBack(): Promise<void> {
-    await this.backButton.click();
   }
 }
