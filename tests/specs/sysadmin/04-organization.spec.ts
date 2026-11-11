@@ -13,8 +13,8 @@ test.describe('SysAdmin Organization Tests', () => {
     await loginAs('sysadmin');
   });
 
-  // 91832: SysAdmin sees all organizations
-  test('@TC-91832 sysadmin sees all organizations', async ({ page }) => {
+  // 71922: SysAdmin sees all organizations
+  test('@TC-71922 sysadmin sees all organizations', async ({ page }) => {
     const orgPage = new OrganizationPage(page);
 
     await orgPage.gotoOrganizationsList();
@@ -27,8 +27,8 @@ test.describe('SysAdmin Organization Tests', () => {
     await orgPage.expectPageLoaded();
   });
 
-  // 91861: Edit organization as SysAdmin
-  test.skip('@TC-91861 sysadmin can edit organization name and revert', async ({ page }) => {
+  // 71957: Edit organization as SysAdmin
+  test.skip('@TC-71957 sysadmin can edit organization name and revert', async ({ page }) => {
     const orgPage = new OrganizationPage(page);
     const targetEmail = 'dtimokhin+aiorg01@aexsoft.com';
 

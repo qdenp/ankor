@@ -1,5 +1,76 @@
 # AGENTS.md — Правила написания тестов для Ankor
 
+## Запуск E2E тестов — решение для Bash tool (120 сек лимит)
+
+Bash tool убивает процессы через 120 секунд по умолчанию. E2E тесты (~10-15 мин) не успевают.
+
+### Решение: параметр `timeout`
+
+**Параметр `timeout` в миллисекундах** — переопределяет дефолтные 120 секунд.
+
+```powershell
+# Запуск с таймаутом 30 минут (1800000 мс):
+Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
+Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+npm run test:all 2>&1 > test-output.log
+# timeout: 1800000
+```
+
+**Рабочие значения:**
+- `timeout: 600000` (10 мин) — для одной роли
+- `timeout: 1800000` (30 мин) — для полного прогона всех ролей
+
+**Формат прогресса:** `list` reporter из конфига показывает `ok N` (прошёл), `x N` (упал), `- N` (пропущен) для каждого теста.
+
+### Мониторинг
+
+```
+# Чтение файла через Read tool:
+# Read tool → test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
+# Формат: ok — прошёл, x — упал, - — пропущен
+
+# Проверка завершены ли:
+# Read tool → test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
+```
+
+### Очистка мусора
+
+**Обязательно очищать ПЕРЕД запуском тестов и ПОСЛЕ генерации Allure отчёта:**
+
+```bash
+# Перед запуском тестов:
+Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
+Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
+npm run test:owner 2>&1 > test-output.log
+
+# После генерации отчёта:
+npx allure generate --clean -o allure-report
+Compress-Archive -Path "allure-results" -DestinationPath "allure-results.zip" -Force
+Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
+Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
+```
+
+- `allure-results` — сырые результаты Playwright (накапливаются при каждом прогоне)
+- `test-results` — скриншоты, видео, трейсы (накапливаются при каждом прогоне)
+- `allure-results.zip` — архив для загрузки в TestOps (перезаписывается каждый раз)
+- **Никогда не оставлять эти папки неочищенными**
+
+### ❌ Не работает:
+- `npm run test:all` без `timeout` — убьётся через 120 сек
+- `Start-Job` — изоляция, файл не пишется
+- `Tee-Object` — блокируется
+
+### PowerShell hidden process — памятка
+
+Запуск через `Start-Process` обходит Bash tool полностью. **Не использовать без запроса пользователя.**
+
+```powershell
+Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
+Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+$proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > test-output.log" -WindowStyle Hidden -PassThru
+Write-Output "Started PID: $($proc.Id)"
+```
+
 ## 1. Процесс автоматизации тестов через скиллы (ОБЯЗАТЕЛЬНО — ПЕРВЫМ ДЕЛОМ)
 
 Для **любого нового тестового сценария** соблюдай цепочку скиллов из `.gigacode_vsc/skills/`:
@@ -452,116 +523,4 @@ grep -r "\.catch(() =>" tests/
     "pre-commit": "npm run lint:tests && npm run lint:waits && npm run lint:catches"
   }
 }
-```
-5. **Следуй цепочке 01→02→03→04** для каждого нового сценария
-
-### Команды проверки дублей (из 01-test-scenario-analyst):
-```bash
-# Поиск по методам PO:
-grep -r "createAthlete" tests/specs/
-grep -r "createCoach" tests/specs/
-grep -r "createParent" tests/specs/
-grep -r "createPlan" tests/specs/
-grep -r "getAthleteRow\|getCoachRow\|getParentRow\|getPlanRow" tests/specs/
-
-# Список существующих тестов по ролям:
-ls tests/specs/owner/
-ls tests/specs/coach/
-ls tests/specs/parent/
-ls tests/specs/athlete/
-```
-
-### Формат плана для утверждения (01-test-scenario-analyst):
-```
-## Тестовый сценарий: [Название]
-
-**Роль:** [owner/coach/parent/athlete/sysadmin]
-**Файл:** [NN-topic.spec.ts]
-**Связанный PO:** [page-object.ts]
-
-### Предварительные условия
-- Пользователь авторизован как [роль]
-- [Любые необходимые настройки данных]
-
-### Шаги теста
-1. Перейти на [страницу/маршрут]
-2. [Действие через PO метод]
-3. [Действие через PO метод]
-...
-
-### Ассерты (web-first, ТОЛЬКО через PO)
-- await expect(po.getRow(name)).toBeVisible({ timeout: TIMEOUTS.long })
-- await expect(page).toHaveURL(/expected-route/)
-
-- [Новые методы PO / новый тестовый файл / расширение существующего]
-
-**Утверждаете ли вы этот план?**
-```
-
----
-
-## 🔴 Запрет на изменение общих методов без подтверждения
-
-**ОБЩИЕ (shared) файлы проекта:**
-- `tests/pages/base-page.ts` — базовый PO с общими методами (logout, openProfileMenu и т.д.)
-- `tests/fixtures.ts` — фикстуры авторизации (loginAs, logout, storageState)
-- `tests/config.ts` — конфигурация, константы, таймауты
-- Любые другие файлы, используемые **несколькими тестами или ролями**
-
-### 🔴 ПРАВИЛО: Не изменять общие методы без подтверждения пользователя
-
-- **Никаких правок в shared-файлы без явного одобрения пользователя**
-- Перед любым изменением — показать diff и объяснить, зачем это нужно
-- Если общий метод используется в нескольких тестах — правка может сломать работающие тесты
-- **Нарушение = остановка и откат изменений**
-
----
-
-## 17. Запуск тестов — решение для Bash tool (120 сек лимит)
-
-Bash tool убивает процессы через 120 секунд по умолчанию. E2E тесты (~10-15 мин) не успевают.
-
-### Решение: параметр `timeout`
-
-**Параметр `timeout` в миллисекундах** — переопределяет дефолтные 120 секунд.
-
-```powershell
-# Запуск с таймаутом 30 минут (1800000 мс):
-Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-Remove-Item "test-output.log" -ErrorAction SilentlyContinue
-npm run test:all 2>&1 > test-output.log
-# timeout: 1800000
-```
-
-**Рабочие значения:**
-- `timeout: 600000` (10 мин) — для одной роли
-- `timeout: 1800000` (30 мин) — для полного прогона всех ролей
-
-**Формат прогресса:** `list` reporter из конфига показывает `ok N` (прошёл), `x N` (упал), `- N` (пропущен) для каждого теста.
-
-### Мониторинг
-
-```
-# Чтение файла через Read tool:
-# Read tool → test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
-# Формат: ok — прошёл, x — упал, - — пропущен
-
-# Проверка завершены ли:
-# Read tool → test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
-```
-
-### ❌ Не работает:
-- `npm run test:all` без `timeout` — убьётся через 120 сек
-- `Start-Job` — изоляция, файл не пишется
-- `Tee-Object` — блокируется
-
-### Альтернатива: PowerShell hidden process
-
-Если `timeout` не сработал, можно запустить процесс вне Bash tool:
-
-```powershell
-Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-Remove-Item "test-output.log" -ErrorAction SilentlyContinue
-$proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > test-output.log" -WindowStyle Hidden -PassThru
-Write-Output "Started PID: $($proc.Id)"
 ```

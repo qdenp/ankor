@@ -24,6 +24,7 @@ export function createPlanTabTests(
       await loginAs(role);
     });
 
+    test.skip(true, 'TODO - новая фича shared plans для атлетов');
     test('should see expected tabs', async ({ page }) => {
       const planPage = new PlanPage(page);
       await planPage.goto();

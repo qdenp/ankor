@@ -1,0 +1,797 @@
+allure_id;name;full_name;description;status;start;stop;duration;precondition;expected_result;message;test_case_id;test_case_status;layer;scenario;tag;link;parameter;executor;RallyUpGitHub;Lead;Owner;QA;Automation;Suite;Component;Story;Feature;Epic
+93824;Home page;;Проверка Coach Summary counts и их обновления по UC-20 (с пометками расхождений с текущей реализацией);;;;;Зайти коачем;;;71818;Draft;;"[step 1] Перейти на Home
+	[step 1.1] exp отображается Coach Summary
+	[step 1.2] exp Athletes: количество атлетов, связанных с командами/доступом коача
+	[step 1.3] exp Submitted Evaluations: количество submitted evaluations коача в этой организации
+	[step 1.4] expShared Plans (планы, которыми коач поделился с атлетами)
+	[step 1.5] exp Assigned Drills
+[step 2] Зарегистрировать команду и атлета, создать Evaluation (submit), создать и расшарить Plan атлету
+[step 3] Вернуться на Home
+	[step 3.1] exp Athletes +1
+	[step 3.2] exp Submitted Evaluations +1
+	[step 3.3] exp  Shared Plans +1 при расшаривании плана";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Coach
+93825;experied code;;;;;;;Существует истёкший join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.;;;71081;Draft;;"[step 1] Ввести валидные данные
+[step 2] Ввести истекший код
+	[step 2.1] This code has expired - или другая формулировка но есть причина";;;;;;;skurgulova;;;Easy Join;Easy join validation;Login;Ankor - 1 version;Singup
+93826;not active;;;;;;;Пользователь не авторизован, открыт /sign-up с этим кодом.;;;71082;Draft;;"[step 1] Ввести валидные данные
+[step 2] Ввести невалидный  код
+	[step 2.1] This code inactive - или другая формулировка но есть причина";;;;;;;skurgulova;;;Easy Join;Easy join validation;Login;Ankor - 1 version;Singup
+93827;homepage;;;;;;;Зайти атлетом, которого не оценивали;;;71821;Draft;;"[step 1] Перейти на home page
+	[step 1.1] No Workout for Today во вкладке воркаут
+	[step 1.2] Также есть элементы 
+Submitted Evaluations: Total number of submitted evaluation reports for this athlete (In Progress is not counted).
+Assigned Plans: Total number of plans to which this athlete has been invited (invitations received, not invitations sent by the signed-in user).
+Assigned Drills: Total number of unique drills mapped to the Primary Development Focus skills from this athlete’s most recently submitted evaluation (not a lifetime total of every drill they have ever received).
+Last Evaluation: Date of this athlete’s most recent submitted evaluation.
+[step 2] Зайти коачем и submit evaluation атлету с оценкой ниже 3 хотя бы по одному Primary Development Focus skill (с настроенным Drill Mapping)
+[step 3] Зайти атлетом на homepage
+	[step 3.1] exp появился Workout Entry
+	[step 3.2] exp Date: сегодняшняя дата (с клиентских часов)
+	[step 3.3] exp Level: заголовок группы дрилов (""Level 1"")
+	[step 3.4] exp показаны ВСЕ дрилы из Drill Mapping Primary Development Focus skills последней submitted evaluation (не один дрил на скилл, не только скиллы с оценкой ниже 3), без дублей
+	[step 3.5] exp у каждого дрила указано Drill name (media title, если есть, иначе имя дрила)
+	[step 3.6] exp Duration показана только если больше 0 минут";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Athlete
+93829;Home page;;;;;;;Зайти Owner/Admin;;;71823;Draft;;"[step 1] Перейти на Home (/)
+	[step 1.1] exp Total Athletes: общее число активных атлетов в организации (org-wide, не только по своей работе)
+	[step 1.2] exp Submitted Evaluations: общее число submitted evaluation reports по организации (НЕ включая In Progress)
+	[step 1.3] exp CHECK-BUG: Shared Plans — число share-событий (не уникальных планов; пример: план расшарен дважды одним коачем и трижды другим = 5)
+	[step 1.4] exp Active Coaches: число активных коачей в организации
+[step 2] Проверить, что счётчики отражают всю организацию, а не только работу текущего пользователя";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Owner / admin
+93830;View evaluation;;;;;;;Есть созданные но не submitted evaluation;;;71567;Draft;;"[step 1] Зайти на evaluaion
+[step 2] Нажать view
+	[step 2.1] открылся репорт, есть Scorecard Team
+Evaluation ID
+	[step 2.2] Есть действия back и edit
+[step 3] Попробовать из view отредактировать
+	[step 3.1] не отредактировать
+[step 4] Нажать back
+	[step 4.1] переход назад
+[step 5] Снова зайти на репорт и нажать view
+[step 6] Нажать edit
+	[step 6.1] Открылась форма редактирования";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93832;регистрация Coach по join-коду;;;;;;;Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.;;;71013;Draft;;"[step 1] Выбрать роль coach в дропдауне
+	[step 1.1] Parent email, Graduation year, Position исчезли, так как релеванты только для атлета
+[step 2] Заполнить все поля валидными данными
+[step 3] НЕ соглашаться с  Terms of Service and Privacy Policy. 
+[step 4] Зарегестрироваться
+	[step 4.1] валидация на Принять Terms of Service and Privacy Policy. 
+[step 5] Принять Terms of Service and Privacy Policy. 
+[step 6] Зарегестрироваться
+[step 7] Войти
+	[step 7.1] юзер вошел
+	[step 7.2] юзер имеет роль коуч";;;;;;;skurgulova;;;Easy Join;;Login;Ankor - 1 version;Singup
+93833;Coach/Administrator/Owner видят все завершённые отчёты организации;;;;;;;"Зайти Coach/Administrator/Owner 
+ Для атлетов есть завершённые (submitted) evaluation.";;;71603;Draft;;"[step 1] Открыть Evaluation Reports
+	[step 1.1] Список содержит все завершённые отчёты организации";;;;;;;skurgulova;;;;;Evaluation report;Ankor - 1 version;
+93834;Invite user to plan  by athlete;;;;;;;Зайти атлетом;;;71683;Draft;;"[step 1] Перейти в my plan
+[step 2] Создать план
+[step 3] Сохранить план
+	[step 3.1] план сохранен
+[step 4] Перейти в edit
+	[step 4.1] есть invite people
+[step 5] Нажать invite
+	[step 5.1] Открылся дропдаун с выбором пользователей
+[step 6] Выбрать пользователя
+[step 7] Нажать invite
+	[step 7.1] нотификация Invites saved. Emails sent: 1.
+[step 8] Приглашенному юзеру пришел инвайт на почту";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;Invite plan
+93835;Invation coach;;;;;;;"Создать easy join code АДМИНОМ
+По коду зарегестрировать юзера";;;71825;Draft;;"[step 1] Зайти тем юзером, кто создал код
+	[step 1.1] есть нотификация 
+
+Title: ""New member joined [Team name]""
+Message: ""[Athlete/Coach name] joined [Team name] using your Easy Join code. [View profile button]""
+Deep link: Opens the new member's profile on the Athletes page ";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Notification
+93837;Переход по deep-link из уведомления/письма открывает отчёт напрямую;;;;;;;"АТЛЕТУ И РОДИТЕЛЮ  пришло уведомление/email со ссылкой на конкретный evaluation report.";;;71605;Draft;;"[step 1] Быть залогиненным атлетом
+[step 2] Атлетом перейти по ссылке из письма
+	[step 2.1] Открывается сразу нужный отчёт  список Evaluation Reports ";;;;;;;skurgulova;;;;;Evaluation report;Ankor - 1 version;
+93838;Easy Join Codes;;;;;;;Зайти оунером / админом /  коачем;;;71847;Draft;;"[step 1] Зайти в Easy Join Codes
+	[step 1.1] показаны коды
+[step 2] Нажать New join code
+	[step 2.1] открылась форма заполнения
+	[step 2.2] team
+max uses
+expires at
+active
+disabled
+[step 3] Заполнить поля
+[step 4] Сохарнить
+	[step 4.1] код создан и отображен в таблице";;;;;;;skurgulova;;;;;Easy join;Ankor - 1 version;
+93839;create evaluation;;;;;;;"зайти как owner/admin / coach
+Существует активный scorecard-шаблон
+Существует команда 
+СУЩЕСТВУЕТ АТЛЕТЫ В КОМАНДЕ";;;71460;Draft;;"[step 1] Открыть Evaluations → ""Create Evaluation"".
+[step 2] Открыть scorecard-шаблон.
+	[step 2.1] открылся дропдаун со всеми шаблонами
+[step 3] Выбрать scorecard-шаблон.
+[step 4] Выбрать команду также через дропдаун
+	[step 4.1] в athlete подтянулись все атлеты в команде
+	[step 4.2] создалась сетка с атлетами
+[step 5] В открывшейся сетке (scorecard grid) выставить оценку каждому атлету по каждой категории.
+[step 6] Сохранить evaluation  (НЕ нажимать submit)
+	[step 6.1] Evaluation сохраняется как редактируемый черновик.
+[step 7] Зайти атлетом / родителю которому создали оценку
+	[step 7.1] Черновик не виден атлету или родителю.";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93840;Create Template with 2+ category;;;;;;;Пользователь авторизован как Owner или Administrator. В библиотеке скиллов уже есть хотя бы два скилла.;;;71293;Draft;;"[step 1] Открыть Scorecard Templates > New Template
+	[step 1.1] Открылась форма создания тимплейта
+[step 2] Ничего не заполнять и нажать Create
+	[step 2.1] Soccer Card name, category name, subskill name , skill обязательны
+[step 3] Заполнить поля шаблона только обязательные поля: template name
+[step 4] Добавить одну категорию: name
+[step 5] Добавить в категорию один под-скилл: name,  skill (из библиотеки скиллов)
+[step 6] Добавить в эту же категорию  еще один под-скилл: name,  skill (из библиотеки скиллов)
+[step 7] Добавить еще категорию и добавить  к ней 2-3 скилла
+[step 8] Сохранить шаблон
+	[step 8.1] Шаблон сохраняется с указанными данными.
+	[step 8.2] Порядок категорий и порядок под-скиллов внутри категорий полностью совпадает с созданием
+[step 9] Перейти в evaluation
+	[step 9.1] Шаблон сразу доступен для использования в evaluations ";;;;;;;skurgulova;;;;;Score Card Template;Ankor - 1 version;
+93841;Shared practice plans;;;;;;;"Отправить инвайт на палн  атлету, к которму слинкован родитель";;;71827;Draft;;"[step 1] Зайти атлетом
+	[step 1.1] пришло уведомление что пришел инвайт
+	[step 1.2] Title: ""You've been invited to a practice plan""
+Message: ""[Coach / Administrator name] shared the practice plan [Plan name] with you. [View Practice plan button]""
+Deep link: Opens the shared plan
+[step 2] Зайти родителем
+	[step 2.1] также есть уведомление";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Notification
+93842;Add manual > check email already registrated;;;;;;;Зайти owner/ admin/coach;;;71217;Draft;;"[step 1] Перейти в Athlete > New athlete
+[step 2] Заполнить всю информацию валидными данными
+[step 3] В Email athlete ввести уже зарегестрированный имайл
+	[step 3.1] валидация на имайл что такой уже существует";;;;;;;skurgulova;;;;;Athlete;Ankor - 1 version;Add manual
+93843;Athlete видит свои репорты;;;;;;;Пользователь авторизован как Athlete. Для этого атлета и для других атлетов команды  есть завершённые (submitted) evaluation.;;;71601;Draft;;"[step 1] Открыть Evaluation Reports.
+	[step 1.1] В списке — только завершённые отчёты этого атлета.
+Отчёты других атлетов не отображаются.";;;;;;;skurgulova;;;;;Evaluation report;Ankor - 1 version;
+93844;Evaluation reports;;;;;;;"Коачем создать evaluation на атлета к которому привязан родитель 
+Submit evaluation";;;71826;Draft;;"[step 1] Зайти атлетом
+	[step 1.1] есть уведомление 
+Notification content
+Title: ""New evaluation available for [Athlete Name]""
+Message: ""[Coach name] submitted a new evaluation - [Scorecard template name] - for [Athlete name], on [Date]. [View Evaluation report button]""
+Deep link: Opens the athlete's evaluation report
+[step 2] Проверить Deep link
+	[step 2.1] ведет на evaluation report
+[step 3] Зайти родителем
+	[step 3.1] также есть это уведомление
+[step 4] Зайти оунером
+	[step 4.1] также есть это уведомление";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Notification
+93846;shared plan;;;;;;;;;;71830;Draft;;"[step 1] Приходит тому, с кем поделились планом";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Email
+93847;View drill;;;;;;;;;;71835;Draft;;"[step 1] Перейти в Drill вкладку
+	[step 1.1] открылась библиотека drills
+	[step 1.2] На дрилсе отображены: 
+Name: Drill name in the organization's sport.
+Visability: public/organization
+Segment: Drill segment name
+Players: Configured min–max player count (""Any size"" when unset).
+[step 2] Нажать на выбранном drill кнопку  view
+	[step 2.1] Name: Drill name.
+Segment: Drill segment name.
+Visibility: Public (platform-wide) or Organization (this club). Private is later.
+Duration: Drill duration in minutes.
+Players: Configured min–max player count (""Any size"" when unset).
+Ages: Configured min–max age in years (""Any age"" when unset).
+Created: When the drill was created.
+Updated: When the drill was last updated.
+Description: Drill description, or ""No description available.""
+Skill Mapping: Names of skills tagged on this drill.
+Media";;;;;;;skurgulova;;;;;Drill;Ankor - 1 version;View drills
+93848;030 Parent cannot create plan;;;;;;;Зайти родителем;;;72602;Active;;"[step 1] Перейти в Plans
+	[step 1.1] exp нет кнопки/опции New Plan
+[step 2] Попробовать открыть /practice-plans/new напрямую по ссылке
+	[step 2.1] exp доступ заблокирован (редирект или ошибка доступа)";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93849;Athlete по join-коду с email родителя;;;;;;;"Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.";;;70979;Draft;;"[step 1] Открыть signin и Нажать signup
+[step 2] Ничего не заполнять и нажать next
+	[step 2.1] на все поля кроме Parent email валидация
+[step 3] Заполнить role как Athlete
+[step 4] Заполнить все поля
+[step 5] Parent email заполнить валидными данными
+[step 6] Принять Terms of Service and Privacy Policy. 
+[step 7] Зарегестрировать атлета
+	[step 7.1] атлет зарегестрирован
+	[step 7.2] у него роль и права атлета
+	[step 7.3] атлет в той команде, как в созданном  easy join
+	[step 7.4] На имайл родителя пришло приглашение
+[step 8] Зайти оунером / коучем на easy join
+	[step 8.1] Счётчик использований (usage counter) join-кода увеличивается на 1.
+[step 9] Зайти оунером на вкладку Athlete на зарегестрированного  атлета
+	[step 9.1] информация совпадает с заполненной информацией на создании
+	[step 9.2] у атлета есть   родитель";;;;;;;skurgulova;;;Easy Join;;Login;Ankor - 1 version;Singup
+93850;edit parent;;;;;;;"Зайди админом / оунером
+Должен быть атлет со заполненными всеми полями и с привязанным родителем";;;71256;Draft;;"[step 1] Перейти в parent
+[step 2] Выбрать parent
+[step 3] Нажать  edit
+[step 4] Отредактировать  все поля, которые можно отредактировать
+[step 5] Сохранить
+[step 6] Снова зайти на родителя
+	[step 6.1] информация обновилась
+[step 7] Зайти родителем
+	[step 7.1] указано новое имя / информация";;;;;;;skurgulova;;;;;Parent;Ankor - 1 version;Create parent from add manual
+93852;Evaluation reports;;;;;;;;;;71829;Draft;;"[step 1] Когда коач/админ оценил атлета,  то атлету и слинкованому родителю приходит Evaluation reports";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Email
+93853;007 Create Plan athlete;;;;;;;"Зайти как атлет";;;71639;Active;;"[step 1] Перейти в Plan
+	[step 1.1] открылся список планов, если есть у юзера
+[step 2] Нажать на +
+	[step 2.1] Открылся New Practice Plan
+[step 3] Ничего не заполнять нажать create
+	[step 3.1] Name и drill обязательны
+[step 4] Заполнить имя
+[step 5] Нажать на drill +
+	[step 5.1] Открылся список дрилсов
+[step 6] Проверить пагинацию
+	[step 6.1] переключается
+[step 7] Проверить поиск
+	[step 7.1] поиск работает
+[step 8] К выбранному дрилу добавить время
+[step 9] Добавить дрил нажав на него
+[step 10] Добавить еще один дрилл кнопку add
+[step 11] Нажать Done
+	[step 11.1] в Segments:  добавилось имя дрила
+	[step 11.2] В total duration колчество времени всех duration дрилов";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93856;Invation athlete;;;;;;;"Создать easy join code КОАЧЕМ
+По коду зарегестрировать юзера";;;71824;Draft;;"[step 1] Зайти тем юзером, кто создал код
+	[step 1.1] есть нотификация 
+
+Title: ""New member joined [Team name]""
+Message: ""[Athlete/Coach name] joined [Team name] using your Easy Join code. [View profile button]""
+Deep link: Opens the new member's profile on the Athletes page ";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Notification
+93857;Permission;;;;;;;"Owner / admin имеет все эти вкладки";;;71889;Draft;;"[step 1] Organization profile - может просматривать, редактировать ВСЕ  организации
+[step 2] Skill - CRUD
+[step 3] Drill - CRUD
+[step 4] Scorecard Templates - CRUD
+[step 5] Athlete - CRUD
+[step 6] Parents - CRUD
+[step 7] Coach - CRUD
+[step 8] Team - CRUD
+[step 9] Easy join - CRUD
+[step 10] Evaluation - CRUD
+[step 11] Evaluation report - see all  organization report
+[step 12] Plan - see all organization plan";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;sys admin
+93858;Forgot email;;;;;;;;;;71831;Draft;;"[step 1] Перейти на логин
+[step 2] Нажать forgot password
+	[step 2.1] на почту должно прийти письмо  forgot password";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Email
+93859;Edit user;;;;;;;Зайти как Owner, Administrator, or System Administrator;;;72062;Draft;;"[step 1] Нажать Manage Users
+[step 2] Выбрать юзера и нажать Edit
+	[step 2.1] Есть поля
+first name
+last name
+email
+phone (optional)
+role (organization role)
+active organization membership
+new password (optional)
+confirm password
+	[step 2.2] Email нельзя поменять
+[step 3] Поменять first name last name phone (optional)
+role (organization role) и new password (optional)
+confirm password
+[step 4] Сохарнить
+	[step 4.1] юзер сохранился
+[step 5] Зайти юзером со старым паролем
+	[step 5.1] неверный пароль
+[step 6] Зайти новым паролем
+	[step 6.1] юзер вошел
+	[step 6.2] роль юзера поменялась
+	[step 6.3] у юзера отображается отредактированная информация";;;;;;;skurgulova;;;;;Manage user;Ankor - 1 version;
+93860;Успешная регистрация организации Lacrosse;;;;;;;Пользователь не авторизован. Открыта форма регистрации организации (/org-signup) через "Sign up your organization" на Sign In.;;;70897;Active;;"[step 1] 1. Открыть Organization Registration
+	[step 1.1] В  начале форма из  из 3 шагов: Admin Info → Organization → Teams
+[step 2] Открыть шаг Admin Info и нажать next
+	[step 2.1] валидация на все поля в форме
+[step 3] Заполнить First name, Last name, Email (уникальный, валидный), Phone (валидный), Password (не менее 8 символов), Confirm password (совпадает с Password).
+[step 4] Нажать Next
+	[step 4.1] Открыт Organization Registration
+	[step 4.2] есть поля
+organization name
+Program gender (Girls/Boys/Coed)
+	[step 4.3] Coed по умолчанию выбран
+[step 5] Ничего не заполнять и нажать Next
+	[step 5.1] organization name обязателен
+[step 6] Заполнить organization name и поменять генедр на любой
+[step 7] Нажать Next
+	[step 7.1] переход на шаг Teams
+[step 8] Ничего не заполнять и нажать next
+	[step 8.1] Sport обязателен
+[step 9] Раскрыть доропдаун teams
+	[step 9.1] - basketball 
+- Lacrosse 
+- Soccer
+[step 10] Выбрать Lacrose
+[step 11] Ввести имя Teams
+[step 12] Нажать save
+	[step 12.1] организация  создана
+[step 13] Войти юзером
+	[step 13.1] юзер вошел в организацию
+	[step 13.2] у юзера роль owner
+[step 14] Есть созданная Teams";;;;;;;skurgulova;;;Register Organization;;Login;Ankor - 1 version;Singup
+93861;После submit генерируется evaluation report;;;;;;;Существует draft evaluation с хотя бы одним оценённым атлетом.;;;71562;Draft;;"[step 1] Открыть draft evaluation.
+[step 2] Изменить оценку одного из атлетов, не нажимая отдельно Save.
+[step 3] Нажать ""Submit"".
+	[step 3.1] Система сохраняет несохранённые изменения оценок перед отправкой.
+	[step 3.2] После submit генерируется evaluation report для каждого оценённого атлета";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;Submit Evaluation
+93863;Forgot password несуществующий юзер;;;;;;;"Открыт экран Sign In.
+Должен быть имайл незарегестрированный на ankor к которому есть доступ";;;70944;Draft;;"[step 1] Найти и нажать на ссылку/кнопку ""Forgot password""
+	[step 1.1] открылась форма
+[step 2] Ввести невалидный имайл
+	[step 2.1] валидация
+[step 3] Ввести имайл незарегестрированного юзера, доступ к почте котрого есть
+	[step 3.1] нотификация If an account exists for that email, a reset link has been sent.
+[step 4] Проверить имайл
+	[step 4.1] имайл не пришел";;;;;;;skurgulova;;;;;Login;Ankor - 1 version;Sign in
+93864;Ввод рейтинга выше 5 блокируется с предупреждением;;;;;;;Открыта scorecard grid для evaluation.;;;71495;Draft;;"[step 1] Попытаться ввести значение рейтинга выше 5 для любой категории
+	[step 1.1] Предупреждение: 
+Values should be from 1 to 5.";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93865;Permission;;;;;;;;;;71845;Draft;;"[step 1] Skill / drill -  view only
+[step 2] Evaluation - view only
+[step 3] Evaluation report -  view only
+[step 4] Plan - CRUD only own plan";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Athlete
+93866;Prebuilt plan appears in Prebuilt Plans for organizations of the same sport;;;;;;;Зайти sys admin. Все дрилы в плане Public. Есть доступ к другой организации с тем же видом спорта и к организации с другим видом спорта;;;72606;Outdated;;"[step 1] Создать план с Public дрилами
+[step 2] Отметить Make this a Prebuilt Plan
+[step 3] Сохранить
+[step 4] Зайти в другую организацию с тем же видом спорта любым юзером
+[step 5] Перейти в раздел Prebuilt Plans (см. UC-22)
+	[step 5.1] exp созданный план отображается в списке Prebuilt Plans
+[step 6] Зайти в организацию с другим видом спорта
+[step 7] Перейти в Prebuilt Plans
+	[step 7.1] exp плана нет в списке (Prebuilt не кросс-спорт)";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93867;Add athlete + parent;;;;;;;Зайди админом / оунером;;;71182;Draft;;"[step 1] Перейти в athlete
+[step 2] нажать New athlete
+[step 3] Заполнить всю информаицю от атлете
+[step 4] Заполнить имайл несущестсующего родителя
+[step 5] Сохранить
+	[step 5.1] атлет зарегестрирован
+	[step 5.2] родителю пришло письмо об комплите аккаунта";;;;;;;skurgulova;;;;;Athlete;Ankor - 1 version;Add manual
+93868;Invite multiple user to plan  by coach;;;;;;;Зайти коачем;;;71716;Draft;;"[step 1] Перейти в my plan
+[step 2] Создать план
+[step 3] Сохранить план
+	[step 3.1] план сохранен
+[step 4] Перейти в edit
+	[step 4.1] есть invite people
+[step 5] Нажать invite
+	[step 5.1] Открылся дропдаун с выбором пользователей
+[step 6] Выбрать  сразу 5 - 10 пользователй
+[step 7] Нажать invite
+	[step 7.1] нотификация Invites saved. Emails sent: 10 ( число приглашенных)
+[step 8] Всем приглашенном юзерам пришел инвайт на почту";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;Invite plan
+93869;homepage;;;;;;;"Должен быть родитель у котрого привязаны 2  атлета
+Сделать оценку 2 атлетам где балл 2 
+Зайти родителем";;;71822;Draft;;"[step 1] Перейти на home page
+	[step 1.1] exp есть Workout Entry для каждого привязанного атлета
+	[step 1.2] exp Date: сегодняшняя дата (с клиентских часов)
+	[step 1.3] exp Level: заголовок группы дрилов (""Level 1"")
+	[step 1.4] exp показаны ВСЕ дрилы из Drill Mapping Primary Development Focus skills последней submitted evaluation каждого атлета, без дублей
+	[step 1.5] exp у каждого дрила Drill name (media title, если есть, иначе имя дрила)
+	[step 1.6] exp Duration показана только если больше 0 минут
+[step 2] Проверить, что родитель НЕ может логировать репы (нет контрола для этого на экране)
+	[step 2.1] exp нет доступного контрола логирования репов у родителя
+[step 3] Проверить Athlete Summary для каждого атлета
+	[step 3.1] exp  Total Evaluations
+	[step 3.2] exp  Shared Plans показывает
+	[step 3.3] exp  Assigned Drills и Last Evaluation";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Parent
+93870;Carete parent;;;;;;;Зайти owner / admin / coach;;;71252;Draft;;"[step 1] Перейти в Parent > New parent
+[step 2] Ничего не заполнять
+[step 3] Нажать create
+	[step 3.1] обязательнеы поля full name, email,  relationship, password, athletes
+[step 4] Заполнить только обязательные поля
+[step 5] Сохранить
+	[step 5.1] Родитель зарегестрирован
+	[step 5.2] у атлета появился родитель
+[step 6] Зайти зарегестрированным родителем
+	[step 6.1] юзер вошел
+	[step 6.2] у юзера права и роль родителя";;;;;;;skurgulova;;;;;Parent;Ankor - 1 version;Create parent from add manual
+93871;Add coach manually;;;;;;;Зайти оунером / админом / коачем;;;71990;Draft;;"[step 1] Перейти в coach
+	[step 1.1] открылась таблица со всеми коачами, если есть
+[step 2] Нажать ""New coach"",
+	[step 2.1] открылась информация к заполнению
+	[step 2.2] есть поля 
+full name
+email
+password
+confirm password
+phone (optional)
+[step 3] Заполнить все поля
+[step 4] Сохранить
+	[step 4.1] коач отобразился в таблице
+	[step 4.2] а имайл пришло велком письмо
+[step 5] Зайти коачем под кредами
+	[step 5.1] юзер вошел
+	[step 5.2] роль коач";;;;;;;skurgulova;;;;;Coach;Ankor - 1 version;
+93872;Оценка категории подтягивает оценку на все сабскилы;;;;;;;"Открыта scorecard grid для evaluation.
+Должен быть категория с 4 саб-скилками";;;71528;Draft;;"[step 1] Поставить оценку выше 3 на категорию
+[step 2] Нажать submit на evaluation
+[step 3] Перейти в evaluation report
+[step 4] Открыть evlaution который оценили
+	[step 4.1] на  ВСЕХ subskill та же оценка что и на категории";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93874;Permission;;;;;;;;;;71846;Draft;;"[step 1] Skill / drill -  view only
+[step 2] Evaluation - view only
+[step 3] Evaluation report -  view only
+[step 4] Plan - view only (athlete's invited plan)";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Parent
+93875;026 Prebuilt Plans and Org Plans tabs visible to Administrator / Owner / System Administrator;;;;;;;Зайти owner / admin / sys admin;;;72617;Active;;"[step 1] Перейти в Practice Plans
+	[step 1.1] exp видны вкладки My Plans, Invited, Prebuilt Plans, Org Plans";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93876;Prebuilt checkbox available to System Administrator on own plan in Edit;;;;;;;Зайти sys admin. Существует план, созданный sys admin, все drill в плане Public;;;72611;Active;;"[step 1] Открыть Edit на собственном плане sys admin
+	[step 1.1] exp есть чекбокс Make this a Prebuilt Plan
+[step 2] Отметить чекбокс и сохранить
+	[step 2.1] exp план опубликован в Prebuilt Plans для всех организаций того же вида спорта";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93877;Рейтинг категории ниже 3 раскрывает под-скиллы;;;;;;;Открыта scorecard grid для evaluation.;;;71494;Draft;;"[step 1] Поставить атлету рейтинг по категории ниже 3.
+	[step 1.1]  Система раскрывает связанные под-скиллы этой категории для детальной оценки";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93878;Parent видит отчёты привязанных к нему атлетов;;;;;;;"Пользователь авторизован как Parent, у него привязан один или несколько атлетов.
+У атлетов есть завершённые (submitted) evaluation.";;;71602;Draft;;"[step 1] Открыть Evaluation Reports
+	[step 1.1]  В списке  только завершённые отчёты привязанных к этому родителю атлетов.";;;;;;;skurgulova;;;;;Evaluation report;Ankor - 1 version;
+93879;Родитель нескольких атлетов может перейти к отчётам конкретного ребёнка;;Родитель должен видеть evaluation всех привязанных атлетов;;;;;"Пользователь авторизован как Parent, у него привязан один или несколько атлетов ИЗ РАЗНЫХ КОМАНД
+ у каждого есть завершённые отчёты.";;;71604;Active;;"[step 1] Открыть Evaluation Reports
+	[step 1.1]  exp В списке  только завершённые отчёты привязанных к этому родителю атлетов.
+[step 2] Перейти к отчету ребенка 1
+	[step 2.1]  exp виден детальный экран  отчета ребенка 1
+[step 3] Перейти к отчету ребенка 2
+	[step 3.1]  exp  виден детальный экран  отчета  ребенка 2";;;;;;;skurgulova;;;;;Evaluation report;Ankor - 1 version;
+93880;View invited plan as coach;;;;;;;Зайти коачем и пригласить другого коача;;;71719;Draft;;"[step 1] Зайти коачем на почту
+	[step 1.1] пришел инвайт на план
+[step 2] Перейти по ссылке
+	[step 2.1] юзер перешел на план
+	[step 2.2] название, duration, дрилс и их порядок сохраняется
+[step 3] Попробовать отредактировать
+	[step 3.1] редактирование разрешно
+	[step 3.2] сохраняется
+[step 4] Перейти в plan > invited
+	[step 4.1] план появился в инвайтед";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;Invite plan
+93881;View invited plan as athlete;;;;;;;Зайти коачем и пригласить атлета;;;71717;Draft;;"[step 1] Зайти атлетом на почту
+	[step 1.1] пришел инвайт на план
+[step 2] Перейти по ссылке
+	[step 2.1] юзер перешел на план
+	[step 2.2] название, duration, дрилс и их порядок сохраняется
+[step 3] Попробовать отредактировать
+	[step 3.1] редактирование запрещено
+[step 4] Перейти в plan > invited
+	[step 4.1] план появился в инвайтед";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;Invite plan
+93884;После submit атлет получает notification и email;;;;;;;Draft evaluation для атлета с валидным email/аккаунтом готов к отправке.;;;71564;Draft;;"[step 1]  Submit evaluation.ё
+[step 2] Проверить in-app уведомление и email атлета.
+	[step 2.1] Атлет получает и in-app notification, и email со ссылкой на отчёт.";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;Submit Evaluation
+93887;Create  skill;;;;;;;Зайти как админ/оунер;;;74217;Draft;;"[step 1] Перейти в Skill
+[step 2] Нажать Create Skill
+[step 3] Ничего не заполнять и нажать create
+	[step 3.1] Title, category и level  обязательны
+[step 4] Заполнить все поля
+[step 5] Вставить видео URL youtube
+[step 6] Создать
+	[step 6.1] успешно
+	[step 6.2] в библиотеке отображен skill
+	[step 6.3] skill принадлежит виду спорта организации
+	[step 6.4] Видимость дрилс - organization";;;;;;;skurgulova;;;;;Skill;Ankor - 1 version;Skill
+93888;Можно сделать оценку менее 3 только для 5;;;;;;;"Выбрать темплейт с 6 категориями
+Сделать evaluation для ателта с данным темплейтом 
+Открыта scorecard grid с атлетом";;;71493;Draft;;"[step 1] Открыть evlautaiom
+[step 2] Проставить атлету для 5 категорий оценку 1 и 2
+[step 3] Поставить этому атлету оценку 2 для 6 категории
+	[step 3.1] валидация, что нельзя поставить оценку ниже 3 более чем 5 категорий";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93889;Forgot password;;;;;;;Открыт экран Sign In.;;;70943;Draft;;"[step 1] Найти и нажать на ссылку/кнопку ""Forgot password"".
+	[step 1.1] открылась форма заполнения имайла
+[step 2] Ввести имайл существующего юзера
+	[step 2.1] нотификация If an account exists for that email, a reset link has been sent.
+[step 3] Проверить имайл
+	[step 3.1] есть письмо о смене пароля
+[step 4] Ввести новый пароль
+	[step 4.1] успешно
+[step 5] Перейти на логин
+[step 6] Ввести старый пароль
+	[step 6.1] валидация ""Invalid login credentials.""
+[step 7] Ввести новый пароль
+	[step 7.1] успешно вошел";;;;;;;skurgulova;;;;;Login;Ankor - 1 version;Sign in
+93890;Add manual > check email already registrated;;;;;;;Зайти owner/ admin/coach;;;72059;Draft;;"[step 1] Перейти в Coach  > New coach
+[step 2] Заполнить всю информацию валидными данными
+[step 3] В Email  ввести уже зарегестрированный имайл
+	[step 3.1] валидация на имайл что такой уже существует";;;;;;;skurgulova;;;;;Coach;Ankor - 1 version;
+93891;view skill lab;;;;;;;Зайти оунером / админом;;;71785;Draft;;"[step 1] Перейти в skill
+	[step 1.1] открылась библиотека скилов
+	[step 1.2] Title: Skill title in the organization's sport (search matches title or category).
+Category: Skill category (chip and ""General"" when empty).
+Level: Skill level (""Unknown"" when empty).
+Description: Skill description, when present.
+Status: Skill status.
+Visibility: Skill visibility.
+Updated: When the skill was last updated.
+[step 2] Нажать на скил view
+	[step 2.1] Title: Skill title.
+Category: Skill category.
+Level: Skill level.
+Visibility: Skill visibility.
+Status: Skill status.
+Sport id: Sport this skill belongs to.
+Created: When the skill was created.
+Updated: When the skill was last updated.
+Description: Skill description, or ""No description available.""
+Drill map: Names of drills mapped to this skill (with level when the mapping has one).";;;;;;;skurgulova;;;;;Skill;Ankor - 1 version;View skill
+93892;Edit own organization;;;;;;;Зайти Owner / admin;;;71924;Draft;;"[step 1] Перейти в Organization profile
+[step 2] Нажать edit
+	[step 2.1] открылись поля 
+organization details: 
+Name
+program gender
+sports
+	[step 2.2] Admin contact 
+first name / last name 
+email 
+phone
+[step 3] Отредактировать информацию organization details:
+	[step 3.1] информация успешно отредактирована";;;;;;;skurgulova;;;;;Organization Profile;Ankor - 1 version;
+93893;Edit email;;;;;;;;;;74184;Draft;;"[step 1] Перейти в Manage user
+[step 2] Нажать edit на юзере
+[step 3] Изменить поле email на невалидные данные
+	[step 3.1] валидация на невалидный имайл
+[step 4] Изменить поле email на  email который уже использует другой юзер
+	[step 4.1] валидация на уже существующий имайл
+[step 5] Изменить имайл на валидный
+	[step 5.1] имайл изменен
+[step 6] Зайти юзером по старому имайлу
+	[step 6.1] валидация
+[step 7] Зайти юзером по новому имайлу
+	[step 7.1] юзер вошел, вся информация сохранена";;;;;;;skurgulova;;;;;Manage user;Ankor - 1 version;
+93895;Create team;;;;;;;Зайти оунером/админом/коачем;;;71851;Draft;;"[step 1] Перейти во вкладку Teams
+[step 2] Нажать ""New team""
+	[step 2.1] открылись поля 
+name
+sport (optional)
+active
+[step 3] Выбрать спорт, заполнить имя, и оставить тоггл active
+[step 4] Нажать create
+	[step 4.1] тима создалась
+	[step 4.2] отображается в таблице";;;;;;;skurgulova;;;;;Team;Ankor - 1 version;
+93896;Drill/ skill;;;;;;;"Должны быть скилы и дрилсы как от организаций, так и публичные
+Создать оунером 1 скил и дрил 
+Иметь хзарегестрированного онуера 2";;;73162;Draft;;"[step 1] Зайти сис админом на edit skill/drill
+	[step 1.1] Есть дропдаун visability
+[step 2] Поменять на organization drill на public
+	[step 2.1] дрилс стал публичным
+	[step 2.2] оунеру 2 виден публичный дрил
+[step 3] Поменять public на  скил на  organization
+	[step 3.1] дрилс стал organization
+	[step 3.2] оунер 2 не видит в списке этот скил";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;sys admin
+93898;Add athlete + parent  existing;;;;;;;"Зайди админом / оунером
+Должен быть зарегестрированный аккаунт родителя";;;71215;Draft;;"[step 1] Перейти в athlete
+[step 2] нажать New athlete
+[step 3] Заполнить всю информаицю от атлете
+[step 4] Заполнить имайл  НЕ зарегестрированного родителя
+[step 5] Сохранить
+	[step 5.1] атлет зарегестрирован
+	[step 5.2] родитель привязан
+[step 6] Перейти во вкладку родителя
+[step 7] Зайти на родителя из прекондишн
+	[step 7.1] + 1 атлет";;;;;;;skurgulova;;;;;Athlete;Ankor - 1 version;Add manual
+93899;Create drill;;;;;;;Зайти как админ/оунер;;;74151;Draft;;"[step 1] Перейти в Drills
+[step 2] Нажать Create drills
+[step 3] Ничего не заполнять и нажать create
+	[step 3.1] Drill name и Segment обязательны
+[step 4] Заполнить все поля
+[step 5] Вставить видео URL youtube
+[step 6] Создать
+	[step 6.1] успешно
+	[step 6.2] в библиотеке отображен drill
+	[step 6.3] Drill принадлежит виду спорта организации
+	[step 6.4] Видимость дрилс - organization";;;;;;;skurgulova;;;;;Drill;Ankor - 1 version;Create drill
+93900;welcome email;;;;;;;;;;71828;Draft;;"[step 1] Когда региструрешься / регстрируешь manual на почту приходит welcome email";;;;;;;skurgulova;;;;;Notification / email;Ankor - 1 version;Email
+93901;Permission;;;;;;;;;;71844;Draft;;"[step 1] Skill / drill  -  view only
+[step 2] Athlete - CRUD
+[step 3] Parents - CRUD
+[step 4] Coach -view only
+[step 5] Team - CRUD
+[step 6] Easy join - CRUD
+[step 7] Evaluation - CRUD
+[step 8] Evaluation report - see all  organization report
+[step 9] Plan - see my plan/invited/prebuilt";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Coach
+93902;Edit evaluation;;;;;;;Есть созданные но не submitted evaluation;;;71600;Draft;;"[step 1] Зайти на evaluaion
+[step 2] Нажать edit на репорте
+	[step 2.1] открылась форма редактирования
+[step 3] Отредактировать тимпелйт, команду, поставить оценку
+[step 4] Не сохранять
+	[step 4.1] данные не сохранены
+[step 5] Снова Отредактировать тимпелйт, команду, поставить оценку
+[step 6] Нажать update
+	[step 6.1] данные сохранились";;;;;;;skurgulova;;;;;Evaluation;Ankor - 1 version;CRUD evaluation
+93904;Activate from signup;;;;;;;"1.  Создать атлета через easy join 
+1. Указать имайл родителя который еще н использовался";;;71426;Draft;;"[step 1] Перейти на имайл
+	[step 1.1] Родителю на имайл пришло письмо
+[step 2] Перейти по ссылке
+	[attachment 2.1] Attachment [54797]
+	[step 2.2] открылась форма
+[step 3] Ничего не заполнять и нажать create
+	[step 3.1] Все поля обязательны
+[step 4] Заполнить first name, last name, cell phone
+[step 5] Заполнить пароль 1 символ
+	[step 5.1] валидация Password must be at least 8 characters long.
+[step 6] Заполнить пароль 8 символов
+[step 7] В Confirm password сделать отличающийся пароль
+	[step 7.1] Passwords do not match.
+[step 8] Заполнить одинаковые пароли
+[step 9] Нажать create account
+	[step 9.1] юзер зарегестрирован
+	[step 9.2] роль родителя";;;;;;;skurgulova;;;;;Parent;Ankor - 1 version;Activate parent
+93905;Carete parent 2more athlete;;;;;;;Зайти owner / admin / coach;;;71254;Draft;;"[step 1] Перейти в Parent > New parent
+[step 2] Ничего не заполнять
+[step 3] Нажать create
+	[step 3.1] обязательнеы поля full name, email,  relationship, password, athletes
+[step 4] Заполнить все поля
+[step 5] Выбрать в дропдауне 2 атета
+[step 6] Сохранить
+	[step 6.1] Родитель зарегестрирован
+	[step 6.2] у атлетаов появился родитель
+[step 7] Зайти зарегестрированным родителем
+	[step 7.1] юзер вошел
+	[step 7.2] у юзера права и роль родителя";;;;;;;skurgulova;;;;;Parent;Ankor - 1 version;Create parent from add manual
+93906;Permission TO OTHER ORG;;;;;;;"Зайти сис админом
+Выбрать организацию 
+Нажать  open 
+Зайти в организацию";;;74719;Draft;;"[step 1] Organization profile -  отредактировать
+[step 2] Skill - CRUD
+[step 3] Drill - CRUD
+[step 4] Scorecard Templates - CRUD
+[step 5] Athlete - CRUD
+[step 6] Parents - CRUD
+[step 7] Coach - CRUD
+[step 8] Team - CRUD
+[step 9] Easy join - CRUD
+[step 10] Evaluation - CRUD
+[step 11] Evaluation report - see all  organization report
+[step 12] Plan - see all organization plan
+[step 13] Проверить данную организацию
+	[expected 13.1] Expected Result
+		[expected.step 13.1.1] Все данные создаются в выбранную организацию
+		[expected.step 13.1.2] Данные не дублируются в другие организации
+[step 14] Зайти оунером/админом выбранной орги
+	[expected 14.1] Expected Result
+		[expected.step 14.1.1] новые данные, созданные сис админом, отображаются в организации
+		[expected.step 14.1.2] Данные можно отредактировать / удалить";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;sys admin
+93907;fully used;;;;;;;Существует join-код, который уже использован максимально.  Пользователь не авторизован, открыт /sign-up с этим кодом.;;;71083;Draft;;"[step 1] Ввести валидные данные
+[step 2] Ввести  КОД fully used
+	[step 2.1] This code fully used - или другая формулировка но есть причина";;;;;;;skurgulova;;;Easy Join;Easy join validation;Login;Ankor - 1 version;Singup
+93908;Пароль валидация;;;;;;;"Зайти owner/admin/sys admin";;;72063;Draft;;"[step 1] Перейти в Manage Users   >  edit
+[step 2] Поменять Password — указать пароль длиной менее 8 символов
+[step 3] Нажать Next
+	[step 3.1] Показано сообщение: ""Password must be at least 8 characters long.""
+[step 4] В поле Password  ввести пароль 8 символов
+[step 5] В поле Confirm Password  ввести пароль 9 символов
+[step 6] Нажать Next
+	[step 6.1] - Переход блокируется, поле Confirm password подсвечено красным
+- Показано сообщение: ""Passwords do not match.""";;;;;;;skurgulova;;;;;Manage user;Ankor - 1 version;
+93909;Permission;;;;;;;"Owner / admin имеет все эти вкладки";;;71843;Draft;;"[step 1] Organization profile - может просматривать, редактировать  только свою организацию
+[step 2] Skill - CRUD
+[step 3] Drill - CRUD
+[step 4] Scorecard Templates - CRUD
+[step 5] Athlete - CRUD
+[step 6] Parents - CRUD
+[step 7] Coach - CRUD
+[step 8] Team - CRUD
+[step 9] Easy join - CRUD
+[step 10] Evaluation - CRUD
+[step 11] Evaluation report - see all  organization report
+[step 12] Plan - see all organization plan";;;;;;;skurgulova;;;;;Roles;Ankor - 1 version;Owner / admin
+93910;active organization membership;;;;;;;"Зайти owner/admin/sys admin
+есть деактивированный юзер";;;72064;Draft;;"[step 1] Перейти в Manage Users
+[step 2] На деактивированном юзере открыть 3 вот
+	[step 2.1] есть activate кнопка
+[step 3] Включить  activate
+	[step 3.1] юзер стал активным , надпись deactivate исчезла
+[step 4] Зайти активированным вновь юзером
+	[step 4.1] юзер вошел";;;;;;;skurgulova;;;;;Manage user;Ankor - 1 version;
+93911;Регистрация с уже зарегистрированным email не создаёт организацию;;;;;;;"В системе уже существует пользователь с email X.
+
+Или ввести имайл aextester@gmail.com (уже зарегнный).";;;70931;Draft;;"[step 1] Пройти шаги Admin Info (указав email X), Organization и Teams с валидными данными
+[step 2] Нажать Save на последнем шаге
+	[step 2.1] Валидация ""A user with this email address has already been registered""
+	[step 2.2] Организация не создана";;;;;;;skurgulova;;;Register Organization;;Login;Ankor - 1 version;Singup
+93912;022 Prebuilt Plans tab visible to Coach;;;;;;;Зайти коачем;;;72616;Active;;"[step 1] Перейти в Practice Plans
+	[step 1.1] exp видны вкладки My Plans, Invited, Prebuilt Plans
+	[step 1.2] exp нет вкладки Org Plans";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93913;Athlete + existing parent;;;;;;;"Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.
+Есть уже зарегестрированный родитель в системе";;;71047;Draft;;"[step 1] Открыть signin и Нажать signup
+[step 2] Выбрать роль атлета
+[step 3] Ввести валидные данные
+[step 4] В имайл родителя вписать имайл, уже зарегестрированного родителя
+[step 5] Зарегестрироваться
+[step 6] Проверить почту родителя
+	[step 6.1] нет имайла -приглашения
+[step 7] Зайти оунером
+[step 8] Зайти в parent > найти родителя
+	[step 8.1] у родителя есть + 1 атлет";;;;;;;skurgulova;;;Easy Join;;Login;Ankor - 1 version;Singup
+93914;Delete team;;;;;;;"Зайти оунером/админом/коачем  
+У организации есть тимы";;;71855;Draft;;"[step 1] Перейти во вкладку Teams без участников
+[step 2] Нажать Delete
+	[step 2.1] группа удалилась
+[step 3] Перейти в easy jone
+[step 4] Перейти к созданию code
+	[step 4.1] нет Teams";;;;;;;skurgulova;;;;;Team;Ankor - 1 version;
+93915;Deactivate;;;;;;;Зайти owner/admin/sys admin;;;72065;Draft;;"[step 1] Перейти в Manage Users
+	[step 1.1] открылась таблица с юзерами
+[step 2] Нажать на юзере deactivate
+	[step 2.1] юзер отражен серым
+	[step 2.2] есть пометка deactivated
+[step 3] Зайти декактивированным юзером
+	[step 3.1] валидация - deactivated";;;;;;;skurgulova;;;;;Manage user;Ankor - 1 version;
+93916;Sysy admin create personal plan;;;;;;;"зайти сис админом
+должны быть как публичне дрисл как и на уровне организации";;;72783;Draft;;"[step 1] Перейти к созданию плана
+[step 2] НЕ нажимать чекбокс Prebuilt
+[step 3] Открыть дрилс
+	[step 3.1] показаны как публичные так и дрилс на уровне организации";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93917;Athlete по join-коду без email родителя;;;;;;;"Существует активный, не истёкший и не исчерпанный join-код. Пользователь не авторизован, открыт /sign-up с этим кодом.";;;70977;Draft;;"[step 1] Открыть signin и Нажать signup
+[step 2] Ничего не заполнять и нажать next
+	[step 2.1] на все поля кроме Parent email валидация
+[step 3] Заполнить role как Athlete
+[step 4] Заполнить все поля, кроме Parent email, валидными данными
+[step 5] Принять Terms of Service and Privacy Policy. 
+[step 6] Зарегестрировать атлета
+	[step 6.1] атлет зарегестрирован
+	[step 6.2] у него роль и права атлета
+	[step 6.3] атлет в той команде, как в созданном  easy join
+[step 7] Зайти оунером / коучем на easy join
+	[step 7.1] Счётчик использований (usage counter) join-кода увеличивается на 1.
+[step 8] Зайти оунером на вкладку Athlete на зарегестрированного  атлета
+	[step 8.1] информация совпадает с заполненной информацией на создании
+	[step 8.2] у атлета нет заполненного  родителя";;;;;;;skurgulova;;;Easy Join;;Login;Ankor - 1 version;Singup
+93918;View invited plan as parent;;;;;;;"Зайти коачем и пригласить атлета к которому привязан родитель 
+Атлетом принять приглашение на план";;;71718;Draft;;"[step 1] Зайти родителем
+	[step 1.1] Есть нотификация о приглашенном  плане
+[step 2] Перейти в plan > invited
+	[step 2.1] план появился в инвайтед
+[step 3] Перейти в план
+	[step 3.1] название, duration, дрилс и их порядок сохраняется
+[step 4] Попробовать отредактировать
+	[step 4.1] редактирование запрещено";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;Invite plan
+93921;Edit organization as sysadmin;;;;;;;"Зайти sys admin
+Должна быть созданная организация с оунером";;;71957;Draft;;"[step 1] Перейти в Organization profile
+	[step 1.1] показаны все организации
+[step 2] Нажать edit на организации из прекондишн
+	[step 2.1] открылись поля 
+organization details: 
+Name
+program gender
+sport
+	[step 2.2] Admin contact 
+first name / last name 
+email 
+phone
+[step 3] Отредактировать информацию organization details:
+	[step 3.1] информация успешно отредактирована
+[step 4] Попытаться отредактировать Admin contact
+	[step 4.1] нельзя редактировать
+[step 5] Зайти как оунер организации
+	[step 5.1] информация отредактирована";;;;;;;skurgulova;;;;;Organization Profile;Ankor - 1 version;
+93922;025 Create Plan as Administrator / Owner;;;;;;;Зайти как administrator или owner;;;72600;Active;;"[step 1] Перейти в Plan, остаться на My Plans
+[step 2] Нажать New Plan
+[step 3] Заполнить name
+[step 4] Добавить drill, указать duration
+[step 5] Сохранить
+	[step 5.1] exp план сохранён и принадлежит текущему юзеру (owner плана)
+	[step 5.2] exp план отображается в My Plans";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan
+93924;[NEW] Create/edit drill: fields, role permissions, Visibility rules;;;;;;;Зайти разными ролями поочерёдно (Owner/Admin, System Administrator, Coach);;;72684;Draft;;"[step 1] Зайти Coach/Athlete/Parent, попытаться найти Create/Edit drill
+	[step 1.1] exp Create/Edit недоступны — только просмотр (view-only)
+[step 2] Зайти Owner/Admin, открыть Create Drill
+	[step 2.1] exp доступны поля: name, description (опционально), segment, duration, min/max players, min/max age (опционально), Skill Mapping, YouTube URL (опционально)
+[step 3] Зайти System Administrator, открыть Create Drill
+	[step 3.1] exp  SysAdmin есть дропдаун  Visibility с Public или Organization при создании
+[step 4] Зайти Owner/Admin, открыть Edit на Public-дриле
+	[step 4.1] exp Owner/Admin НЕ должен иметь возможность редактировать Public drill (это должно быть доступно только System Administrator)
+[step 5] Зайти System Administrator, открыть Edit на Organization-scoped дриле
+	[step 5.1] exp  SysAdmin должен мочь изменить visibility Organization → Public на Edit";;;;;;;skurgulova;;;;;Drill;Ankor - 1 version;View drills
+93929;[NEW] Drill Library scope: only Public + own organization's drills;;;;;;;Существуют минимум 2 организации одного вида спорта, у каждой есть Organization-scoped drill;;;72682;Draft;;"[step 1] Зайти пользователем организации A, у которой есть свой Organization-scoped drill того же вида спорта, что и у организации B
+[step 2] Открыть Drills Library
+	[step 2.1] exp видны Public drills этого вида спорта
+	[step 2.2] exp видны Organization-scoped drills организации A
+	[step 2.3] exp  Organization-scoped drills организации B НЕ должны быть видны
+[step 3] Зайти юзером в орагнизацию B
+	[step 3.1] видны Organization-scoped drills организации B
+	[step 3.2] Organization-scoped drills организации A НЕ должны быть видны";;;;;;;skurgulova;;;;;Drill;Ankor - 1 version;View drills
+93933;Filters;;;;;;;Перейти в drills;;;71836;Draft;;"[step 1] Перейти в drills
+[step 2] Открыть фильтры
+	[step 2.1] exp есть фильтр segment
+	[step 2.2] exp есть фильтр age — вводится ОДНО число, а не диапазон min/max
+	[step 2.3] exp есть фильтр player count — вводится ОДНО число, а не диапазон min/max
+	[step 2.4] exp  Skill Mapping: Skills tagged on the drill (""No tags"" when none).
+	[step 2.5] exp фильтра ""Level"" на этом экране НЕТ (согласно требованию: ""The Level filter is not shown on this screen"")
+[step 3] Ввести age=X, где X входит в диапазон min-max нескольких дрилов
+	[step 3.1] exp возвращены дрилы, чей настроенный диапазон включает X (не наоборот)
+[step 4] Ввести player count=Y аналогично
+	[step 4.1] exp возвращены дрилы, чей диапазон игроков включает Y
+[step 5] Скомбинировать несколько фильтров (segment + age)
+	[step 5.1] exp результат — пересечение (AND), а не объединение (OR)
+[step 6] Очистить все фильтры и поиск
+	[step 6.1] exp возвращается вся библиотека, доступная пользователю
+	[step 6.2] exp пагинация должна отражать реальное число результатов
+[step 7] Ввеcти скил теги и поиск по Skill Mapping
+	[step 7.1] найдены скилы";;;;;;;skurgulova;;;;;Drill;Ankor - 1 version;View drills
+93935;Prebuilt save blocked when plan contains Organization-scoped drill (Edit);;=;;;;;Зайти sys admin. Существует собственный Prebuilt-план sys admin. В библиотеке drills есть минимум один drill со scope Organization (не Public);;;72615;Active;;"[step 1] Открыть Edit на Prebuilt-плане
+[step 2] Добавить в план Organization-scoped drill
+[step 3] Сохранить (чекбокс Prebuilt остаётся отмечен)
+	[step 3.1] exp сохранение блокируется, показана валидация о необходимости удалить или сделать Public организационные дрилы";;;;;;;skurgulova;;;;;Plan;Ankor - 1 version;CRUD plan

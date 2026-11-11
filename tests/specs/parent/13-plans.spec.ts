@@ -14,8 +14,8 @@ test.describe('Parent Plan Tests', () => {
     await loginAs('parent');
   });
 
-  // 91897: Parent can view plans
-  test('@TC-91897 parent can view plans', async ({ page }) => {
+  // 71643: Parent can view plans
+  test('@TC-71643 parent can view plans', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     // [step 1] Зайти родителем в Plans
@@ -29,8 +29,8 @@ test.describe('Parent Plan Tests', () => {
     await expect(planPage.prebuiltTab).not.toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
-  // 91844: Parent does not see Org Plans tab
-  test('@TC-91844 parent does not see Org Plans tab', async ({ page }) => {
+  // 72622: Parent does not see Org Plans tab
+  test('@TC-72622 parent does not see Org Plans tab', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     // [step 1] Перейти в Practice Plans

@@ -14,8 +14,8 @@ test.describe('Athlete Plan Tests', () => {
     await loginAs('athlete');
   });
 
-  // 91840: Athlete cannot edit invited plan
-  test('@TC-91840 athlete cannot edit invited plan', async ({ page }) => {
+  // 72609: Athlete cannot edit invited plan
+  test('@TC-72609 athlete cannot edit invited plan', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     // [step 1] Зайти атлетом, перейти в Plan > Invited
@@ -27,8 +27,8 @@ test.describe('Athlete Plan Tests', () => {
     await expect(planPage.planCardEditLink, 'Edit link should not be visible on invited plan card').not.toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
-  // 91844: Athlete does not see Org Plans tab
-  test('@TC-91844 athlete does not see Org Plans tab', async ({ page }) => {
+  // 72622: Athlete does not see Org Plans tab
+  test('@TC-72622 athlete does not see Org Plans tab', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     // [step 1] Перейти в Practice Plans

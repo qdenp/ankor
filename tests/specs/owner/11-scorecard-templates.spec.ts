@@ -17,8 +17,8 @@ test.describe('Owner Score Card Template Tests', () => {
   });
 
   /**
-   * @TC-91882 Should create a basic Score Card Template
-   * @TC-91889 Should mark template as inactive
+    * @TC-71292 Should create a basic Score Card Template
+    * @TC-71393 Should mark template as inactive
    * Объединённый тест: создаёт шаблон → деактивирует → проверяет
    */
   test('should create and deactivate a basic Score Card Template', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('Owner Score Card Template Tests', () => {
   });
 
   /**
-   * @TC-91863 Should create template with 2+ categories
+    * @TC-71293 Should create template with 2+ categories
    */
   test('should create template with 2+ categories and deactivate', async ({ page }) => {
     const templateName = generateTemplateName();

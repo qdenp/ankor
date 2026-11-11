@@ -11,7 +11,7 @@ import { HomePage } from '../../pages/home-page';
 import { TIMEOUTS } from '../../config';
 
 /**
- * @TC-91849 Permission (Coach)
+ * @TC-71844 Permission (Coach)
  *
  * CSV Steps:
  * [step 1] Skill / drill - view only
@@ -97,7 +97,7 @@ test.describe('Coach Permission Tests', () => {
     await planPage.goToPrebuilt();
     await expect(planPage.prebuiltTab, 'Prebuilt tab should be visible for coach').toBeVisible();
 
-    // Org Plans tab — NOT visible for coach (TC-91878)
+    // Org Plans tab — NOT visible for coach (TC-72623)
     await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for coach').toBeHidden({ timeout: TIMEOUTS.medium });
   });
 });

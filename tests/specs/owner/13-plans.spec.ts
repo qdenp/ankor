@@ -14,8 +14,8 @@ test.describe('Owner Plan Tests', () => {
     await loginAs('owner');
   });
 
-  // 91859: Create Plan as Administrator / Owner
-  test('@TC-91859 should create plan and see in My Plans', async ({ page }) => {
+  // 72600: Create Plan as Administrator / Owner
+  test('@TC-72600 should create plan and see in My Plans', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -37,8 +37,8 @@ test.describe('Owner Plan Tests', () => {
     await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
-  // 91871: View Plan Owner / Admin
-  test('@TC-91871 should see all plan tabs as owner', async ({ page }) => {
+  // 71645: View Plan Owner / Admin
+  test('@TC-71645 should see all plan tabs as owner', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -51,7 +51,7 @@ test.describe('Owner Plan Tests', () => {
   });
 
   // 91843: Non-sysadmin no Prebuilt checkbox
-  test('@TC-91843 non-sysadmin roles do not see Prebuilt checkbox', async ({ page }) => {
+  test('@TC-72612 non-sysadmin roles do not see Prebuilt checkbox', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -75,8 +75,8 @@ test.describe('Sysadmin Plan Tests', () => {
     await loginAs('sysadmin');
   });
 
-  // 91830: Home page (System Administrator) - verify all tabs visible for Plans
-  test('@TC-91830 sysadmin sees all plan tabs', async ({ page }) => {
+  // 72679: Home page (System Administrator) - verify all tabs visible for Plans
+  test('@TC-72679 sysadmin sees all plan tabs', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -88,8 +88,8 @@ test.describe('Sysadmin Plan Tests', () => {
     await expect(planPage.orgPlansTab, 'Org Plans tab should be visible for sysadmin').toBeVisible();
   });
 
-  // 91916: Invite multiple users to plan
-  test('@TC-91916 should invite multiple users to plan', async ({ page }) => {
+  // 71716: Invite multiple users to plan
+  test('@TC-71716 should invite multiple users to plan', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -118,8 +118,8 @@ test.describe('Sysadmin Plan Tests', () => {
     await expect(page.getByRole('heading', { name: /Invite/i }), 'Invite users dialog should open').toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
-  // 91838: Prebuilt checkbox (sys admin)
-  test('@TC-91838 sysadmin can create plan with Prebuilt checkbox', async ({ page }) => {
+  // 72611: Prebuilt checkbox (sys admin)
+  test('@TC-72611 sysadmin can create plan with Prebuilt checkbox', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -141,8 +141,8 @@ test.describe('Sysadmin Plan Tests', () => {
     await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
-  // 91918: Unchecking Prebuilt removes plan from Prebuilt tab
-  test('@TC-91918 unchecking Prebuilt removes plan from Prebuilt tab', async ({ page }) => {
+  // 72614: Unchecking Prebuilt removes plan from Prebuilt tab
+  test('@TC-72614 unchecking Prebuilt removes plan from Prebuilt tab', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();

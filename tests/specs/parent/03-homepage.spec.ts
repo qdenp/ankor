@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures';
 import { HomePage } from '../../pages/home-page';
 
 /**
- * @TC-91885 Home page (Parent)
+ * @TC-71822 Home page (Parent)
  *
  * CSV Steps:
  * [step 1] Перейти на home page

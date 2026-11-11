@@ -4,7 +4,7 @@ import { TIMEOUTS } from '../../config';
 
 /**
  * Module-level переменные — доступны всем тестам в файле.
- * TC-91865 генерирует уникальное имя и сохраняет сюда, остальные тесты используют.
+ * TC-74151 генерирует уникальное имя и сохраняет сюда, остальные тесты используют.
  */
 let DRILL_NAME: string;
 const SEGMENT = 'Shooting';
@@ -17,7 +17,7 @@ test.describe('Owner Drill Tests', () => {
   });
 
   /**
-   * @TC-91865 Create drill
+   * @TC-74151 Create drill
    * TC-91865 [step 1-6]: Create drill with all fields → verify in library
    * - Drill name and Segment are required
    * - All fields: name, description, segment, duration, min/max players, min/max age, skill mapping, YouTube URL
@@ -35,7 +35,7 @@ test.describe('Owner Drill Tests', () => {
     // TC-91865 [step 2]: Нажать Create drills
     await drillPage.clickNewDrill();
 
-    // TC-91865 [step 3]: Ничего не заполнять и нажать create → валидация
+    // TC-74151 [step 3]: Ничего не заполнять и нажать create → валидация
     await drillPage.clickCreate();
     // Имя должно остаться (валидация сработала)
     await expect(drillPage.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
@@ -53,7 +53,7 @@ test.describe('Owner Drill Tests', () => {
     // TC-91865 [step 5]: Вставить видео URL youtube
     await drillPage.fillYoutubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
 
-    // TC-91865 [step 6]: Создать
+    // TC-74151 [step 6]: Создать
     await drillPage.clickCreate();
     // После создания дрила — редирект на detail page (heading = имя дрила)
     await expect(page.getByRole('heading', { name: DRILL_NAME })).toBeVisible({ timeout: TIMEOUTS.long });
@@ -64,7 +64,7 @@ test.describe('Owner Drill Tests', () => {
   });
 
   /**
-   * @TC-91837 Create/edit drill: fields, role permissions, Visibility rules
+   * @TC-72684 Create/edit drill: fields, role permissions, Visibility rules
    * TC-91837 [step 1-2]: Owner/Admin create drill with all fields
    * - Coach/Athlete/Parent: view-only (Create/Edit недоступны)
    * - Owner/Admin: НЕ должен редактировать Public drill
@@ -76,7 +76,7 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.goto();
     await drillPage.clickNewDrill();
 
-    // TC-91837 [step 2.1]: exp доступны поля: name, description, segment, duration, min/max players, min/max age, Skills, YouTube URL
+    // TC-72684 [step 2.1]: exp доступны поля: name, description, segment, duration, min/max players, min/max age, Skills, YouTube URL
     await expect(drillPage.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
     await expect(drillPage.descriptionInput).toBeVisible({ timeout: TIMEOUTS.medium });
     await expect(drillPage.segmentSelect).toBeVisible({ timeout: TIMEOUTS.medium });
@@ -87,7 +87,7 @@ test.describe('Owner Drill Tests', () => {
     await expect(drillPage.maxAgeInput).toBeVisible({ timeout: TIMEOUTS.medium });
     await expect(drillPage.youtubeUrlInput).toBeVisible({ timeout: TIMEOUTS.medium });
 
-    // Заполнить и создать drill — используем DRILL_NAME из TC-91865
+    // Заполнить и создать drill — используем DRILL_NAME из TC-74151
     await drillPage.fillName(DRILL_NAME);
     await drillPage.fillDescription('Test drill for permissions');
     await drillPage.selectSegment(SEGMENT);
@@ -106,8 +106,8 @@ test.describe('Owner Drill Tests', () => {
   });
 
   /**
-   * @TC-91906 Drill detail: play instructional video (YouTube)
-   * TC-91906 [step 1-2]: Open drill detail with YouTube URL → verify play button
+    * @TC-72683 Drill detail: play instructional video (YouTube)
+    * TC-71835 [step 1-2]: Open drill detail with YouTube URL → verify play button
    */
   test('should view drill detail with YouTube video', async ({ page }) => {
     const drillPage = new DrillPage(page);
@@ -130,10 +130,10 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.goToDrillsList();
     await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // TC-91906 [step 1]: Открыть detail дрила
+    // TC-71835 [step 1]: Открыть detail дрила
     await drillPage.openDrillDetail(DRILL_NAME);
 
-    // TC-91906 [step 2]: Проверить что YouTube video встроен (iframe)
+    // TC-71835 [step 2]: Проверить что YouTube video встроен (iframe)
     await drillPage.waitForYouTubeIframe();
     await expect(drillPage.youtubeIframe).toBeVisible({ timeout: TIMEOUTS.long });
   });

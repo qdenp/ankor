@@ -23,8 +23,8 @@ test.describe('Owner Organization Tests', () => {
     await expect(page, 'Should be on organization profile page, not sign-in').not.toHaveURL(/sign-in/);
   });
 
-  // 91915: Edit own organization
-  test('@TC-91915 should edit organization name and revert', async ({ page }) => {
+  // 71924: Edit own organization
+  test('@TC-71924 should edit organization name and revert', async ({ page }) => {
     const orgPage = new OrganizationPage(page);
 
     await orgPage.goto();

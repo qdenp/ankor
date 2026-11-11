@@ -13,7 +13,7 @@ test.describe('Owner Skill Tests', () => {
     await loginAs('owner');
   });
 
-  /** @TC-91919 Create skill */
+  /** @TC-74217 Create skill */
   test('should validate empty form, create skill and see in library', async ({ page }) => {
     const skillPage = new SkillPage(page);
     const timestamp = Date.now();

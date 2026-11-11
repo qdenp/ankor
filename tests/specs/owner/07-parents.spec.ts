@@ -15,7 +15,7 @@ test.describe('Owner Parent Tests', () => {
     await loginAs('owner');
   });
 
-  /** @TC-91873 Create parent from add manual */
+  /** @TC-71252 Create parent from add manual */
   test('should validate empty form, create parent and login as parent', async ({ page }) => {
     const parentPage = new ParentPage(page);
     const timestamp = Date.now();
@@ -59,11 +59,11 @@ test.describe('Owner Parent Tests', () => {
     await expect(page.getByText('Owner')).toBeHidden({ timeout: TIMEOUTS.medium });
   });
 
-  /** @TC-91912 Edit parent */
+  /** @TC-71256 Edit parent */
   test('should edit parent and verify changes', async ({ page }) => {
     const parentPage = new ParentPage(page);
 
-    // Используем parent, созданный в TC-91873 (уникальный email)
+    // Используем parent, созданный в TC-71252 (уникальный email)
     const parentEmail = 'dtimokhin+parent';
 
     // --- Шаг 1-2: найти parent по email ---

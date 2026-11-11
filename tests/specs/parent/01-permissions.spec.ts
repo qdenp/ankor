@@ -7,7 +7,7 @@ import { HomePage } from '../../pages/home-page';
 import { TIMEOUTS } from '../../config';
 
 /**
- * @TC-91910 Permission (Parent)
+ * @TC-71846 Permission (Parent)
  *
  * CSV Steps:
  * [step 1] Skill / drill - view only
@@ -60,7 +60,7 @@ test.describe('Parent Permission Tests', () => {
     // Prebuilt tab — NOT visible for parent
     await expect(planPage.prebuiltTab, 'Prebuilt tab should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
 
-    // Org Plans tab — NOT visible (TC-91844)
+    // Org Plans tab — NOT visible (TC-72622)
     await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
 
     // Direct access to /practice-plans/new — blocked

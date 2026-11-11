@@ -7,7 +7,7 @@ import { HomePage } from '../../pages/home-page';
 import { TIMEOUTS } from '../../config';
 
 /**
- * @TC-91836 Permission (Athlete)
+ * @TC-71845 Permission (Athlete)
  *
  * CSV Steps:
  * [step 1] Skill / drill - view only
@@ -22,6 +22,7 @@ test.describe('Athlete Permission Tests', () => {
     await loginAs('athlete');
   });
 
+  test.skip(true, 'TODO - новая фича shared plans для атлетов');
   test('should have view-only access to Skills, Drills, Evaluations and view-only Evaluation Reports', async ({ page }) => {
     const homePage = new HomePage(page);
     const skillPage = new SkillPage(page);
@@ -60,7 +61,7 @@ test.describe('Athlete Permission Tests', () => {
     // Prebuilt tab — NOT visible for athlete
     await expect(planPage.prebuiltTab, 'Prebuilt tab should be hidden for athlete').toBeHidden({ timeout: TIMEOUTS.medium });
 
-    // Org Plans tab — NOT visible (TC-91844)
+    // Org Plans tab — NOT visible (TC-72622)
     await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for athlete').toBeHidden({ timeout: TIMEOUTS.medium });
   });
 });

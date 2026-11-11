@@ -13,7 +13,7 @@ import { HomePage } from '../../pages/home-page';
 import { TIMEOUTS } from '../../config';
 
 /**
- * @TC-91864 Permission (Sys admin)
+ * @TC-71889 Permission (Sys admin)
  *
  * CSV Steps:
  * [step 1] Organization profile - может просматривать, редактировать ВСЕ организации

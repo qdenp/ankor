@@ -14,8 +14,8 @@ test.describe('Coach Plan Tests', () => {
     await loginAs('coach');
   });
 
-  // 91890: Create plan with drill notes and duration
-  test('@TC-91890 should create plan with drill notes and duration', async ({ page }) => {
+  // 71641: Create plan with drill notes and duration
+  test('@TC-71641 should create plan with drill notes and duration', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     // [step 1] Зайти в Plan и нажать +

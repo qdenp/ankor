@@ -13,9 +13,9 @@
 ## Сгруппировано по Story (категориям)
 
 ### 1. Login / Sign In (4 теста)
-- 91876 — Успешный вход зарегистрированного пользователя ✅ (01-signin.spec.ts)
-- 91868 — Forgot password несуществующий юзер ⏭️ (пропускаем — проверка почты)
-- 91869 — Athlete по join-коду без email родителя ⏭️ (Easy Join)
+- 70936 — Успешный вход зарегистрированного пользователя ✅ (01-signin.spec.ts)
+- 70944 — Forgot password несуществующий юзер ⏭️ (пропускаем — проверка почты)
+- 70977 — Athlete по join-коду без email родителя ⏭️ (Easy Join)
 - 91914 — Forgot password ⏭️ (пропускаем — проверка почты)
 
 ### 2. Roles (13 тестов)
@@ -54,10 +54,10 @@
 - 91918 — Unchecking Prebuilt removes plan ✅ (13-plans.spec.ts)
 
 ### 4. Organization Profile (4 теста)
-- 91832 — Sys admin see all organizations ✅ (sysadmin/04-organization.spec.ts)
-- 91861 — Edit organization as sysadmin ✅ (sysadmin/04-organization.spec.ts)
-- 91884 — Owner/admin view own organization ✅ (04-organization.spec.ts)
-- 91915 — Edit own organization ✅ (04-organization.spec.ts)
+- 71922 — Sys admin see all organizations ✅ (sysadmin/04-organization.spec.ts)
+- 71957 — Edit organization as sysadmin ✅ (sysadmin/04-organization.spec.ts)
+- 71116 — Owner/admin view own organization ✅ (04-organization.spec.ts)
+- 71924 — Edit own organization ✅ (04-organization.spec.ts)
 
 ### 5. Easy Join (6 тестов)
 - 91833 — Athlete по join-коду с email родителя ❌
@@ -138,67 +138,67 @@
 - 91912 — Edit parent ✅ (07-parents.spec.ts)
 
 ### 17. Skill (2 теста)
-- 91835 — Drill/skill visibility ❌
-- 91919 — Create skill ✅ (09-skills.spec.ts)
+- 73162 — Drill/skill visibility ❌
+- 74217 — Create skill ✅ (09-skills.spec.ts)
 
 ---
 
 ## Статус покрытия
 
 ### ✅ Завершено (46 тест-кейсов)
-- 91876 — Успешный вход (01-signin.spec.ts)
-- 91848 — Create team (08-teams.spec.ts)
-- 91884 — Owner/admin view own organization (04-organization.spec.ts)
-- 91831 — Parent cannot create plan (13-practice-plans.spec.ts)
-- 91847 — Athlete cannot duplicate plan (13-practice-plans.spec.ts)
-- 91853 — Duplicate creates copy (13-practice-plans.spec.ts)
-- 91859 — Create Plan as Administrator/Owner (13-practice-plans.spec.ts)
-- 91860 — View Plan coach (13-practice-plans.spec.ts)
-- 91871 — View Plan Owner/Admin (13-practice-plans.spec.ts)
-- 91878 — Coach no Org Plans tab (13-practice-plans.spec.ts)
-- 91881 — View Plan athlete (13-practice-plans.spec.ts)
-- 91883 — Parent no Prebuilt Plans tab (13-practice-plans.spec.ts)
-- 91897 — View Plan Parent (parent/13-plans.spec.ts)
-- 91890 — Create plan: notes (coach/13-plans.spec.ts)
-- 91840 — Athlete cannot edit invited plan (athlete/13-plans.spec.ts)
-- 91844 — Athlete and Parent do not see Org Plans tab (athlete/13-plans.spec.ts, parent/13-plans.spec.ts)
-- 91830 — Home page (System Administrator) (13-plans.spec.ts)
-- 91838 — Prebuilt checkbox (sys admin) (13-plans.spec.ts)
-- 91843 — Non-sysadmin no Prebuilt checkbox (13-plans.spec.ts)
-- 91870 — Non-sysadmin no Prebuilt (13-plans.spec.ts)
-- 91916 — Invite multiple users to plan (13-plans.spec.ts)
-- 91918 — Unchecking Prebuilt removes plan (13-plans.spec.ts)
-- 91832 — Sys admin see all organizations (sysadmin/04-organization.spec.ts)
-- 91861 — Edit organization as sysadmin (sysadmin/04-organization.spec.ts)
-- 91915 — Edit own organization (04-organization.spec.ts)
-- 91863 — Create Template with 2+ categories (11-scorecard-templates.spec.ts)
-- 91882 — Create Template (11-scorecard-templates.spec.ts)
-- 91889 — Make inactive (объединён с 91882)
-- 91842 — Rating выше 5 блокируется (12-evaluations.spec.ts)
-- 91857 — Оценка категории подтягивает сабскиллы (12-evaluations.spec.ts) — ⚠️ объединён с другими, semantic issue: no assertion verifies sub-skills
-- 91866 — Create evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 91908
-- 91874 — View evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 91877
-- 91877 — Edit evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 91874
-- 91894 — Рейтинг ниже 3 раскрывает под-скиллы (12-evaluations.spec.ts) — ⚠️ объединён с 91913
-- 91908 — View not submitted evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 91866
-- 91911 — После submit генерируется report (12-evaluations.spec.ts) — ⚠️ объединён с 91888, semantic issue: no assertion checks report
-- 91913 — Оценка < 3 только для 5 категорий (12-evaluations.spec.ts) — ⚠️ объединён с 91894
-- 91888 — После submit генерируется workout (12-evaluations.spec.ts) — ⚠️ объединён с 91911, semantic issue: no assertion checks workout
-- 91837 — Create/edit drill: fields, permissions (10-drills.spec.ts)
-- 91865 — Create drill (10-drills.spec.ts)
-- 91906 — Drill detail: play YouTube video (10-drills.spec.ts)
-- 91873 — Create parent (07-parents.spec.ts)
-- 91912 — Edit parent (07-parents.spec.ts)
-- 91919 — Create skill (09-skills.spec.ts)
-- 91836 — Permission (Athlete) (01-permissions.spec.ts)
-- 91903 — Permission (Owner/admin) (01-permissions.spec.ts)
-- 91910 — Permission (Parent) (parent/01-permissions.spec.ts)
-- 91849 — Permission (Coach) (coach/01-permissions.spec.ts)
-- 91864 — Permission (Sys admin) (sysadmin/01-permissions.spec.ts)
-- 91839 — Home page (Owner/admin) (owner/02-homepage.spec.ts)
-- 91856 — Home page (Coach Summary) (coach/02-homepage.spec.ts)
-- 91885 — Home page (Parent) (parent/03-homepage.spec.ts)
-- 91892 — Home page (Athlete) (athlete/03-homepage.spec.ts)
+- 70936 — Успешный вход (01-signin.spec.ts)
+- 71851 — Create team (08-teams.spec.ts)
+- 71116 — Owner/admin view own organization (04-organization.spec.ts)
+- 72602 — Parent cannot create plan (13-practice-plans.spec.ts)
+- 72631 — Athlete cannot duplicate plan (13-practice-plans.spec.ts)
+- 72628 — Duplicate creates copy (13-practice-plans.spec.ts)
+- 72600 — Create Plan as Administrator/Owner (13-practice-plans.spec.ts)
+- 71644 — View Plan coach (13-practice-plans.spec.ts)
+- 71645 — View Plan Owner/Admin (13-practice-plans.spec.ts)
+- 72623 — Coach no Org Plans tab (13-practice-plans.spec.ts)
+- 71642 — View Plan athlete (13-practice-plans.spec.ts)
+- 72624 — Parent no Prebuilt Plans tab (13-practice-plans.spec.ts)
+- 71643 — View Plan Parent (parent/13-plans.spec.ts)
+- 71641 — Create plan: notes (coach/13-plans.spec.ts)
+- 72609 — Athlete cannot edit invited plan (athlete/13-plans.spec.ts)
+- 72622 — Athlete and Parent do not see Org Plans tab (athlete/13-plans.spec.ts, parent/13-plans.spec.ts)
+- 72679 — Home page (System Administrator) (13-plans.spec.ts)
+- 72611 — Prebuilt checkbox (sys admin) (13-plans.spec.ts)
+- 72612 — Non-sysadmin no Prebuilt checkbox (13-plans.spec.ts)
+- 72604 — Non-sysadmin no Prebuilt (13-plans.spec.ts)
+- 71716 — Invite multiple users to plan (13-plans.spec.ts)
+- 72614 — Unchecking Prebuilt removes plan (13-plans.spec.ts)
+- 71922 — Sys admin see all organizations (sysadmin/04-organization.spec.ts)
+- 71957 — Edit organization as sysadmin (sysadmin/04-organization.spec.ts)
+- 71924 — Edit own organization (04-organization.spec.ts)
+- 71293 — Create Template with 2+ categories (11-scorecard-templates.spec.ts)
+- 71292 — Create Template (11-scorecard-templates.spec.ts)
+- 71393 — Make inactive (объединён с 71292)
+- 71495 — Rating выше 5 блокируется (12-evaluations.spec.ts)
+- 71528 — Оценка категории подтягивает сабскиллы (12-evaluations.spec.ts) — ⚠️ объединён с другими, semantic issue: no assertion verifies sub-skills
+- 71460 — Create evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 71561
+- 71567 — View evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 71600
+- 71600 — Edit evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 71567
+- 71494 — Рейтинг ниже 3 раскрывает под-скиллы (12-evaluations.spec.ts) — ⚠️ объединён с 71493
+- 71561 — View not submitted evaluation (12-evaluations.spec.ts) — ⚠️ объединён с 71460
+- 71562 — После submit генерируется report (12-evaluations.spec.ts) — ⚠️ объединён с 71563, semantic issue: no assertion checks report
+- 71493 — Оценка < 3 только для 5 категорий (12-evaluations.spec.ts) — ⚠️ объединён с 71494
+- 71563 — После submit генерируется workout (12-evaluations.spec.ts) — ⚠️ объединён с 71562, semantic issue: no assertion checks workout
+- 72684 — Create/edit drill: fields, permissions (10-drills.spec.ts)
+- 74151 — Create drill (10-drills.spec.ts)
+- 71835 — Drill detail: play YouTube video (10-drills.spec.ts)
+- 71252 — Create parent (07-parents.spec.ts)
+- 71256 — Edit parent (07-parents.spec.ts)
+- 74217 — Create skill (09-skills.spec.ts)
+- 71845 — Permission (Athlete) (01-permissions.spec.ts)
+- 71843 — Permission (Owner/admin) (01-permissions.spec.ts)
+- 71846 — Permission (Parent) (parent/01-permissions.spec.ts)
+- 71844 — Permission (Coach) (coach/01-permissions.spec.ts)
+- 71889 — Permission (Sys admin) (sysadmin/01-permissions.spec.ts)
+- 71823 — Home page (Owner/admin) (owner/02-homepage.spec.ts)
+- 71818 — Home page (Coach Summary) (coach/02-homepage.spec.ts)
+- 71822 — Home page (Parent) (parent/03-homepage.spec.ts)
+- 71821 — Home page (Athlete) (athlete/03-homepage.spec.ts)
 
 ### ⏭️ Пропускаем (4 тест-кейса)
 - 91868 — Forgot password (проверка почты)
