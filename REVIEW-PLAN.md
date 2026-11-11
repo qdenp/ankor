@@ -78,7 +78,7 @@
     - После каждого удаления ждать `toHaveCount(n - 1)`.
   - **Готово, когда:** cleanup детерминирован и не трогает чужие данные.
 
-- [ ] **1.6 Включить проверку типов TypeScript.**
+- [x] **1.6 Включить проверку типов TypeScript.** Сделано: `typescript@5.9`, `@types/node@24`, `tsconfig.json` (strict, noEmit), `npm run typecheck`. Первый запуск — 244 ошибки (разбор в 1.7); скрипт красный до завершения 1.7.
   - **Проблема:** нет `tsconfig.json` и пакета `typescript`. Playwright только транспилирует код, поэтому ошибки типов не видны.
   - **Что сделать:**
     - Добавить `typescript` в devDependencies.
@@ -86,7 +86,13 @@
     - Добавить скрипт `"typecheck": "tsc --noEmit"`.
   - **Готово, когда:** `npm run typecheck` проходит без ошибок.
 
-- [ ] **1.7 Исправить ошибки, которые найдёт `tsc`.** Известные:
+- [ ] **1.7 Исправить ошибки, которые найдёт `tsc`.** Первый запуск `npm run typecheck` (2026-11-11): 244 ошибки.
+  - TS2322 ×203 — тип `ReturnType<this['page']['getByRole']>` не сводится к `Locator`; заменить на `Locator`.
+  - TS2339/TS2551/TS2564 ×32 — необъявленные / неприсвоенные поля (ниже).
+  - TS2353 ×8 — `filter({ hasText, exact: false })`: у `filter` нет опции `exact`, Playwright её молча игнорирует (athlete, coach ×3, parent ×2, team, `getAthleteRow`/`isAthleteExists`). Убрать.
+  - TS7006 ×1 — параметр без типа в `isTokenValid` (`fixtures.ts`).
+
+  Известные заранее:
   - **Присваиваются без объявления:**
     - `plan-page`: `planCardViewButton`, `planCardDuplicateButton`, `planCardEditLink`, `inviteUsersButton`, `planDetailEditLink`, `planCards`.
     - `drill-page`: `addSkillMappingButton`, `skillMappingPopup`, `skillMappingPopupTitle`, `doneButton`, `tableRows`.

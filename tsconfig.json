@@ -1,0 +1,17 @@
+{
+  // Только проверка типов: Playwright сам транспилирует TS при запуске, tsc ничего не собирает.
+  // Запуск: npm run typecheck
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true
+  },
+  "include": ["tests/**/*.ts", "playwright.config.ts"]
+}
