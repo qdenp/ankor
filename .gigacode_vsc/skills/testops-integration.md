@@ -23,6 +23,12 @@ https://rallyup.testops.cloud
 - `testops_find_testcases` — поиск тест-кейсов
 - `testops_find_testresults` — поиск прогонов
 
+**Настройка токена (один раз на машине).** MCP-сервер настроен в `.gigacode_vsc/gigacode.jsonc` и берёт заголовок авторизации из пользовательской переменной окружения `TESTOPS_AUTH_HEADER`. Токен в репозиторий не коммитить.
+```powershell
+[Environment]::SetEnvironmentVariable('TESTOPS_AUTH_HEADER', 'api-token <TOKEN>', 'User')
+```
+После этого полностью перезапустить VS Code, чтобы он подхватил переменную.
+
 ### 4. API (если нужен программный доступ)
 ```
 Base URL: https://rallyup.testops.cloud/api

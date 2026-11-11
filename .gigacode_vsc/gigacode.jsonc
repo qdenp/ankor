@@ -1,0 +1,16 @@
+{
+  "$schema": "https://app.tmp_not_exist_for_test.ru/config.json",
+  "mcpServers": {
+    "allure-testops": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://rallyup.testops.cloud/api/mcp",
+        "--header",
+        // Значение берётся из пользовательской переменной окружения TESTOPS_AUTH_HEADER
+        // ("api-token <TOKEN>"). Без пробела после двоеточия: на Windows пробелы в args ломаются.
+        "Authorization:${TESTOPS_AUTH_HEADER}"
+      ]
+    }
+  }
+}
