@@ -25,8 +25,6 @@ test.describe('Athlete Permission Tests', () => {
 
   test('should have view-only access to Skills, Drills, Evaluations and view-only Evaluation Reports', async ({ page }) => {
     await allure.allureId('71845');
-    // Пропуск после allureId — иначе тело не выполнится и TestOps не свяжет результат с кейсом
-    test.skip(true, 'TODO - новая фича shared plans для атлетов');
     const homePage = new HomePage(page);
     const skillPage = new SkillPage(page);
     const drillPage = new DrillPage(page);
@@ -61,8 +59,9 @@ test.describe('Athlete Permission Tests', () => {
     await planPage.goToInvited();
     await expect(planPage.invitedTab, 'Invited tab should be visible').toBeVisible();
 
-    // Prebuilt tab — NOT visible for athlete
-    await expect(planPage.prebuiltTab, 'Prebuilt tab should be hidden for athlete').toBeHidden();
+    // Prebuilt tab — visible for athlete: добавлена намеренно (подтверждено 2026-11-12);
+    // ручной кейс 72625 «Athlete does not see Prebuilt Plans tab» устарел
+    await expect(planPage.prebuiltTab, 'Prebuilt tab should be visible for athlete').toBeVisible();
 
     // Org Plans tab — NOT visible (TC-72622)
     await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for athlete').toBeHidden();
