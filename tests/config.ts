@@ -54,6 +54,21 @@ export const CREDENTIALS = {
   },
 };
 
+/**
+ * Атлет, которого оценивают тесты 12-evaluations ("Athlete Last", Team01). Не роль для loginAs:
+ * входят под ним только в отдельном контексте браузера, чтобы проверить его отчёт (71563).
+ */
+export const EVALUATED_ATHLETE = {
+  name: 'Athlete Last',
+  // Геттеры: переменные нужны одному тесту — без них падает только он, а не загрузка конфига у всех ролей
+  get email(): string {
+    return requiredEnv('ANKOR_EVAL_ATHLETE_EMAIL');
+  },
+  get password(): string {
+    return requiredEnv('ANKOR_EVAL_ATHLETE_PASSWORD');
+  },
+};
+
 /* ======================== Organizations ======================== */
 /**
  * Организации, имена которых меняют тесты редактирования. Тест возвращает имя к константе,
