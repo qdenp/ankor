@@ -18,7 +18,7 @@ test.describe('Owner Drill Tests', () => {
 
   /**
    * @TC-74151 Create drill
-   * TC-91865 [step 1-6]: Create drill with all fields → verify in library
+   * TC-74151 [step 1-6]: Create drill with all fields → verify in library
    * - Drill name and Segment are required
    * - All fields: name, description, segment, duration, min/max players, min/max age, skill mapping, YouTube URL
    * - Visibility: organization
@@ -29,10 +29,10 @@ test.describe('Owner Drill Tests', () => {
     // Генерируем уникальное имя для drill
     DRILL_NAME = `Test Drill ${Date.now()}`;
 
-    // TC-91865 [step 1]: Перейти в Drills
+    // TC-74151 [step 1]: Перейти в Drills
     await drillPage.goto();
 
-    // TC-91865 [step 2]: Нажать Create drills
+    // TC-74151 [step 2]: Нажать Create drills
     await drillPage.clickNewDrill();
 
     // TC-74151 [step 3]: Ничего не заполнять и нажать create → валидация
@@ -40,7 +40,7 @@ test.describe('Owner Drill Tests', () => {
     // Имя должно остаться (валидация сработала)
     await expect(drillPage.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
 
-    // TC-91865 [step 4]: Заполнить все поля
+    // TC-74151 [step 4]: Заполнить все поля
     await drillPage.fillName(DRILL_NAME);
     await drillPage.fillDescription('Test drill description');
     await drillPage.selectSegment(SEGMENT);
@@ -50,7 +50,7 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.fillMinAge('10');
     await drillPage.fillMaxAge('18');
 
-    // TC-91865 [step 5]: Вставить видео URL youtube
+    // TC-74151 [step 5]: Вставить видео URL youtube
     await drillPage.fillYoutubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
 
     // TC-74151 [step 6]: Создать
@@ -58,21 +58,21 @@ test.describe('Owner Drill Tests', () => {
     // После создания дрила — редирект на detail page (heading = имя дрила)
     await expect(page.getByRole('heading', { name: DRILL_NAME })).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // TC-91865 [step 6.2]: в библиотеке отображен drill — вернуться в список
+    // TC-74151 [step 6.2]: в библиотеке отображен drill — вернуться в список
     await drillPage.goToDrillsList();
     await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
   /**
    * @TC-72684 Create/edit drill: fields, role permissions, Visibility rules
-   * TC-91837 [step 1-2]: Owner/Admin create drill with all fields
+   * TC-72684 [step 1-2]: Owner/Admin create drill with all fields
    * - Coach/Athlete/Parent: view-only (Create/Edit недоступны)
    * - Owner/Admin: НЕ должен редактировать Public drill
    */
   test('should create drill and verify role permissions', async ({ page }) => {
     const drillPage = new DrillPage(page);
 
-    // TC-91837 [step 2]: Зайти Owner/Admin, открыть Create Drill
+    // TC-72684 [step 2]: Зайти Owner/Admin, открыть Create Drill
     await drillPage.goto();
     await drillPage.clickNewDrill();
 
@@ -101,18 +101,18 @@ test.describe('Owner Drill Tests', () => {
     // Вернуться в список
     await drillPage.goToDrillsList();
 
-    // TC-91837 [step 1.1]: Verify drill appears in table
+    // TC-72684 [step 1.1]: Verify drill appears in table
     await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
   /**
     * @TC-72683 Drill detail: play instructional video (YouTube)
-    * TC-71835 [step 1-2]: Open drill detail with YouTube URL → verify play button
+    * TC-72683 [step 1-2]: Open drill detail with YouTube URL → verify play button
    */
   test('should view drill detail with YouTube video', async ({ page }) => {
     const drillPage = new DrillPage(page);
 
-    // Создать drill с YouTube URL — используем DRILL_NAME из TC-91865
+    // Создать drill с YouTube URL — используем DRILL_NAME из TC-74151
     await drillPage.goto();
     await drillPage.clickNewDrill();
     await drillPage.fillName(DRILL_NAME);
@@ -130,10 +130,10 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.goToDrillsList();
     await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // TC-71835 [step 1]: Открыть detail дрила
+    // TC-72683 [step 1]: Открыть detail дрила
     await drillPage.openDrillDetail(DRILL_NAME);
 
-    // TC-71835 [step 2]: Проверить что YouTube video встроен (iframe)
+    // TC-72683 [step 2]: Проверить что YouTube video встроен (iframe)
     await drillPage.waitForYouTubeIframe();
     await expect(drillPage.youtubeIframe).toBeVisible({ timeout: TIMEOUTS.long });
   });

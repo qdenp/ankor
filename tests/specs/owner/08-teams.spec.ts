@@ -9,7 +9,7 @@ import { TIMEOUTS } from '../../config';
 test.describe('Owner Team Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
-  // 91848: Create team
+  // 71851: Create team
   test('should create new team', async ({ loginAs, page }) => {
     const teamPage = new TeamPage(page);
 

@@ -50,8 +50,8 @@ test.describe('Owner Plan Tests', () => {
     await expect(planPage.orgPlansTab).toBeVisible();
   });
 
-  // 91843: Non-sysadmin no Prebuilt checkbox
-  test('@TC-72612 non-sysadmin roles do not see Prebuilt checkbox', async ({ page }) => {
+  // 72604: Non-sysadmin no Prebuilt checkbox
+  test('@TC-72604 non-sysadmin roles do not see Prebuilt checkbox', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
