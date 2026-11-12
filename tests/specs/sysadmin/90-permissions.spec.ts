@@ -11,7 +11,7 @@ import { TeamPage } from '../../pages/team-page';
 import { EvaluationPage } from '../../pages/evaluation-page';
 import { PlanPage } from '../../pages/plan-page';
 import { HomePage } from '../../pages/home-page';
-import { TIMEOUTS } from '../../config';
+import { CREDENTIALS, ORGANIZATIONS, TIMEOUTS } from '../../config';
 
 /**
  * @TC-71889 Permission (Sys admin)
@@ -37,7 +37,8 @@ test.describe('SysAdmin Permission Tests', () => {
     await loginAs('sysadmin');
   });
 
-  test('should have full CRUD access to all modules and see all organizations', async ({ page }) => {
+  // Название — по реальным проверкам: видимость кнопок создания (не сами CRUD-операции) и чужие организации
+  test('should see create actions in all sections and organizations of other owners', async ({ page }) => {
     await allure.allureId('71889');
     const homePage = new HomePage(page);
     const orgPage = new OrganizationPage(page);
@@ -54,6 +55,11 @@ test.describe('SysAdmin Permission Tests', () => {
     // [step 1] Organization profile - может просматривать, редактировать ВСЕ организации
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
+    // Все организации: находятся две разные — owner (aiorg01) и aiorg01sysedit; owner видит только свою
+    for (const adminEmail of [CREDENTIALS.owner.email, ORGANIZATIONS.sysadminEdit.adminEmail]) {
+      await orgPage.search(adminEmail);
+      await expect(orgPage.getOrgRowByEmail(adminEmail), `Organization of ${adminEmail} should be listed`).toBeVisible({ timeout: TIMEOUTS.long });
+    }
 
     // [step 2] Skill - CRUD (Create button visible)
     await homePage.goToSkills();

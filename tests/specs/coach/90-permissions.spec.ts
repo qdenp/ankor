@@ -33,7 +33,8 @@ test.describe('Coach Permission Tests', () => {
     await loginAs('coach');
   });
 
-  test('should have CRUD access to Athlete/Parent/Team/EasyJoin/Eval/Plan and view-only to Skill/Drill/Scorecard/Coach', async ({ page }) => {
+  // Название — по реальным проверкам: какие кнопки создания и пункты меню видны (не сами CRUD-операции)
+  test('should see create actions for athletes, parents, teams, evaluations and plans but not for skills, drills and coaches', async ({ page }) => {
     await allure.allureId('71844');
     const homePage = new HomePage(page);
     const skillPage = new SkillPage(page);

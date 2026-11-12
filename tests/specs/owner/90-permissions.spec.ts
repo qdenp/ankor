@@ -11,7 +11,7 @@ import { TeamPage } from '../../pages/team-page';
 import { EvaluationPage } from '../../pages/evaluation-page';
 import { PlanPage } from '../../pages/plan-page';
 import { HomePage } from '../../pages/home-page';
-import { TIMEOUTS } from '../../config';
+import { CREDENTIALS, TIMEOUTS } from '../../config';
 
 /**
  * @TC-71843 Permission (Owner/admin)
@@ -37,7 +37,8 @@ test.describe('Owner Permission Tests', () => {
     await loginAs('owner');
   });
 
-  test('should have full CRUD access to all modules and see own organization only', async ({ page }) => {
+  // Название — по реальным проверкам: видимость кнопок создания (не сами CRUD-операции) и список организаций
+  test('should see create actions in all sections and only own organization', async ({ page }) => {
     await allure.allureId('71843');
     const homePage = new HomePage(page);
     const orgPage = new OrganizationPage(page);
@@ -54,6 +55,9 @@ test.describe('Owner Permission Tests', () => {
     // [step 1] Organization profile — только СВОЯ организация (видна edit кнопка)
     await orgPage.goto();
     await expect(orgPage.editButton, 'Edit button should be visible on Organization Profile').toBeVisible({ timeout: TIMEOUTS.long });
+    // Только своя: строка организации owner есть, а всего строк — заголовок + одна (sysadmin видит десятки)
+    await expect(orgPage.getOrgRowByEmail(CREDENTIALS.owner.email), 'Own organization should be listed').toBeVisible();
+    await expect(orgPage.orgRows, 'Owner should see only own organization (header row + 1)').toHaveCount(2);
 
     // [step 2] Skill — CRUD (Create button visible)
     await homePage.goToSkills();
