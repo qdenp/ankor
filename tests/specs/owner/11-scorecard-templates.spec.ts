@@ -48,6 +48,8 @@ test.describe('Owner Score Card Template Tests', () => {
     await templatePage.toggleActive(templateName, false);
 
     await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to remain visible after marking inactive`).toBeVisible({ timeout: TIMEOUTS.long });
+    // Колонка Status: раньше проверялась только видимость строки — тест проходил, даже если деактивация не сохранилась
+    await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to have status Inactive`).toContainText('Inactive');
   });
 
   /** TC-71293 Create Template with 2+ category */
@@ -71,5 +73,7 @@ test.describe('Owner Score Card Template Tests', () => {
     await templatePage.toggleActive(templateName, false);
 
     await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to remain visible after marking inactive`).toBeVisible({ timeout: TIMEOUTS.long });
+    // Колонка Status: раньше проверялась только видимость строки — тест проходил, даже если деактивация не сохранилась
+    await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to have status Inactive`).toContainText('Inactive');
   });
 });

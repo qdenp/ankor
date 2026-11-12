@@ -69,6 +69,16 @@ export const ORGANIZATIONS = {
   sysadminEdit: { name: 'aiorg01sysedit', adminEmail: 'dtimokhin+aiorg01sysedit@aexsoft.com' },
 } as const;
 
+/* ======================== Plans ======================== */
+/**
+ * Планы-данные, которые переиспользуют тесты (создаются tests/setup/create-users.spec.ts, один раз).
+ * athleteInvited — план owner, в который приглашён атлет: без него вкладка Invited у атлета пуста
+ * и проверки «на invited-плане нет Edit» проходят впустую (REVIEW-PLAN 2.4).
+ */
+export const PLANS = {
+  athleteInvited: { name: 'Athlete Invited Plan', invitee: 'Athlete User' },
+} as const;
+
 /* ======================== Roles ======================== */
 export const ROLES = {
   SYSTEM_ADMIN: 'System Administrator',
