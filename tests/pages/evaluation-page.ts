@@ -51,6 +51,20 @@ export class EvaluationPage extends BasePage {
   readonly deleteDialog: Locator;
   readonly confirmDeleteButton: Locator;
 
+  // View / Edit evaluation screens
+  readonly viewEvaluationHeading: Locator;
+  readonly editEvaluationHeading: Locator;
+  readonly scorecardHeading: Locator;
+  readonly teamHeading: Locator;
+  readonly athletesEvaluatedHeading: Locator;
+  readonly editEvaluationButton: Locator;
+  readonly editMenuItem: Locator;
+
+  // Evaluation Reports
+  readonly reportsHeading: Locator;
+  readonly viewReportButtons: Locator;
+  readonly reportContent: Locator;
+
   constructor(page: Page) {
     super(page);
 
@@ -113,6 +127,22 @@ export class EvaluationPage extends BasePage {
     // Диалог подтверждения: "Delete Team01? This action cannot be undone." [Cancel] [Delete]
     this.deleteDialog = page.getByRole('dialog');
     this.confirmDeleteButton = this.deleteDialog.getByRole('button', { name: 'Delete', exact: true });
+
+    // View / Edit evaluation screens
+    this.viewEvaluationHeading = page.getByRole('heading', { name: 'View Evaluation', level: 3 });
+    this.editEvaluationHeading = page.getByRole('heading', { name: 'Edit evaluation' });
+    this.scorecardHeading = page.getByRole('heading', { name: 'Scorecard', exact: true });
+    this.teamHeading = page.getByRole('heading', { name: 'Team', exact: true });
+    this.athletesEvaluatedHeading = page.getByRole('heading', { name: 'Athletes evaluated' });
+    this.editEvaluationButton = page.getByRole('button', { name: 'Edit Evaluation' });
+    this.editMenuItem = page.getByRole('menuitem', { name: 'Edit' });
+
+    // Evaluation Reports: последние 20 отчётов карточками с кнопкой "View Report", новые — первыми.
+    // Счётчик «(N)» не больше 20 и реальное число отчётов не отражает.
+    this.reportsHeading = page.getByRole('heading', { name: 'Evaluation Reports', level: 3 });
+    this.viewReportButtons = page.getByRole('button', { name: 'View Report' });
+    // Детали отчёта: шаблон, атлет, дата, категории и подскиллы с оценками ("Skill1 4.0")
+    this.reportContent = page.getByRole('main');
   }
 
   /** Переход на страницу Evaluations через левое меню */
@@ -222,7 +252,34 @@ export class EvaluationPage extends BasePage {
   /** Переход на страницу Evaluation Reports */
   async gotoReports(): Promise<void> {
     await this.sidebarReportLink.click();
-    await expect(this.page.getByRole('heading', { name: 'Evaluation Reports', level: 3 })).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.reportsHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
+  }
+
+  /** Открыть самый новый отчёт (первый в списке) */
+  async openNewestReport(): Promise<void> {
+    await this.viewReportButtons.first().click();
+    await expect(this.page).toHaveURL(/\/reports\/evaluation-reports\/.+/, { timeout: TIMEOUTS.long });
+    await this.waitForLoading();
+  }
+
+  /** Строка категории в сетке оценок (создание, просмотр, редактирование): "Category1 4" */
+  getCategoryRow(categoryName: string): Locator {
+    return this.tableRows.filter({ hasText: categoryName });
+  }
+
+  /** Открыть просмотр самого нового черновика (In Progress) из списка */
+  async openNewestDraftView(): Promise<void> {
+    await this.tableRows.filter({ hasText: 'In Progress' }).first().getByRole('button', { name: 'View' }).click();
+    await expect(this.viewEvaluationHeading).toBeVisible({ timeout: TIMEOUTS.long });
+    await this.waitForLoading();
+  }
+
+  /** Открыть редактирование самого нового черновика через More actions → Edit */
+  async openNewestDraftEdit(): Promise<void> {
+    await this.tableRows.filter({ hasText: 'In Progress' }).first().getByRole('button', { name: 'More actions' }).click();
+    await this.editMenuItem.click();
+    await expect(this.editEvaluationHeading).toBeVisible({ timeout: TIMEOUTS.long });
     await this.waitForLoading();
   }
 
@@ -253,7 +310,9 @@ export class EvaluationPage extends BasePage {
    */
   async submit(): Promise<void> {
     await this.submitButton.click();
-    await expect(this.page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    // Ждём именно список (/evaluations), а не любой адрес с "/evaluations": форма открыта на
+    // /evaluations/create или /evaluations/<id>/edit, и /\/evaluations/ совпадал до отправки
+    await expect(this.page).toHaveURL(/\/evaluations\/?(\?.*)?$/, { timeout: TIMEOUTS.long });
     await this.waitForLoading();
   }
 

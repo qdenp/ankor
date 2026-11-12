@@ -88,9 +88,10 @@ test.describe('Owner Evaluation Tests', () => {
   });
 
   /**
-   * @TC-71493 @TC-71494 Rating below 3 expands sub-skills
-   * TC-71493 [step 1-2]: Allow score below 3 for max 5 categories
+   * @TC-71494 Rating below 3 expands sub-skills
    * TC-71494 [step 1.1]: Rating below 3 should expand sub-skills for detailed rating
+   * Сохраняется черновиком (Submit не нужен — отчёт неудаляем); черновик удаляет afterEach.
+   * TC-71493 (не больше 5 категорий ниже 3) здесь не проверяется: нужен шаблон с 6 категориями (REVIEW-PLAN 1.5).
    */
   test('should handle rating below 3 with sub-skills', async ({ page }) => {
     const evaluationPage = new EvaluationPage(page);
@@ -102,16 +103,8 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.selectTeam(TEAM_NAME);
     await evaluationPage.addSkill(skillName);
 
-    // Click on rating cell "—" → becomes number input
-    const categoryCell = page.getByRole('gridcell').filter({ hasText: '—' }).first();
-    await expect(categoryCell).toBeVisible({ timeout: TIMEOUTS.medium });
-    await categoryCell.click();
-
-    // Enter rating 2 (below 3)
-    const numberInput = page.locator('input[type="number"]').first();
-    await expect(numberInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await numberInput.fill('2');
-    await page.keyboard.press('Tab');
+    // Оценка категории 2 (ниже 3)
+    await evaluationPage.rateCategory(2);
 
     // TC-71494 [step 1.1]: Subskills popup should appear
     await expect(evaluationPage.subskillsPopupTitle).toBeVisible({ timeout: TIMEOUTS.long });
@@ -120,133 +113,110 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.setSubskillRating(skillName, 2);
     await evaluationPage.saveSubskillRatings();
 
-    // TC-71493: Wait for Submit to become enabled
+    // Отправка доступна — оценка ниже 3 с оценёнными подскиллами допустима
     await evaluationPage.waitForSubmitEnabled();
 
-    // Submit
-    await evaluationPage.submit();
+    // Сохраняем черновиком (Submit создал бы неудаляемый отчёт); afterEach удалит черновик
+    await evaluationPage.saveAsDraft();
+    await expect(evaluationPage.tableRows.filter({ hasText: 'In Progress' }).first()).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
   /**
-   * @TC-71528 Rating > 3 on category → all subskills get same rating
-   * TC-71528 [step 1-2]: Rate category above 3 → submit → verify in table
-   */
-  test('should pull sub-skills when category rated above 3', async ({ page }) => {
-    const evaluationPage = new EvaluationPage(page);
-    const skillName = 'Skill1';
-
-    await evaluationPage.goto();
-    await evaluationPage.clickNewEvaluation();
-    await evaluationPage.selectScorecardTemplate(TEMPLATE_NAME);
-    await evaluationPage.selectTeam(TEAM_NAME);
-    await evaluationPage.addSkill(skillName);
-
-    // Click on rating cell "—" → becomes number input
-    const categoryCell = page.getByRole('gridcell').filter({ hasText: '—' }).first();
-    await expect(categoryCell).toBeVisible({ timeout: TIMEOUTS.medium });
-    await categoryCell.click();
-
-    // Enter rating 4 (above 3)
-    const numberInput = page.locator('input[type="number"]').first();
-    await expect(numberInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await numberInput.fill('4');
-    await page.keyboard.press('Tab');
-
-    // For rating > 3, no subskills popup — just wait for Submit to become enabled
-    await evaluationPage.waitForSubmitEnabled();
-
-    // Submit evaluation (TC-71528 [step 2])
-    await evaluationPage.submit();
-
-    // Verify evaluation appears in table
-    await expect(evaluationPage.getRow(TEMPLATE_NAME), 'Expected evaluation to appear in table after submit').toBeVisible({ timeout: TIMEOUTS.long });
-  });
-
-  /**
-   * @TC-71567 @TC-71600 View and Edit evaluation
-   * TC-71567 [step 2-4]: View evaluation detail → Back
-   * TC-71567 [step 6]: Click Edit via More actions
-   * TC-71600 [step 2-3]: Edit evaluation → Update rating
-   * TC-71600 [step 6.1]: Verify data saved
+   * @TC-71567 @TC-71600 View and Edit evaluation (на черновике — по предусловию обоих TC: «не submitted»)
+   * TC-71567 [step 2]: View → экран просмотра (Scorecard, Team, Athletes evaluated), есть Back и Edit
+   * TC-71567 [step 4]: Back → список
+   * TC-71567 [step 6]: Edit → форма редактирования
+   * TC-71600 [step 3-4.1]: изменить оценку и НЕ сохранять → данные не сохранены
+   * TC-71600 [step 5-6.1]: изменить оценку и сохранить → данные сохранены
+   * В форме редактирования черновика кнопки Save as draft / Submit (отдельной Update нет) — сохраняем черновиком.
    */
   test('should view and edit evaluation', async ({ page }) => {
     const evaluationPage = new EvaluationPage(page);
-    const skillName = 'Skill2';
+    const category = 'Category1';
 
-    // Create and submit evaluation first
+    // Черновик с оценкой 4
     await evaluationPage.goto();
     await evaluationPage.clickNewEvaluation();
     await evaluationPage.selectScorecardTemplate(TEMPLATE_NAME);
     await evaluationPage.selectTeam(TEAM_NAME);
-    await evaluationPage.addSkill(skillName);
-
-    // Rate category
+    await evaluationPage.addSkill('Skill2');
     await evaluationPage.rateCategory(4);
+    await evaluationPage.saveAsDraft();
 
-    // Submit
-    await evaluationPage.submit();
+    // TC-71567 [step 2]: View
+    await evaluationPage.openNewestDraftView();
+    await expect(evaluationPage.scorecardHeading).toBeVisible();
+    await expect(evaluationPage.teamHeading).toBeVisible();
+    await expect(evaluationPage.athletesEvaluatedHeading).toBeVisible();
+    await expect(evaluationPage.editEvaluationButton).toBeVisible();
+    await expect(evaluationPage.backLink).toBeVisible();
+    await expect(evaluationPage.getCategoryRow(category)).toContainText('4');
 
-    // Verify evaluation appears in table
-    await expect(evaluationPage.getRow(TEMPLATE_NAME), 'Expected evaluation to appear in table').toBeVisible({ timeout: TIMEOUTS.long });
-
-    // TC-71567 [step 2]: Click View on evaluation row
-    const viewButton = evaluationPage.getRow(TEMPLATE_NAME).getByRole('button', { name: 'View' });
-    await expect(viewButton).toBeVisible({ timeout: TIMEOUTS.medium });
-    await viewButton.click();
-
-    // TC-71567 [step 2.1]: Verify evaluation detail page
-    await expect(page.getByRole('heading', { name: 'View Evaluation', level: 3 })).toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(page.getByRole('heading', { name: 'Scorecard' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(page.getByRole('heading', { name: 'Default Template for Evaluation' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(page.getByRole('heading', { name: 'Team', exact: true })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(page.getByRole('heading', { name: 'Athletes evaluated' })).toBeVisible({ timeout: TIMEOUTS.medium });
-
-    // TC-71567 [step 3]: Edit button on view page
-    await expect(page.getByRole('button', { name: 'Edit Evaluation' })).toBeVisible({ timeout: TIMEOUTS.medium });
-
-    // TC-71567 [step 4]: Click Back
+    // TC-71567 [step 4]: Back
     await evaluationPage.backToList();
 
-    // TC-71567 [step 6]: Click Edit via More actions
-    const moreActions = evaluationPage.getRow(TEMPLATE_NAME).getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
-    await moreActions.click();
-    await expect(page.getByRole('menuitem', { name: 'Edit' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await page.getByRole('menuitem', { name: 'Edit' }).click();
-    await expect(page.getByRole('heading', { name: 'Edit evaluation' })).toBeVisible({ timeout: TIMEOUTS.long });
-
-    // TC-71600 [step 3]: Edit rating
+    // TC-71567 [step 6] / TC-71600 [step 3-4]: Edit → изменить оценку → уйти без сохранения
+    await evaluationPage.openNewestDraftEdit();
     await evaluationPage.updateCategoryRating(5);
+    await evaluationPage.backToList();
 
-    // TC-71600 [step 6]: Click Update
-    await evaluationPage.submit();
+    // TC-71600 [step 4.1]: данные не сохранены — в просмотре по-прежнему 4
+    await evaluationPage.openNewestDraftView();
+    await expect(evaluationPage.getCategoryRow(category)).toContainText('4');
+    await evaluationPage.backToList();
 
-    // TC-71600 [step 6.1]: Verify data saved
-    await expect(evaluationPage.getRow(TEMPLATE_NAME), 'Expected updated evaluation in table').toBeVisible({ timeout: TIMEOUTS.long });
+    // TC-71600 [step 5-6]: снова изменить и сохранить
+    await evaluationPage.openNewestDraftEdit();
+    await evaluationPage.updateCategoryRating(5);
+    await evaluationPage.saveAsDraft();
+
+    // TC-71600 [step 6.1]: данные сохранены — в просмотре 5
+    await evaluationPage.openNewestDraftView();
+    await expect(evaluationPage.getCategoryRow(category)).toContainText('5');
   });
 
   /**
-   * @TC-71562 @TC-71563 Generate report and workout after submit
-   * TC-71562 [step 1-3]: Submit evaluation → check report generated
-   * TC-71563 [step 1-4]: Submit evaluation → check workout generated
+   * @TC-71562 @TC-71528 Submit generates an evaluation report; category rating is applied to all subskills
+   * ЕДИНСТВЕННЫЙ тест с Submit: создаёт отчёт, который в интерфейсе нельзя удалить (1 отчёт за прогон — это и есть проверка создания).
+   * TC-71562 [step 3.2]: после Submit появляется новый evaluation report
+   * TC-71528 [step 1-4.1]: оценка категории выше 3 → в отчёте у ВСЕХ подскиллов та же оценка
+   * TC-71563 (workout) отложен: нужна оценка ниже 3, а в Team01 один атлет и у шаблона одна категория (REVIEW-PLAN 1.5).
    */
-  test('should generate report and workout after submit', async ({ page }) => {
+  test('should generate evaluation report with category rating applied to all subskills', async ({ page }) => {
     const evaluationPage = new EvaluationPage(page);
-    const skillName = 'Skill4';
+    const today = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+    // Список отчётов показывает только последние 20 (счётчик всегда «(20)»), поэтому новый отчёт
+    // определяем так: адрес самого нового отчёта до Submit ≠ адрес самого нового после
+    await evaluationPage.gotoReports();
+    await evaluationPage.openNewestReport();
+    const newestReportBefore = page.url();
 
     await evaluationPage.goto();
     await evaluationPage.clickNewEvaluation();
     await evaluationPage.selectScorecardTemplate(TEMPLATE_NAME);
     await evaluationPage.selectTeam(TEAM_NAME);
-    await evaluationPage.addSkill(skillName);
+    await evaluationPage.addSkill('Skill4');
 
-    // Rate category
-    await evaluationPage.rateCategory(5);
+    // TC-71528 [step 1]: оценка категории выше 3
+    await evaluationPage.rateCategory(4);
+    await evaluationPage.waitForSubmitEnabled();
 
-    // Submit
+    // TC-71528 [step 2] / TC-71562 [step 3]: Submit
     await evaluationPage.submit();
 
-    // Verify evaluation appears in table
-    await expect(evaluationPage.getRow(TEMPLATE_NAME), `Expected evaluation with skill "${skillName}" to appear in table`).toBeVisible({ timeout: TIMEOUTS.long });
+    // TC-71562 [step 3.2] / TC-71528 [step 3-4]: появился новый отчёт — он первый в списке
+    await expect(async () => {
+      await evaluationPage.gotoReports();
+      await evaluationPage.openNewestReport();
+      await expect(page).not.toHaveURL(newestReportBefore);
+    }).toPass({ timeout: TIMEOUTS.long });
+    await expect(evaluationPage.reportContent).toContainText(TEMPLATE_NAME);
+    await expect(evaluationPage.reportContent).toContainText(today);
+
+    // TC-71528 [step 4.1]: у всех подскиллов категории та же оценка, что у категории
+    for (const subskill of ['Skill1', 'Skill2', 'Skill3', 'Skill4']) {
+      await expect(evaluationPage.reportContent, `${subskill} should have the category rating 4.0`).toContainText(new RegExp(`${subskill}\\s*4\\.0`));
+    }
   });
 });
