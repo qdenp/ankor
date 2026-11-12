@@ -68,15 +68,40 @@
   - **Что сделать:** добавить хелпер `escapeRegExp()` или перейти на `filter({ hasText })`.
   - **Готово, когда:** в `tests/pages/` нет `new RegExp(<переменная>)` без экранирования.
 
-- [ ] **1.5 Переписать cleanup оценок.**
-  - **Где:** `deleteAllByTemplate` в [tests/pages/evaluation-page.ts:266-282](tests/pages/evaluation-page.ts#L266-L282).
-  - **Проблема 1:** цикл `while (count > 0)` не ждёт, пока строка исчезнет, и может зациклиться.
-  - **Проблема 2:** удаляются **все** оценки шаблона, включая чужие.
-  - **Что сделать:**
-    - Запоминать, что создал тест (уникальный маркер или счётчик).
-    - Удалять только своё.
-    - После каждого удаления ждать `toHaveCount(n - 1)`.
-  - **Готово, когда:** cleanup детерминирован и не трогает чужие данные.
+- [ ] **1.5 Переписать cleanup оценок и сократить Submit.**
+  - **Где:** `deleteAllByTemplate` в [tests/pages/evaluation-page.ts](tests/pages/evaluation-page.ts), вызывается из `afterEach` в [12-evaluations.spec.ts](tests/specs/owner/12-evaluations.spec.ts).
+  - **Найдено (2026-11-12):** cleanup **никогда ничего не удалял**. `EvaluationPage.goto()` не вызывает `waitForLoading()`, и `deleteAllByTemplate` считал строки до загрузки таблицы: 0 строк → выход (замер: сразу после `goto()` — 0, после `waitForLoading()` — 10). Из-за этого у owner накопилось 72 черновика In Progress.
+  - **Сделано:** все 72 черновика удалены через UI (⋮ → Delete → подтверждение), каждое удаление подтверждено уменьшением счётчика; итог — 0.
+  - **Правила стенда (от пользователя):** оценки In Progress удалять можно; отчёты Evaluation Reports в интерфейсе удалить нельзя — Submit создаёт их навсегда (сейчас 20 отчётов).
+  - **Что сделать в коде** (🔒 `evaluation-page.ts`):
+    - `goto()` / `gotoReports()` — ждать загрузки (`waitForLoading()`, см. 1.8).
+    - Удалять только своё: строки In Progress с датой CREATED не раньше начала теста (колонки: CREATED, TEAM, SCORECARD, STATUS, ACTION).
+    - После каждого удаления ждать уменьшения числа строк; учитывать, что при ≤10 записях подпись «1-10 of N» не показывается.
+    - Не чистить в тестах, которые ничего не сохраняют.
+  - **Что сделать в тестах** (меняет поведение — по согласованию):
+    - Сейчас Submit делают 4 теста из 6 (rating below 3, rating above 3, view/edit, report) → 4 неудаляемых отчёта за прогон owner.
+    - Submit оставить только там, где проверяется именно отправка/отчёт; остальным работать с In Progress и удалять его, или использовать уже существующий отчёт (связано с 3.12).
+  - **Готово, когда:** прогон owner не оставляет черновиков, а новых отчётов создаёт не больше, чем тестов, которым нужен именно Submit.
+
+- [ ] **1.8 Ждать загрузки данных после каждого перехода на страницу.**
+  - **Правило (от пользователя):** спиннеры загрузки есть на всех страницах, кроме входа и регистрации; после перехода или возврата на страницу нужно вызывать `BasePage.waitForLoading()`. Без этого тест читает пустую таблицу (так сломался cleanup в 1.5).
+  - **Аудит (2026-11-12) — методы PO, которые переходят на страницу и НЕ ждут загрузки:**
+
+    | PO | Методы |
+    |---|---|
+    | `base-page.ts` | `goToSkills`, `goToDrills`, `goToEasyJoin` и остальные `goTo*` (только клик по меню) |
+    | `evaluation-page.ts` | `goto`, `gotoReports`, `createEvaluation`, `deleteEvaluation`, `deleteAllByTemplate` |
+    | `plan-page.ts` | `goto`, `createPlan`, `savePlanAndReturnToMyPlans`, `editPlanFromCard`, `saveDrillEdit`; переключение вкладок `goToMyPlans/Invited/Prebuilt/OrgPlans` — проверить, грузят ли данные |
+    | `drill-page.ts` | `goto`, `clickCreate`, `goToDrillsList` |
+    | `scorecard-template-page.ts` | `goto`, `createScorecard`, `toggleActive` |
+    | `team-page.ts` | `goto` (переход через меню) |
+    | `organization-page.ts` | `gotoOrganizationsList` |
+
+    Уже ждут: `goto` у athlete/coach/parent/skill/home/organization, `create*`/`edit*` у athlete/coach/parent/team/skill.
+  - **В спеках напрямую:** `homePage.goToSkills/Drills/EasyJoin()` во всех `90-permissions`; `page.getByRole('link', { name: 'Back' }).click()` в `12-evaluations`; `page.goto('/practice-plans/new')` в `parent/90-permissions`.
+  - **Тонкость:** `waitForLoading()` проверяет «спиннеров 0». Если вызвать его сразу после клика, когда спиннер ещё не появился, проверка пройдёт мгновенно. Надёжный порядок: дождаться признака страницы (заголовок/кнопка), затем `waitForLoading()` — так работает `goto()` у athlete/coach (на Evaluations этот порядок проверен 3/3).
+  - **Что сделать** (🔒 PO): добавить `waitForLoading()` во все методы из таблицы; `goTo*` в `BasePage` — тоже; правило — в AGENTS.md §4 и чек-лист скилла 04.
+  - **Готово, когда:** каждый метод PO, который приводит на страницу со спиннером, заканчивается ожиданием загрузки.
 
 - [x] **1.6 Включить проверку типов TypeScript.** Сделано: `typescript@5.9`, `@types/node@24`, `tsconfig.json` (strict, noEmit), `npm run typecheck`. Первый запуск — 244 ошибки (разбор в 1.7); скрипт красный до завершения 1.7.
   - **Проблема:** нет `tsconfig.json` и пакета `typescript`. Playwright только транспилирует код, поэтому ошибки типов не видны.
