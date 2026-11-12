@@ -17,6 +17,16 @@ const RULES = [
   },
   {
     dir: 'tests',
+    pattern: /expect\(await /,
+    message: 'expect(await …) — одноразовое чтение без ретрая; web-first матчер: toHaveText / toHaveCount / toBeVisible (AGENTS.md §3)',
+  },
+  {
+    dir: 'tests',
+    pattern: /\.toBe(Truthy|Falsy)\(\)/,
+    message: 'toBeTruthy/toBeFalsy — на локаторе или промисе всегда истинно; проверять конкретное состояние (чек-лист ревью A2)',
+  },
+  {
+    dir: 'tests',
     pattern: /\.catch\(\(\) =>/,
     message: '.catch(() => …) глушит ошибки — пусть тест падает с понятной ошибкой (AGENTS.md §3)',
   },
