@@ -2,6 +2,7 @@ import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { ScorecardTemplatePage } from '../../pages/scorecard-template-page';
 import { TIMEOUTS } from '../../config';
+import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
 
 /**
  * Генератор уникального имени для шаблона.
@@ -14,7 +15,7 @@ test.describe('Owner Score Card Template Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
   // Шаблон, созданный первым тестом; второй тест деактивирует именно его (новый не создаёт)
-  let createdTemplateName: string | undefined;
+  // Шаблон для деактивации (71393) — из 71292, через хранилище (REVIEW-PLAN 3.12)
 
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
@@ -34,14 +35,13 @@ test.describe('Owner Score Card Template Tests', () => {
     });
 
     await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to appear in table`).toBeVisible({ timeout: TIMEOUTS.long });
-    createdTemplateName = templateName;
+    rememberEntity('owner', 'scorecard-template', { name: templateName });
   });
 
   /** TC-71393 Make inactive (на шаблоне из TC-71292) */
   test('should mark the template as inactive', async ({ page }) => {
     await allure.allureId('71393');
-    expect(createdTemplateName, 'Requires the template created by the previous test (serial mode)').toBeDefined();
-    const templateName = createdTemplateName!;
+    const templateName = recallEntity<{ name: string }>('owner', 'scorecard-template', 'should create a basic Score Card Template').name;
     const templatePage = new ScorecardTemplatePage(page);
 
     await templatePage.goto();

@@ -2,6 +2,7 @@ import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { CoachPage } from '../../pages/coach-page';
 import { TIMEOUTS } from '../../config';
+import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
 
 /**
  * 06 — Coaches для Owner.
@@ -12,7 +13,9 @@ test.describe('Owner Coach Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
   // Коуч, созданный первым тестом; уникальное имя — поиск в таблице идёт по имени
-  let createdCoach: { firstName: string; fullName: string; email: string } | undefined;
+  // Коуча создаёт только 71990; view/edit берут его из хранилища — и из прошлого прогона (REVIEW-PLAN 3.12)
+  type Coach = { firstName: string; fullName: string; email: string };
+  const CREATE_COACH_TEST = 'should create a coach and show it in the table';
 
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
@@ -62,7 +65,7 @@ test.describe('Owner Coach Tests', () => {
     // [step 4.1]
     await coachPage.search(coach.firstName);
     await expect(coachPage.getRowByName(coach.fullName)).toBeVisible({ timeout: TIMEOUTS.long });
-    createdCoach = coach;
+    rememberEntity('owner', 'coach', coach);
   });
 
   /**
@@ -74,8 +77,7 @@ test.describe('Owner Coach Tests', () => {
    */
   test('should show coaches table with View action and search by name and email', async ({ page }) => {
     await allure.allureId('72057');
-    expect(createdCoach, 'Requires the coach created by the previous test (serial mode)').toBeDefined();
-    const coach = createdCoach!;
+    const coach = recallEntity<Coach>('owner', 'coach', CREATE_COACH_TEST);
     const coachPage = new CoachPage(page);
 
     // [step 1]
@@ -102,8 +104,7 @@ test.describe('Owner Coach Tests', () => {
    */
   test('should edit coach name and phone, email is read-only', async ({ page }) => {
     await allure.allureId('71991');
-    expect(createdCoach, 'Requires the coach created by the first test (serial mode)').toBeDefined();
-    const coach = createdCoach!;
+    const coach = recallEntity<Coach>('owner', 'coach', CREATE_COACH_TEST);
     const coachPage = new CoachPage(page);
     const editedFirstName = `Edited${coach.firstName}`;
 
@@ -127,5 +128,7 @@ test.describe('Owner Coach Tests', () => {
     await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
     await coachPage.search(editedFirstName);
     await expect(coachPage.getRowByName(`${editedFirstName} Edited`)).toBeVisible({ timeout: TIMEOUTS.long });
+    // Имя изменилось — следующий прогон ищет коуча по новому имени
+    rememberEntity('owner', 'coach', { ...coach, firstName: editedFirstName, fullName: `${editedFirstName} Edited` });
   });
 });
