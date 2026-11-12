@@ -38,6 +38,16 @@ npx playwright show-report reports/html             # HTML-отчёт после
   В конфиге `fullyParallel: true`: без `--workers 1` тесты пойдут параллельно, и logout из `99-auth`
   отзовёт сессию посреди соседнего теста.
 
+## CI (GitHub Actions)
+
+Workflow [.github/workflows/playwrightMain.yml](.github/workflows/playwrightMain.yml) запускается **только вручную**:
+Actions → «E2E tests» → Run workflow (можно выбрать роли). Каждый прогон создаёт данные на общем стенде,
+поэтому на push и PR он не срабатывает; два прогона одновременно не запускаются.
+
+- Учётные данные тестовых пользователей — в GitHub Secrets (`ANKOR_OWNER_EMAIL`, `ANKOR_OWNER_PASSWORD`, … для всех пяти ролей).
+- С секретом `ALLURE_TOKEN` результаты уходят в Allure TestOps (проект 366). Без него тесты идут без выгрузки.
+- Логи ролей, трейсы упавших тестов и результаты Allure — в артефактах запуска.
+
 ## Как устроен проект
 
 ```

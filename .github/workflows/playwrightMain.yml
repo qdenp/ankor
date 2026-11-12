@@ -1,0 +1,118 @@
+# E2E-тесты Ankor на стенде + выгрузка результатов в Allure TestOps.
+# Запуск только вручную (Actions → "E2E tests" → Run workflow) или из TestOps:
+# каждый прогон создаёт данные на общем стенде, поэтому на push/PR он не запускается.
+#
+# Нужные секреты (Settings → Secrets and variables → Actions):
+#   ANKOR_OWNER_EMAIL, ANKOR_OWNER_PASSWORD, ANKOR_SYSADMIN_EMAIL, ANKOR_SYSADMIN_PASSWORD,
+#   ANKOR_COACH_EMAIL, ANKOR_COACH_PASSWORD, ANKOR_PARENT_EMAIL, ANKOR_PARENT_PASSWORD,
+#   ANKOR_ATHLETE_EMAIL, ANKOR_ATHLETE_PASSWORD — тестовые пользователи (как в .env.d333afta2q6llv);
+#   ALLURE_TOKEN — API-токен Allure TestOps. Без него тесты запускаются, но в TestOps ничего не уходит.
+name: E2E tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      roles:
+        description: 'Роли через пробел: owner sysadmin coach parent athlete'
+        default: 'owner sysadmin coach parent athlete'
+      ALLURE_JOB_RUN_ID:
+        description: ALLURE_JOB_RUN_ID service parameter (TestOps). Leave blank.
+        required: false
+      ALLURE_USERNAME:
+        description: ALLURE_USERNAME service parameter (TestOps). Leave blank.
+        required: false
+
+# Стенд и тестовые пользователи общие: два прогона одновременно выбивают друг друга (logout в 99-auth)
+concurrency:
+  group: ankor-stand
+  cancel-in-progress: false
+
+env:
+  # Тестовые пользователи: tests/config.ts читает их из окружения, файл .env в CI не нужен
+  ANKOR_OWNER_EMAIL: ${{ secrets.ANKOR_OWNER_EMAIL }}
+  ANKOR_OWNER_PASSWORD: ${{ secrets.ANKOR_OWNER_PASSWORD }}
+  ANKOR_SYSADMIN_EMAIL: ${{ secrets.ANKOR_SYSADMIN_EMAIL }}
+  ANKOR_SYSADMIN_PASSWORD: ${{ secrets.ANKOR_SYSADMIN_PASSWORD }}
+  ANKOR_COACH_EMAIL: ${{ secrets.ANKOR_COACH_EMAIL }}
+  ANKOR_COACH_PASSWORD: ${{ secrets.ANKOR_COACH_PASSWORD }}
+  ANKOR_PARENT_EMAIL: ${{ secrets.ANKOR_PARENT_EMAIL }}
+  ANKOR_PARENT_PASSWORD: ${{ secrets.ANKOR_PARENT_PASSWORD }}
+  ANKOR_ATHLETE_EMAIL: ${{ secrets.ANKOR_ATHLETE_EMAIL }}
+  ANKOR_ATHLETE_PASSWORD: ${{ secrets.ANKOR_ATHLETE_PASSWORD }}
+  # Allure TestOps
+  ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+  ALLURE_ENDPOINT: https://rallyup.testops.cloud
+  ALLURE_PROJECT_ID: 366
+  ALLURE_RESULTS: allure-results
+  ALLURE_JOB_RUN_ID: ${{ github.event.inputs.ALLURE_JOB_RUN_ID }}
+  ALLURE_LAUNCH_NAME: 'Ankor E2E #${{ github.run_number }} (${{ github.event.inputs.roles }})'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Install allurectl
+        if: env.ALLURE_TOKEN != ''
+        uses: allure-framework/setup-allurectl@v1
+
+      - name: Write run script
+        # Роли параллельно, внутри роли — строго последовательно (--workers 1), как npm run test:all.
+        # Репортеры задаются здесь: в CI конфиг пишет только HTML, а для TestOps нужен allure-playwright.
+        run: |
+          cat > run-roles.sh <<'EOF'
+          #!/usr/bin/env bash
+          set -u
+          pids=()
+          for role in $ROLES; do
+            npx playwright test --project="$role" --workers 1 --reporter=list,allure-playwright > "e2e-$role.log" 2>&1 &
+            pids+=("$!:$role")
+          done
+          status=0
+          for entry in "${pids[@]}"; do
+            pid="${entry%%:*}"; role="${entry#*:}"
+            if wait "$pid"; then echo "PASS  $role"; else echo "FAIL  $role"; status=1; fi
+            echo "----- $role -----"; tail -n 40 "e2e-$role.log"
+          done
+          exit $status
+          EOF
+          chmod +x run-roles.sh
+
+      - name: Run tests (results → Allure TestOps)
+        env:
+          ROLES: ${{ github.event.inputs.roles }}
+        run: |
+          rm -rf allure-results
+          if [ -n "$ALLURE_TOKEN" ]; then
+            allurectl watch -- ./run-roles.sh
+          else
+            echo "ALLURE_TOKEN не задан — тесты без выгрузки в TestOps"
+            ./run-roles.sh
+          fi
+
+      - name: Upload logs, traces and Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ github.run_number }}
+          path: |
+            e2e-*.log
+            test-results/
+            allure-results/
+          retention-days: 14
