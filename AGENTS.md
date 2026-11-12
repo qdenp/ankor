@@ -1,544 +1,134 @@
-# AGENTS.md — Правила написания тестов для Ankor
+# AGENTS.md — правила тестов Ankor
 
-## Запуск E2E тестов — решение для Bash tool (120 сек лимит)
+Единый источник правил. Скиллы в `.gigacode_vsc/skills/` описывают только процесс и ссылаются сюда.
+Образцы кода — настоящие файлы проекта (их проверяют `typecheck` и `lint`), а не копии в документации.
 
-Bash tool убивает процессы через 120 секунд по умолчанию. E2E тесты (~10-15 мин) не успевают.
+## 0. Запуск тестов агентом
 
-### Решение: параметр `timeout`
-
-**Параметр `timeout` в миллисекундах** — переопределяет дефолтные 120 секунд.
-
-```powershell
-# Запуск с таймаутом 30 минут (1800000 мс):
-Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force reports | Out-Null   # перенаправление `>` само папку не создаёт
-Remove-Item "reports\test-output.log" -ErrorAction SilentlyContinue
-# Оболочка агента задаёт NO_COLOR=1, Playwright даёт воркерам FORCE_COLOR — Node на каждый воркер
-# пишет в лог предупреждение о конфликте. Цветов в файле нет в любом случае.
-Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue
-npm run test:all 2>&1 > reports\test-output.log
-# timeout: 1800000
-```
-
-**Рабочие значения:**
-- `timeout: 600000` (10 мин) — для одной роли
-- `timeout: 1800000` (30 мин) — для полного прогона всех ролей
-
-**Формат прогресса:** `list` reporter из конфига показывает `ok N` (прошёл), `x N` (упал), `- N` (пропущен) для каждого теста.
-
-### Мониторинг
-
-```
-# Короткая сводка по всем ролям (обновляется после каждого теста):
-# Read tool → reports/progress.txt → строка на роль: N/M, ok/x/-, текущий тест; ниже — упавшие попытки с ошибкой
-# Первая строка RUNNING / FINISHED — идёт ли ещё прогон
-
-# Подробности — полный лог через Read tool:
-# Read tool → reports/test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
-# Формат: [N/M] — тест N из M стартовал (line), ok N / x N / - N — прошёл / упал / пропущен (list)
-# test:all: перед каждой строкой имя роли — [owner], [coach] …; одна роль в логе — поиск по [coach]
-
-# Проверка завершены ли:
-# Read tool → reports/test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
-# (test:all — такая строка для каждой из 5 ролей)
-```
-
-### Очистка мусора
-
-**Обязательно очищать ПЕРЕД запуском тестов и ПОСЛЕ генерации Allure отчёта:**
-
-```powershell
-# Перед запуском тестов:
-Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
-Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
-Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force reports | Out-Null
-npm run test:owner 2>&1 > reports\test-output.log
-
-# После генерации отчёта:
-npx allure generate --clean -o allure-report
-Compress-Archive -Path "allure-results" -DestinationPath "allure-results.zip" -Force
-Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
-Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
-```
-
-- `allure-results` — сырые результаты Playwright (накапливаются при каждом прогоне)
-- `test-results` — скриншоты, видео, трейсы (накапливаются при каждом прогоне)
-- `allure-results.zip` — архив для загрузки в TestOps (перезаписывается каждый раз)
-- **Никогда не оставлять эти папки неочищенными**
-
-### ❌ Не работает:
-- `npm run test:all` без `timeout` — убьётся через 120 сек
-- `Start-Job` — изоляция, файл не пишется
-- `Tee-Object` — блокируется
-
-### PowerShell hidden process — памятка
-
-Запуск через `Start-Process` обходит Bash tool полностью. **Не использовать без запроса пользователя.**
+Bash/PowerShell tool обрывает команду через 120 с; задавать параметр `timeout`: `600000` — одна роль, `1800000` — все роли.
 
 ```powershell
 Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force reports | Out-Null   # перенаправление `>` само папку не создаёт
-Remove-Item "reports\test-output.log" -ErrorAction SilentlyContinue
-Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue   # дочерний процесс наследует окружение
-$proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > reports\test-output.log" -WindowStyle Hidden -PassThru
-Write-Output "Started PID: $($proc.Id)"
+Remove-Item allure-results\*, test-results\* -Recurse -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force reports | Out-Null   # `>` сам папку не создаёт
+Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue  # иначе Node на каждый воркер пишет предупреждение в лог
+npm run test:all 2>&1 > reports\test-output.log         # или npm run test:<роль>
 ```
 
-## 1. Процесс автоматизации тестов через скиллы (обязателен для каждого нового сценария)
+- **Ход прогона:** `reports/progress.txt` — по роли `N/M`, `ok/x/-`, текущий тест, ниже упавшие попытки; первая строка `RUNNING` / `FINISHED`. Подробности — `reports/test-output.log` (`[N/M]` — старт теста, `ok N` / `x N` / `- N` — итог; в `test:all` строки помечены `[owner]`, `[coach]`…).
+- **Не работает:** запуск без `timeout`, `Start-Job` (файл не пишется), `Tee-Object` (блокируется). Скрытый `Start-Process powershell …` — только по просьбе пользователя.
+- После прогона чистить `allure-results/` и `test-results/` (копятся). Для выгрузки вручную: `npx allure generate --clean -o allure-report`, архив `allure-results.zip`.
 
-Для **любого нового тестового сценария** соблюдай цепочку скиллов из `.gigacode_vsc/skills/`:
+**Команды** (всегда через npm-скрипты; `npx playwright test` без `--project` смешает роли):
 
-```
-01-test-scenario-analyst.md  →  Анализ требований, проверка дублей, план шагов
-           ↓ (утверждение пользователем)
-02-test-step-planner.md      →  Детальная таблица шагов с PO методами
-           ↓ (утверждение пользователем)
-03-test-code-writer.md       →  Написание кода, запуск, рефакторинг до PASS
-           ↓ (работающий тест)
-04-test-review-and-fixes.md  →  Финальный ревью, правки, отдача результата
-           ↓ (по желанию пользователя)
-05-test-harvester.md         →  Анализ прогона и улучшение скиллов
-```
-
-### Правила процесса
-1. Кода нет, пока скилл 01 не пройден и план не утверждён пользователем (шаг 5 в 01).
-2. Цепочка 01→02→03→04 — для каждого нового сценария; каждый шаг — отдельный пункт todo list.
-3. Скилл 04 — обязательный последний шаг: без него сценарий не завершён. После 04 — обновить PLAN.md.
-4. Простой сценарий (1–3 шага, существующие PO-методы) — план 01 и таблицу 02 можно показать на утверждение одним сообщением.
-
-### Что читать и когда
-Не нужно читать все скиллы перед каждым сценарием — только то, что нужно на текущем шаге:
-
-| Когда | Читать |
+| Что | Команда |
 |---|---|
-| Старт сценария | `01`, `02`, `03` (вместе ~410 строк) |
-| Нужен номер кейса или шаги из TestOps | `testops-integration.md` |
-| Шаг 04 (ревью) | `04` + чек-листы `test-reliability.md`, `test-antipatterns.md`, `test-pom-review.md` |
-| По желанию пользователя после 04 | `05-test-harvester.md` |
+| Все роли параллельно | `npm run test:all` |
+| Одна роль | `npm run test:owner` / `sysadmin` / `coach` / `parent` / `athlete` |
+| Один тест | `npm run test:owner -- --grep "should edit parent"` (`--` обязателен) |
+| Файл(ы) | `npx playwright test tests/specs/owner/07-parents.spec.ts --project=owner --workers 1` (+ `npm run typecheck` вручную) |
+| Подготовка нового стенда | `npm run test:setup -- --grep "<тест>"` (вне `test:all` и CI) |
+| Проверки | `npm run typecheck`, `npm run lint` |
+| HTML-отчёт роли | `npx playwright show-report reports/html/owner` |
 
-### Где детали
-- Команды проверки дублей и формат плана для утверждения — в `01-test-scenario-analyst.md` (шаги 2 и 4).
-- Пошаговый чеклист старта и запреты — в `.gigacode_vsc/agent/workflow.md`.
+`--workers 1` обязателен: в конфиге `fullyParallel: true`, и logout из `99-auth` отозвал бы сессию соседнего теста. `npm run test:*` сами запускают `typecheck` (хуки `pretest:*`).
 
----
+## 1. Процесс: цепочка скиллов
 
-## 🔴 Запрет на изменение общих методов без подтверждения
+Для каждого нового сценария: **01 → 02 → 03 → 04**, каждый шаг — отдельный пункт todo list:
 
-**ОБЩИЕ (shared) файлы проекта:**
-- `tests/pages/base-page.ts` — базовый PO с общими методами (logout, openProfileMenu и т.д.)
-- `tests/fixtures.ts` — фикстуры авторизации (loginAs, logout, storageState)
-- `tests/config.ts` — конфигурация, константы, таймауты
-- Любые другие файлы, используемые **несколькими тестами или ролями**
+- [ ] 01 `01-test-scenario-analyst.md` — кейс из TestOps (MCP), проверка дублей, план
+- [ ] Утверждение плана пользователем — до этого кода нет
+- [ ] 02 `02-test-step-planner.md` — таблица шагов с методами PO (простой сценарий — утверждается вместе с планом 01)
+- [ ] 03 `03-test-code-writer.md` — код, локальный прогон до PASS
+- [ ] 04 `04-test-review-and-fixes.md` — ревью по `test-review-checklist.md`; без 04 сценарий не завершён
+- [ ] Обновить статус кейса в `PLAN.md`
 
-### Правило: не изменять общие методы без подтверждения пользователя
+`05-test-harvester.md` — по желанию пользователя после 04.
 
-- **Никаких правок в shared-файлы без явного одобрения пользователя**
-- Перед любым изменением — показать diff и объяснить, зачем это нужно
-- Если общий метод используется в нескольких тестах — правка может сломать работающие тесты
-- **Нарушение = остановка и откат изменений**
+**Что читать:** на старте — 01, 02, 03; на шаге 04 — 04 и `test-review-checklist.md`; `testops-integration.md` — когда нужен кейс из TestOps.
 
----
+## 2. Общие файлы — только с подтверждением 🔴
 
-## 2. Web-first ассерты — единственный допустимый способ
+Общие: `tests/pages/base-page.ts`, `tests/fixtures.ts`, `tests/config.ts`, `playwright.config.ts` и любой PO/helper, который используют несколько тестов или ролей. Перед правкой — показать diff, объяснить зачем, получить одобрение. Добавление нового метода тоже правка.
 
-```ts
-// ✅ ПРАВИЛЬНО — авто-ретрай, ждёт условие
-await expect(page.locator('.athlete-count')).toHaveText('12');
-await expect(page).toHaveURL(/\/organizations/);
-await expect(evaluationPage.scorecardGrid).toHaveCount(1);
+## 3. Ассерты и ожидания
 
-// ❌ НЕПРАВИЛЬНО — одна попытка
-expect(await page.locator('.badge').count()).toBe(6);
-```
+- Только web-first ассерты с авто-ретраем: `await expect(locator).toHaveText(…)`, `toHaveCount`, `toHaveURL`. Нельзя `expect(await locator.count()).toBe(…)` и другие одноразовые чтения.
+- Запрещено (ловит `npm run lint`): `waitForTimeout`, `.catch(() => …)`, локаторы `page.getByRole/locator/getByText` в спеках.
+- Нельзя `try/catch` для глушения ошибок; `try/finally` для уборки — можно.
+- Таймауты — только `TIMEOUTS.*` из `config.ts`.
+- Сообщение вторым аргументом `expect` — для неочевидных проверок.
+- **Ожидание загрузки — `await this.waitForLoading()` в PO** (спиннеры на всех страницах, кроме входа и регистрации): после любого перехода (меню, `goto`, Back) и после создания/правки/удаления (приложение возвращает на список, он грузится заново). Сохранять методом PO (`createX`, `editX`, `saveX`), а не кликом по кнопке в тесте. Образец — `tests/pages/base-page.ts` (`waitForLoading`).
+- Отрицательная проверка (`toBeHidden`) — после положительной на той же странице (заголовок, вкладка), иначе проходит до рендера.
 
-## 3. Запрещённые анти-паттерны
+## 4. Page Objects
 
-- `page.waitForTimeout(...)` — вместо этого `expect(...).toHaveCount()`, `locator.waitFor()`, `page.waitForLoadState('networkidle')`
-- `try/catch` для глушения ошибок
-- `.catch(() => {})` или `.catch(() => false)` в ассертах — пусть тест упадёт с понятной ошибкой
-- Хардкод таймаутов — только из `config.ts`
-- Логин в `beforeEach` для всех тестов — только если тесту нужен
-- Статические локаторы, созданные в методах PO, — они объявляются в конструкторе. Параметризованные (по имени, email) — методы-геттеры PO: `getRow(name)`, `getCard(name)`
-
-## 4. Page Object Discipline
-
-- В тестах **нет** `page.locator(...)` — только методы и свойства PO
-- Локаторы живут в PO один раз, дублирование запрещено
-- Предпочтительно `[data-test="..."]` или стабильные селекторы по `getByRole` / `getByPlaceholder`. CSS/XPath допустимы только когда `getByRole` невозможен: iframe без доступного имени, сторонние виджеты без семантического HTML, декоративные элементы без роли
-- Все `readonly` локаторы объявляются в конструкторе
-- Методы PO: actions (`click`, `fill`, `goto`) — не возвращают `boolean`
-- PO может **ждать** состояние через `expect` (появился диалог, загрузился список); **проверки бизнес-результата** (запись создана, статус Inactive) — только в тестах
-- **Ожидание загрузки данных — `await this.waitForLoading()`** (спиннеры загрузки есть на всех страницах, кроме входа и регистрации; без ожидания тест читает пустую таблицу):
-  - после любого перехода на страницу: меню, `goto`, ссылка Back;
-  - **после создания, редактирования или удаления записи/пользователя** — по завершении приложение возвращает на страницу с данными, и она грузится заново;
-  - сохранение делать методом PO (`createX`, `editX`, `saveX`), который сам ждёт загрузки, а не кликом по кнопке Create/Save/Submit в тесте;
-  - спиннер появляется через ~150–215 мс после клика, поэтому `waitForLoading()` сначала коротко ждёт его появления (`TIMEOUTS.spinnerAppear`), затем исчезновения — вызывать можно сразу после клика (REVIEW-PLAN 1.8)
-
-### Кнопки создания на страницах списков
-- На **пустом** списке (нет записей/пользователей) рядом с кнопкой в шапке появляется вторая такая же кнопка создания (пустое состояние) — это на всех страницах с созданием записей.
-- Поэтому локатор кнопки создания на странице списка всегда с `.first()`: `getByRole('button', { name: 'Create evaluation' }).first()`. Без него на пустом списке тест падает со strict mode violation (обе кнопки открывают одну форму).
-
-### Кнопки в разных режимах
-- Create mode → кнопка "Create"
-- Edit mode → кнопка "Save"
-- Всегда объявлять отдельные локаторы: `createButton` и `saveButton`
-- Не использовать один локатор для разных режимов
-- Текст кнопок проверять на реальном UI, не угадывать
-
-### Шаблон Page Object (см. `pages/base-page.ts`, `pages/athlete-page.ts`)
-
-```ts
-export class AthletePage extends BasePage {
-  readonly heading = page.getByRole('heading', { name: 'Athletes', level: 3 });
-  readonly newAthleteButton = page.getByRole('button', { name: /^New\s+\w+$/i }).first();
-  readonly searchInput = page.getByRole('textbox', { name: /search.*name|search.*email/i });
-  readonly createButton = page.getByRole('button', { name: 'Create' });
-  
-  // Form fields
-  readonly firstNameInput = page.getByRole('textbox', { name: 'First name', exact: true });
-  // ...
-  
-  // Table rows
-  readonly athleteRows = page.getByRole('row');
-
-  constructor(page: Page) {
-    super(page);
-    // все локаторы здесь
-  }
-
-  async goto(): Promise<void> { ... }
-  async createAthlete(params: {...}): Promise<void> { ... }
-  
-  // Строка таблицы — только getByRole('row'). Строка в name — подстрока без учёта регистра.
-  // Не строить new RegExp из данных: "+" в email — квантификатор
-  getAthleteRow(email: string): Locator {
-    return this.page.getByRole('row', { name: email }).first();
-  }
-}
-```
-
-### Поиск строки таблицы или карточки списка
-
-```ts
-// Таблица (grid): только строка
-getRow(name: string): Locator {
-  return this.page.getByRole('row', { name }).first();
-}
-
-// Список карточками (дриллы, планы): только карточка
-getCard(name: string): Locator {
-  return this.page.getByRole('article', { name, exact: true }).first();
-}
-```
-
-- **Без запасной ветки `getByText(name)`**: она находит имя во всплывающем уведомлении («… created»), заголовке страницы или диалоге — ассерт проходит, даже если записи в списке нет (REVIEW-PLAN 2.13).
-- Сначала посмотреть, чем список является на самом деле (таблица `row` или карточки `article`): у дриллов карточки, и `getRow` по `row` там не находил ничего — работала только ветка `getByText`.
+- В спеках только методы и свойства PO. Каждый локатор живёт в PO один раз.
+- Локаторы: `getByRole` / `getByLabel` / `getByPlaceholder`; CSS/XPath — только если роли нет (iframe без имени, сторонние виджеты).
+- Статические локаторы — `readonly`-поля, присваиваются в конструкторе. Параметризованные (по имени, email) — методы-геттеры: `getRow(name)`, `getCard(name)`. Образец — `tests/pages/manage-users-page.ts`.
+- **Строка таблицы** — только среди строк: `getByRole('row', { name })` или `rows.filter({ hasText })`; **карточка списка** (дриллы, планы) — `getByRole('article', { name, exact: true })` (`drill-page.ts` → `getCard`). Без запасной ветки `.or(getByText(name))`: она находит имя в уведомлении или заголовке, и ассерт проходит без записи. Сначала посмотреть, что список на самом деле: таблица или карточки.
+- Строку не строить через `new RegExp` из данных (`+` в email — квантификатор); `name` — подстрока без учёта регистра.
+- PO может **ждать** состояние через `expect` (открылся диалог, загрузился список); **проверки бизнес-результата** (запись создана, статус Inactive) — только в тестах. Методы-действия не возвращают `boolean`.
+- Кнопка создания на странице списка — с `.first()`: на пустом списке появляется вторая такая же.
+- Режимы формы: `createButton` ("Create") и `saveButton` ("Save") — отдельные локаторы; текст кнопок брать из реального UI.
 
 ## 5. Данные и конфигурация
 
-- Все credentials — из `.env` (не коммитить!)
-- Числа (кол-во атлетов и т.д.) — именованные константы из `config.ts`
+- Credentials — только из `.env.d333afta2q6llv` (не коммитить); в CI — GitHub Secrets. Пароль у всех тестовых аккаунтов один, в код не писать.
+- Константы (имена организаций, планов, числа) — `config.ts`.
 
-## 6. Названия тестов
+## 6. Названия тестов и кейсы TestOps
 
-- Описывают **поведение и ожидаемый результат**
-- Номер только в префиксе имени файла `NN-topic.spec.ts`
-- В заголовках `test(...)` номера **не** используются — ни тикетов, ни файлов
-
-```ts
-// ✅ ПРАВИЛЬНО
-test('should display error with invalid credentials', () => { ... });
-
-// ❌ НЕПРАВИЛЬНО
-test('01 - should display error with invalid credentials', () => { ... });
-test('91859 should create plan', () => { ... });
-test('13 should create plan', () => { ... });
-```
-
-### Привязка к тест-кейсу TestOps — `allure.allureId`
-
-Первая строка теста — номер кейса (`test_case_id` из TestOps, не allure_id 91XXX). По нему TestOps записывает результат прогона в кейс.
+- Название `test(...)` описывает поведение и результат, без номеров (номер — только в имени файла `NN-topic.spec.ts`).
+- Первая строка теста — номер кейса TestOps (`test_case_id`, не allure_id 91XXX):
 
 ```ts
 import * as allure from 'allure-js-commons';
 
 test('should create plan and see in My Plans', async ({ page }) => {
   await allure.allureId('72600');
-  ...
+  // кейс покрыт не полностью — пропуск ПОСЛЕ allureId, иначе метка не запишется:
+  // test.skip(true, 'TODO(72600): чего не хватает'); и комментарий TODO(72600) над тестом
 });
 ```
 
-- Один тест — один кейс: у результата только один ID. Тест на несколько кейсов — разделить.
-- `@TC-…` в названии TestOps **не** распознаёт — не использовать.
-- Тест без номера при выгрузке создаёт в TestOps новый автоматический кейс — номер ставить всем тестам, у которых есть кейс; тесты без кейса не держать.
-- Тест покрывает кейс не полностью — номер ставить, тест пропускать: `test.skip(true, 'TODO(<id>): …')` **после** `allureId` (иначе метка не запишется), над тестом — комментарий `TODO(<id>)`, чего не хватает.
+- Один тест — один кейс. `@TC-…` в названии TestOps не распознаёт. Тест без номера при выгрузке создаёт в TestOps новый кейс — тестов без кейса не держать.
 
-### Правила нумерации файлов
+**Нумерация файлов = пункты меню** (одинаковая у всех ролей; роль содержит только доступные ей файлы):
+01 signin · 02 homepage · 03 signup (join-код) · 04 organization · 05 athletes · 06 coaches · 07 parents · 08 teams · 09 skills · 10 drills · 11 scorecard-templates · 12 evaluations · 13 plans · 14 easy-join · 15 manage-users · 16 notifications · 90 permissions (права роли) · 99 auth (logout, только owner, всегда последний).
+Разные сущности — в разных файлах.
 
-Номера файлов соответствуют **пунктам бокового меню** приложения. Это обеспечивает синхронизацию между ролями.
+## 7. Роли и параллельность
 
-**Пункты меню (owner — полный набор):**
+- `tests/specs/<роль>/` — owner, sysadmin, coach, parent, athlete; проект Playwright = папка. Тест лежит в папке той роли, под которой логинится (иначе два проекта пишут в один `tests/.auth/<роль>.json`).
+- Роли идут параллельно, внутри роли — последовательно: `test.describe.configure({ mode: 'serial' })`.
+- `retries: 2` в конфиге; свои ретраи не добавлять. Группа с неудаляемыми действиями (Submit оценки) — `retries: 0`: ретрай serial-группы повторяет её целиком.
 
-| № | Пункт меню | Файл |
-|---|------------|------|
-| 01 | Авторизация (страница входа) | `01-signin.spec.ts` |
-| 02 | Home (главная страница роли) | `02-homepage.spec.ts` |
-| 03 | Регистрация (join-код) | `03-signup.spec.ts` |
-| 04 | Organizations | `04-organization.spec.ts` |
-| 05 | Athletes | `05-athletes.spec.ts` |
-| 06 | Coaches | `06-coaches.spec.ts` |
-| 07 | Parents | `07-parents.spec.ts` |
-| 08 | Teams | `08-teams.spec.ts` |
-| 09 | Skills | `09-skills.spec.ts` |
-| 10 | Drills | `10-drills.spec.ts` |
-| 11 | Scorecard Templates | `11-scorecard-templates.spec.ts` |
-| 12 | Evaluations | `12-evaluations.spec.ts` |
-| 13 | Practice Plans | `13-plans.spec.ts` |
-| 14 | Easy Join | `14-easy-join.spec.ts` |
-| 15 | Manage Users | `15-manage-users.spec.ts` |
-| 16 | Notifications | `16-notifications.spec.ts` |
-| 90 | Права роли (сквозная проверка разделов) | `90-permissions.spec.ts` |
-| 99 | Выход (logout) — только owner | `99-auth.spec.ts` |
+## 8. Авторизация
 
-**Правила:**
-- ✅ `99-auth` — всегда последний файл owner: logout отзывает сессию, и всё, что идёт после него, логинится заново (§8). Кнопка выхода одна для всех ролей, поэтому logout проверяется только у owner; вход отдельно не проверяется — его проходит каждый тест через `loginAs`, а вход через форму — `01-signin`
-- ✅ Подготовка данных для нового стенда — `tests/setup/create-users.spec.ts`, отдельный проект `setup` (`npm run test:setup`), в `test:all` и CI не входит
-- ✅ Нумерация одинаковая для всех ролей
-- ✅ Каждая роль содержит только те файлы, которые ей доступны
-- ✅ Файлы с одной ролью в одной папке идут последовательно (`serial`)
-- ❌ Не объединять разные сущности в одном файле (organization ≠ teams ≠ plans)
+- `loginAs(role)` и `logout()` из `tests/fixtures.ts`. Кэш сессии — `tests/.auth/<роль>.json`; отозванную сессию `loginAs` замечает и входит через форму заново.
+- Вход через форму (`signInPage.login`) — в `01-signin`, `tests/setup` и для **другого пользователя в отдельном контексте** `browser.newContext({ baseURL })` (образец — `owner/07-parents.spec.ts`), а не через logout текущей роли.
+- Logout отзывает сессию на сервере — тест logout всегда последний в роли.
+- Тесты входа (`01-signin`) не вызывают `loginAs`: их браузер чистый.
 
-## 7. Параллельность и последовательность по ролям
+## 9. Тестовые данные на стенде
 
-### Структура по ролям
+- **Удаляются в интерфейсе только Teams и черновики оценок (In Progress)** (проверено 2026-11-12). Drills, plans, skills, отчёты оценок — не удаляются; шаблоны оценок и пользователи — только деактивируются (пользователи — через Manage Users, под owner).
+- Запись создаёт **только тест, который проверяет само создание**; view/edit/права/валидация берут её из хранилища `tests/helpers/test-data-store.ts` (`rememberEntity` / `recallEntity` / `forgetEntity`, файлы `tests/.data/<роль>/<сущность>.json`). Edit сохраняет новое имя.
+- Что можно удалить (команды, черновики) — тест удаляет сам (`finally` / `afterEach`).
+- Email создаваемых пользователей — `dtimokhin+temp-<роль>-${Date.now()}@aexsoft.com`; созданного тест деактивирует в `afterAll` (`tests/helpers/deactivate-user.ts`). Накопленных — служебный `tests/setup/deactivate-test-users.spec.ts` (список постоянных пользователей `PROTECTED_USERS` там же).
+- Отчёт оценки неудаляем: Submit — только где нужен отчёт (сейчас 71562 и 71563); новые Submit — с согласия пользователя.
+- Основные пользователи ролей (`.env`) и «Athlete Last» (`EVALUATED_ATHLETE` — его оценивают тесты 12-evaluations) не менять. Организации: `aiorg01` (owner) правит только `owner/04`, `aiorg01sysedit` — только `sysadmin/04`; имя возвращать к константе `ORGANIZATIONS`, а не к прочитанному в начале.
+- Тесты разных ролей не меняют одну запись. Правки инфраструктуры проверять на спеках, которые ничего не создают (`*-homepage`, `*-permissions`).
 
-Тесты разбиты по подпапкам — по одной на роль:
+## 10. Предметная область
 
-```
-tests/specs/
-├── owner/     ← тесты Owner/Admin
-├── sysadmin/  ← тесты System Administrator
-├── coach/     ← тесты Coach
-├── parent/    ← тесты Parent
-└── athlete/   ← тесты Athlete
-```
+- Роли: SysAdmin — всё, все организации; Owner/Admin — своя организация, пользователи, команды; Coach — атлеты, родители, команды, оценки, планы; Athlete — свои оценки и планы; Parent — атлеты родителя, только просмотр.
+- Оценка 1–5; ниже 3 — раскрываются подскиллы; ниже 3 нельзя больше чем для 5 категорий.
+- Prebuilt-план создаёт только SysAdmin; вкладку Prebuilt видят все роли, кроме Parent (у атлета — с 2026-11). Org Plans — Owner/Admin/SysAdmin.
+- Письма не проверяем — только in-app уведомления.
 
-Тест лежит в папке той роли, под которой логинится. Проект Playwright определяется папкой: `loginAs('sysadmin')` в `owner/` выполнится в проекте owner, параллельно с проектом sysadmin, и оба будут писать в один `tests/.auth/sysadmin.json`.
+## 11. Проверки перед коммитом и в PR
 
-### Запуск тестов
-
-**Каждая роль запускается на отдельном воркере — не пересекаются.**
-
-```bash
-# Запустить все 5 ролей параллельно (каждая на своём воркере)
-npm run test:all
-
-# Запустить только одну роль
-npm run test:owner
-npm run test:sysadmin
-npm run test:coach
-npm run test:parent
-npm run test:athlete
-
-# Один тест
-npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner --workers 1
-```
-
-**Важно:** внутри каждой роли тесты идут последовательно (через `serial`), между ролями — параллельно.
-
-```ts
-// ✅ ПРАВИЛЬНО — serial внутри роли
-test.describe('Owner Plan Tests', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  test('should create plan and see in My Plans', async ({ page }) => { ... });
-  test('should see all plan tabs as owner', async ({ page }) => { ... });
-});
-```
-
-### Ретраи
-
-- `retries: 2` в `playwright.config.ts` — автоматически ретраит упавшие тесты (сетевые ошибки, тайминги)
-- Не нужно добавлять retry вручную
-
-## 8. Авторизация через фикстуры
-
-- Всегда используй `loginAs(role)` fixture из `fixtures.ts`
-- Логаут — `logout()` fixture (через `BasePage.logout()`)
-- Ручной `signInPage.login()` только в `01-signin` (проверка формы входа) и `tests/setup/create-users.spec.ts` (подготовка данных)
-
-### ⚠️ Logout в конце serial-последовательности
-
-- Supabase отзывает сессию при logout — токен становится невалидным на сервере
-- Проверять вход другого пользователя (например, только что созданного) — в отдельном контексте `browser.newContext({ baseURL })`, а не через logout текущей роли (пример — `owner/07-parents.spec.ts`)
-- Параллельные тесты с тем же email могут потерять сессию
-- **Правило:** тесты logout должны идти последними в serial-последовательности
-
-```ts
-// ✅ ПРАВИЛЬНО — logout в конце
-test.describe('Owner Auth Tests', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  test('should login as owner and see dashboard', async ({ loginAs }) => { ... });
-  // logout — последний тест
-  test('should logout as owner', async ({ loginAs, logout }) => { ... });
-});
-```
-
-```ts
-// ❌ НЕПРАВИЛЬНО — logout до других тестов
-test.describe('Owner Auth Tests', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  test('should logout as owner', async ({ loginAs, logout }) => { ... });
-  test('should login as owner and see dashboard', async ({ loginAs }) => { ... }); // упадёт
-});
-```
-
-## 9. Инфраструктура тестов — кэш авторизации (localStorage)
-
-### tests/fixtures.ts — per-role storageState кэш
-
-- Кэш: `tests/.auth/{role}.json` (каждая роль — свой файл: owner, sysadmin, coach, parent, athlete)
-- `isTokenValid(storagePath)` — проверяет `exp` access-токена в storageState (токен не истёк). Access-токен живёт час, после этого — UI-логин.
-- `restoreAuthFromCache(page, storagePath)` — кладёт cookies + localStorage в контекст `page` и открывает `/` через `goto('/')`. Именно `goto`, а не `reload`: к этому моменту приложение уже увело пустой браузер на `/sign-in`, и `reload` рендерит страницу входа, которая мелькает и сбивает проверку.
-- `loginAs(role)` — если кэш валиден → восстанавливает сессию и ждёт ссылку **Home** в меню (`BasePage.navHome`) или заголовок страницы входа. Приложению нужно ~3–4 с, чтобы решить судьбу сессии; отозванный на сервере токен уводит на `/sign-in` → UI-логин. При UI-логине кэш пишется только после появления Home.
-- `logout()` — удаляет **только файл кэша той роли, которая была залогинена** (отслеживается через модульную переменную `currentRole`). Кэши других ролей не трогаются — они живут на своих воркерах.
-- `currentRole` — устанавливается в `loginAs(role)`, сбрасывается в `logout()`. Нужно для корректной инвалидации кэша только своей роли.
-- Тесты sign-in/sign-up не вызывают `loginAs` — их браузер чистый (Playwright создаёт новый контекст на каждый тест, storageState в конфиге не задан); `test.use({ storageState: undefined })` для этого не нужен.
-
-### tests/pages/base-page.ts — селекторы профиля и логаута
-
-- `profileButton` — комбинированный локатор через `.or()`:
-  - `getByRole('button', { name: /profile|user|account|username/i })`
-  - `[role="button"]:has(svg)`, `[role="button"]:has(img)`, `[role="button"]:has(.MuiAvatar-root)`
-  - `.first()`
-- `logoutMenuItem` — `getByRole('menuitem', { name: /log out/i })` (совпадает с `<h6>Log Out</h6>` внутри `<li role="menuitem">`)
-- `openProfileMenu()` — ждёт `profileButton`visible, кликает, затем ждёт `logoutMenuItem`visible. Убран сломанный fallback, где `click()` вызывался без проверки `isVisible()`.
-
-## 10. Создание тестовых данных
-
-### Ограничение стенда
-- **Удалять в интерфейсе можно только Teams и черновики оценок (In Progress)** — проверено 2026-11-12. Нет удаления у drills, plans, skills, отчётов оценок; шаблоны оценок — только деактивировать; пользователей любых ролей — только деактивировать через Manage Users (после этого они пропадают из своих списков).
-- Поэтому новые записи создаёт **только тест, который проверяет само создание**. Остальные тесты (view, edit, invite, права, валидация) переиспользуют созданную им сущность (REVIEW-PLAN 3.12).
-- Переиспользование между прогонами — `tests/helpers/test-data-store.ts`: тест создания сохраняет ключ (`rememberEntity('owner', 'coach', …)`), зависимые тесты читают (`recallEntity`) — и сущность прошлого прогона, поэтому работают по отдельности (`--grep`). Тест, меняющий имя (edit), сохраняет новое. Файлы — `tests/.data/<роль>/<сущность>.json` (в .gitignore).
-- Созданное, что удалить можно (команды, черновики оценок), тест удаляет сам.
-- **Email пользователей, которых создают тесты, — с маркером `+temp-`:** `dtimokhin+temp-<роль>-${Date.now()}@aexsoft.com` (parent, coach, athlete…). По нему служебная чистка находит их одним шаблоном; постоянные пользователи (`.env`, `EVALUATED_ATHLETE`, ручные) этот маркер не используют.
-- Созданных пользователей тест деактивирует сам в `afterAll` (`tests/helpers/deactivate-user.ts`, под owner). Накопленных раньше — служебный тест `npm run test:setup -- --grep "deactivate users created by tests"` (только owner — своя организация, только email-шаблоны тестов).
-- Проверять правки инфраструктуры — на спеках, которые ничего не создают (`*-homepage`, `*-permissions`).
-
-### Основные тестовые пользователи
-- Пользователи ролей из `.env` уже созданы на стенде; `tests/setup/create-users.spec.ts` (`npm run test:setup`) нужен только для разворачивания нового стенда
-- Тесты не должны менять этих пользователей (имя, email, связи) — на них держатся тесты ролей
-- «Athlete Last» (Team01, `ANKOR_EVAL_ATHLETE_*`, `EVALUATED_ATHLETE` в `config.ts`) — атлет, которого оценивают тесты 12-evaluations; не роль для `loginAs`, вход только в отдельном контексте (71563). Пароль у всех тестовых аккаунтов один
-- Каждый email может быть использован только один раз — повторная попытка создаст ошибку
-- Порядок создания: Athlete → Coach → Parent (так как Parent требует Athlete)
-- Для создания пользователей используем:
-  - Athlete: First name, Last name, Email, Password, Confirm password, Graduation year (2010), Position, Team, Gender
-  - Coach: First name, Last name, Email, Password, Confirm password
-  - Parent: First name, Last name, Email, Password, Confirm password, Relationship, Athlete
-
-### Организации, которые меняют тесты (`ORGANIZATIONS` в `config.ts`)
-- `aiorg01` — организация owner, имя меняет `owner/04-organization`; `aiorg01sysedit` — отдельная, для `sysadmin/04-organization` (создана `tests/setup`, пароль админа — `ANKOR_SYSEDIT_ORG_PASSWORD` в `.env`)
-- Тесты разных ролей не должны менять одну и ту же запись: роли идут параллельно и сбивают друг друга
-- После правки тест возвращает имя к **константе**, а не к прочитанному в начале значению: упавший до возврата прогон иначе оставляет временное имя «исходным» для всех следующих
-
-## 11. Роли и права доступа
-
-5 ролей с разными правами:
-- **System Administrator** — полный доступ ко всему
-- **Owner/Admin** — управление организацией, пользователями, командами
-- **Coach** — управление атлетами, планами тренировок
-- **Athlete** — просмотр своих оценок, планов
-- **Parent** — просмотр атлетов, связанных с родителем
-
-## 12. Email-уведомления
-
-- Тесты, проверяющие письма, пока пропускаем
-- Проверяем только in-app уведомления
-
-## 13. Особенности валидации
-
-- Оценки 1-5: нельзя поставить < 3 более чем для 5 категорий
-- Deep links из email — проверять редирект и права доступа (когда реализуем)
-- Prebuilt plans — доступны только для SysAdmin
-- Org Plans — видны только Owner/Admin/SysAdmin
-
-## 14. Структура тестов
-
-```
-tests/
-├── config.ts           # URL, константы, credentials (из .env.d333afta2q6llv)
-├── fixtures.ts         # Фикстуры: loginAs(role), logout(), кэш сессий
-├── .auth/              # Кэш сессий по ролям (gitignored)
-├── pages/              # Page Objects (base-page.ts + по одному на раздел)
-│   ├── base-page.ts
-│   ├── sign-in-page.ts
-│   ├── athlete-page.ts
-│   └── ...
-├── setup/              # Подготовка данных для нового стенда (проект setup, npm run test:setup)
-└── specs/              # Тесты по папкам ролей
-    ├── owner/          # 01-signin … 13-plans, 90-permissions, 99-auth
-    ├── sysadmin/       # 04-organization, 13-plans, 90-permissions
-    ├── coach/
-    ├── parent/
-    └── athlete/
-```
-
-## 15. Команды для запуска
-
-### ВАЖНО: всегда используй npm скрипты для запуска тестов
-
-```bash
-# Все тесты (5 ролей параллельно, каждая на своём воркере)
-npm run test:all
-
-# Одна роль
-npm run test:owner
-npm run test:sysadmin
-npm run test:coach
-npm run test:parent
-npm run test:athlete
-
-# Один тест по названию (-- обязателен, иначе npm заберёт --grep себе)
-npm run test:owner -- --grep "should edit parent"
-
-# Один или несколько файлов — обязательно --project и --workers 1
-# (в конфиге fullyParallel: true; без --workers 1 тесты пойдут параллельно,
-#  и logout из 99-auth отзовёт сессию посреди соседнего теста)
-npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner --workers 1
-
-# Проверка типов
-npm run typecheck
-
-# HTML-отчёт роли (у каждой роли своя папка; артефакты — test-results/<роль>)
-npx playwright show-report reports/html/owner
-```
-
-**❌ НЕ используй** `npx playwright test` без аргументов — он запустит тесты без учёта ролей и они пересекутся!
-
-### Проверка типов перед прогоном — автоматически
-- `npm run test:<роль>` и `npm run test:all` сначала выполняют `npm run typecheck` (npm-хуки `pretest:*`, 3–6 с). Есть ошибки типов — тесты не стартуют, в выводе файл и строка ошибки.
-- `test:all` проверяет типы один раз и вызывает роли с `--ignore-scripts` (отключает только pre-хуки).
-- `npx playwright test …` идёт в обход хуков — перед ним запускать `npm run typecheck` вручную.
-
-## 16. Pre-commit / CI проверки
-
-Автоматические проверки перед коммитом:
-
-```bash
-# Типы без ошибок
-npm run typecheck
-
-# Тесты находятся (нет ошибок загрузки)
-# ⚠️ allure-playwright из локального конфига пишет на --list «skipped» на каждый тест — потом очистить allure-results
-npx playwright test --list
-
-# Запрещённые шаблоны: локаторы в спеках, waitForTimeout, .catch(() =>) — scripts/lint-tests.mjs
-npm run lint
-```
-
-`npm run lint` — скрипт на Node: работает и на Windows (npm запускает скрипты через `cmd.exe`, где нет `grep`).
-
-**На GitHub те же проверки идут автоматически на каждый PR** — `.github/workflows/pr-checks.yml` (типы, `--list`, `npm run lint`; около минуты, без браузера и стенда). Красный PR не мержить. Это не ревью: логику тестов проверка не оценивает.
+`npm run typecheck` и `npm run lint` (Node-скрипт `scripts/lint-tests.mjs`, работает на Windows). То же автоматически на каждый PR (`.github/workflows/pr-checks.yml`, плюс `--list`); красный PR не мержить. `npx playwright test --list` с локальным конфигом пишет «skipped» в `allure-results` — после него папку очистить и не выгружать.

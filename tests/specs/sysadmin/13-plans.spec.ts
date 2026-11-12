@@ -64,7 +64,7 @@ test.describe('Sysadmin Plan Tests', () => {
   /**
    * TC-71716 Invite multiple user to plan by coach — тест открывал только диалог приглашения.
    * TODO(71716): кейс — роль coach (перенести в coach/13-plans, на план из 71641), выбрать сразу 5–10
-   * пользователей, Send invites → уведомление «Invites saved. Emails sent: N»; письма не проверяем (AGENTS.md §12).
+   * пользователей, Send invites → уведомление «Invites saved. Emails sent: N»; письма не проверяем (AGENTS.md §10).
    * Реальные приглашения уходят пользователям стенда — нужно решение, кого приглашать.
    */
   test('should invite multiple users to plan', async () => {

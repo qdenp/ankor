@@ -1,4 +1,4 @@
-# Быстрые проверки каждого PR: типы, загрузка спеков, запрещённые шаблоны (AGENTS.md §16).
+# Быстрые проверки каждого PR: типы, загрузка спеков, запрещённые шаблоны (AGENTS.md §11).
 # Браузер не запускается, стенд не трогается, секреты не нужны — около минуты.
 # Это не ревью: ловит формальные нарушения, а не ошибки логики тестов.
 name: PR checks
@@ -45,7 +45,7 @@ jobs:
         run: npm run typecheck
 
       - name: All specs load
-        # --reporter=list: без allure-playwright, иначе --list пишет «skipped» на каждый тест (AGENTS.md §16)
+        # --reporter=list: без allure-playwright, иначе --list пишет «skipped» на каждый тест (AGENTS.md §11)
         run: npx playwright test --list --reporter=list > /dev/null
 
       - name: Forbidden patterns (locators in specs, waitForTimeout, .catch(() =>))
