@@ -169,12 +169,9 @@ export class DrillPage extends BasePage {
     await this.waitForLoading();
   }
 
-  /** Получить локатор строки дрила в таблице */
-  getRow(drillName: string): Locator {
-    const byRole = this.page.getByRole('row', { name: drillName });
-    const byCell = this.page.locator('tr', { hasText: drillName }).first();
-    const byText = this.page.getByText(drillName, { exact: false }).first();
-    return byRole.or(byCell).or(byText).first();
+  /** Карточка дрилла в списке. Список — карточки (article), не таблица; getByText находил и имя в уведомлении */
+  getCard(drillName: string): Locator {
+    return this.page.getByRole('article', { name: drillName, exact: true }).first();
   }
 
   /** Вернуться в список дриллов */

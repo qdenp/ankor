@@ -214,31 +214,30 @@ export class AthletePage extends BasePage {
   async goto(): Promise<void> { ... }
   async createAthlete(params: {...}): Promise<void> { ... }
   
-  // Robust row lookup — multiple strategies
-  // Строка в name — подстрока без учёта регистра. Не строить new RegExp из данных: "+" в email — квантификатор
+  // Строка таблицы — только getByRole('row'). Строка в name — подстрока без учёта регистра.
+  // Не строить new RegExp из данных: "+" в email — квантификатор
   getAthleteRow(email: string): Locator {
-    const byRole = this.page.getByRole('row', { name: email });
-    const byCell = this.page.locator('tr', { hasText: email }).first();
-    const byText = this.page.getByText(email, { exact: false }).first();
-    return byRole.or(byCell).or(byText).first();
+    return this.page.getByRole('row', { name: email }).first();
   }
 }
 ```
 
-### Поиск строк в таблицах — robust pattern
+### Поиск строки таблицы или карточки списка
 
 ```ts
-// В PO конструкторе:
-readonly tableRows = page.getByRole('row');
-
-// Метод:
+// Таблица (grid): только строка
 getRow(name: string): Locator {
-  const byRole = this.page.getByRole('row', { name });
-  const byCell = this.page.locator('tr', { hasText: name }).first();
-  const byText = this.page.getByText(name, { exact: false }).first();
-  return byRole.or(byCell).or(byText).first();
+  return this.page.getByRole('row', { name }).first();
+}
+
+// Список карточками (дриллы, планы): только карточка
+getCard(name: string): Locator {
+  return this.page.getByRole('article', { name, exact: true }).first();
 }
 ```
+
+- **Без запасной ветки `getByText(name)`**: она находит имя во всплывающем уведомлении («… created»), заголовке страницы или диалоге — ассерт проходит, даже если записи в списке нет (REVIEW-PLAN 2.13).
+- Сначала посмотреть, чем список является на самом деле (таблица `row` или карточки `article`): у дриллов карточки, и `getRow` по `row` там не находил ничего — работала только ветка `getByText`.
 
 ## 5. Данные и конфигурация
 

@@ -373,21 +373,6 @@ export class EvaluationPage extends BasePage {
     await this.waitForLoading();
   }
 
-  /** Получить локатор строки оценки в таблице.
-   * Ищет по имени шаблона или имени команды (имя скилла не отображается в таблице).
-   */
-  getRow(templateOrTeam: string): Locator {
-    const byRole = this.page.getByRole('row', { name: templateOrTeam });
-    const byCell = this.page.locator('tr', { hasText: templateOrTeam }).first();
-    const byText = this.page.getByText(templateOrTeam, { exact: false }).first();
-    return byRole.or(byCell).or(byText).first();
-  }
-
-  /** Получить кнопку Edit в строке таблицы */
-  getEditButton(name: string): Locator {
-    return this.getRow(name).getByRole('button', { name: 'Edit' });
-  }
-
   /**
    * Сколько оценок в списке (данные уже загружены).
    * Берётся из подписи "1-10 of N evaluations"; при ≤10 записях подписи нет — тогда считаем строки данных.
