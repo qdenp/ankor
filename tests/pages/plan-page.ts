@@ -48,7 +48,7 @@ export class PlanPage extends BasePage {
   // Plan detail actions (after View)
   readonly inviteUsersButton: Locator;
   readonly inviteDialogHeading: Locator;
-  readonly planDetailEditLink: Locator;
+  readonly planDetailEditButton: Locator;
 
   // Toast / success notification
   readonly toast: Locator;
@@ -95,7 +95,7 @@ export class PlanPage extends BasePage {
     // Plan detail actions (after clicking View)
     this.inviteUsersButton = page.getByRole('button', { name: 'Invite users' }).first();
     this.inviteDialogHeading = page.getByRole('heading', { name: /Invite/i });
-    this.planDetailEditLink = page.getByRole('link', { name: 'Edit' }).first();
+    this.planDetailEditButton = page.getByRole('button', { name: 'Edit', exact: true });
 
     // Drill edit dialog
     this.drillSaveButton = page.getByRole('button', { name: /save|create/i }).first();
@@ -214,7 +214,7 @@ export class PlanPage extends BasePage {
 
   /** Кликнуть Edit в деталях плана */
   async editPlanFromDetail(): Promise<void> {
-    await this.planDetailEditLink.click();
+    await this.planDetailEditButton.click();
     await this.waitForLoading();
   }
 
