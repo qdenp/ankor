@@ -117,14 +117,14 @@
 - Прочитать `test('title', ...)` — что обещает заголовок?
 - Пройти по всем `expect(...)` в тесте — проверяют ли они то, что обещает title?
 - **Нарушение:** title говорит "generate report", но ассерт только "evaluation in table"
-- **Записать в chat report:** `MEDIUM: TC-91911 title "generate report" — no assertion checks report exists`
+- **Записать в chat report:** `MEDIUM: 71562 title "generate report" — no assertion checks report exists`
 
 #### 3.2: TC steps coverage
 - Для каждого теста с `allure.allureId('XXXXX')` проверить:
   - Все шаги `[step N]` из CSV покрыты кодом?
   - Все ассерты `[step N.x] exp` из CSV проверены?
   - Нет ли "мёртвых" шагов (код есть, но без `expect`)?
-- **Записать в chat report:** `HIGH: TC-91874 [step 6] not verified — Edit clicked but result not asserted`
+- **Записать в chat report:** `HIGH: 71991 [step 6] not verified — Edit clicked but result not asserted`
 
 #### 3.3: No false positives
 - Тест проходит, но **не проверяет ключевое поведение**
