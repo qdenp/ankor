@@ -4,7 +4,8 @@ import { ParentPage } from '../../pages/parent-page';
 import { SignInPage } from '../../pages/sign-in-page';
 import { HomePage } from '../../pages/home-page';
 import { CREDENTIALS, TIMEOUTS } from '../../config';
-import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
+import { forgetEntity, recallEntity, rememberEntity } from '../../helpers/test-data-store';
+import { deactivateCreatedUser } from '../../helpers/deactivate-user';
 
 /**
  * 07 — Parents CRUD для Owner role.
@@ -19,6 +20,14 @@ test.describe('Owner Parent Tests', () => {
    */
   // Родителя создаёт только 71252; edit берёт его из хранилища — и из прошлого прогона (REVIEW-PLAN 3.12)
   type Parent = { firstName: string; email: string };
+  // Родитель, созданный ЭТИМ прогоном: после edit деактивируется, чтобы тестовые родители не копились (3.11)
+  let createdThisRunEmail: string | undefined;
+
+  test.afterAll(async ({ browser }, testInfo) => {
+    if (!createdThisRunEmail) return;
+    await deactivateCreatedUser(browser, testInfo.project.use.baseURL, createdThisRunEmail);
+    forgetEntity('owner', 'parent');
+  });
 
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
@@ -61,6 +70,7 @@ test.describe('Owner Parent Tests', () => {
     await parentPage.search(parent.firstName);
     await expect(parentPage.getParentRow(parent.firstName)).toBeVisible({ timeout: TIMEOUTS.long });
     rememberEntity('owner', 'parent', { firstName: parent.firstName, email: parent.email });
+    createdThisRunEmail = parent.email;
 
     // --- Шаг 6-8: логин как созданный parent ---
     // В отдельном контексте браузера: сессия owner в основном контексте не трогается,
