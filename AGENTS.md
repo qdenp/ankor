@@ -27,10 +27,12 @@ npm run test:all 2>&1 > test-output.log
 ```
 # Чтение файла через Read tool:
 # Read tool → test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
-# Формат: ok — прошёл, x — упал, - — пропущен
+# Формат: [N/M] — тест N из M стартовал (line), ok N / x N / - N — прошёл / упал / пропущен (list)
+# test:all: перед каждой строкой имя роли — [owner], [coach] …; одна роль в логе — поиск по [coach]
 
 # Проверка завершены ли:
 # Read tool → test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
+# (test:all — такая строка для каждой из 5 ролей)
 ```
 
 ### Очистка мусора
@@ -493,8 +495,8 @@ npx playwright test tests/specs/owner/01-signin.spec.ts --project=owner --worker
 # Проверка типов
 npm run typecheck
 
-# Show report
-npx playwright show-report
+# HTML-отчёт роли (у каждой роли своя папка; артефакты — test-results/<роль>)
+npx playwright show-report reports/html/owner
 ```
 
 **❌ НЕ используй** `npx playwright test` без аргументов — он запустит тесты без учёта ролей и они пересекутся!

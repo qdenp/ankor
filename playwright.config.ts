@@ -1,10 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Роль — из --project=<роль> (npm run test:<роль>, CI). У каждой роли свои HTML-отчёт и артефакты:
+// test:all запускает 5 процессов, и с общей папкой они затирали друг другу отчёт и скриншоты/трейсы.
+// Воркеры перечитывают конфиг без --project в argv — роль им передаётся через окружение главного процесса.
+const projectArg = process.argv.find((a) => a.startsWith('--project='));
+const role = projectArg ? projectArg.split('=')[1] : (process.env.ANKOR_PW_ROLE ?? 'all');
+process.env.ANKOR_PW_ROLE = role;
+
 /**
  * Playwright configuration for Ankor Athletics App
  */
 export default defineConfig({
   testDir: './tests/specs',
+  outputDir: `test-results/${role}`,
 
   /* Timeout for each test */
   timeout: 60 * 1000,
@@ -31,10 +39,12 @@ export default defineConfig({
   // а запуск может быть только части ролей. Ограничение задаётся на уровне CLI.
   workers: process.env.CI ? 1 : undefined,
 
-  /* Reporter to use */
+  // Локально line + list вместе намеренно: line при старте теста пишет [N/M] (прогресс),
+  // list по завершении — ok/x/- N (результат). В файл лог пишет перенаправление
+  // `> test-output.log` из команды запуска: outputFile у line не поддерживается.
   reporter: process.env.CI
-    ? [['html', { outputFolder: 'reports/html' }]]
-    : [['line', { outputFile: 'test-output.log' }], ['list'], ['allure-playwright'], ['html', { outputFolder: 'reports/html' }]],
+    ? [['html', { outputFolder: `reports/html/${role}` }]]
+    : [['line'], ['list'], ['allure-playwright'], ['html', { outputFolder: `reports/html/${role}` }]],
 
   /* Shared settings for all projects */
   use: {

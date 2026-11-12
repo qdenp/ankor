@@ -30,7 +30,7 @@ npx playwright test tests/specs/owner/02-homepage.spec.ts --project=owner --work
 npm run test:owner        # одна роль: owner | sysadmin | coach | parent | athlete
 npm run test:all          # все роли параллельно (~10 мин)
 npm run test:owner -- --grep "should edit parent"   # один тест; "--" обязателен
-npx playwright show-report reports/html             # HTML-отчёт последнего прогона
+npx playwright show-report reports/html/owner       # HTML-отчёт роли (у каждой роли своя папка)
 ```
 
 - Перед каждым `npm run test:*` автоматически запускается `npm run typecheck`. При ошибке типов тесты не стартуют.

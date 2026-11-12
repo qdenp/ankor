@@ -327,11 +327,13 @@
 
 ## Этап 5. Эффективность прогона
 
-- [ ] **5.1 🔒 Развести HTML-отчёты по ролям.** `test:all` запускает 5 процессов, и все пишут в одну `reports/html`: остаётся отчёт последнего процесса или битый.
+- [x] **5.1 🔒 Развести HTML-отчёты по ролям.** Сделано (2026-11-12): роль из `--project=` (воркерам — через `ANKOR_PW_ROLE`), отчёт `reports/html/<роль>`, артефакты `test-results/<роль>`; в `test:all` строки лога подписаны именем роли (`concurrently -n`).
+  - Было: `test:all` запускает 5 процессов, и все пишут в одну `reports/html`: остаётся отчёт последнего процесса или битый.
   - Вариант А: свой `outputFolder` на роль через переменную окружения.
   - Вариант Б: один процесс с проектами и детерминированным распределением.
 - [ ] **5.2 🔒 (опционально) Перейти на стандартный storageState.** Setup-проект на роль + `use.storageState` в проекте вместо собственного restore-механизма. Это меньше кода и закрывает п.1.2. Logout-тесты — в отдельном `browser.newContext()`.
-- [ ] **5.3 🔒 Проверить конфликт `test-output.log`.** Его пишет и reporter в `playwright.config.ts`, и перенаправление в shell из AGENTS.md. Оставить один источник.
+- [x] **5.3 🔒 Проверить конфликт `test-output.log`.** Сделано (2026-11-12): конфликта не было — `line` не поддерживает `outputFile` и пишет в консоль; лог пишет только перенаправление. Убран бесполезный `outputFile`, `line` + `list` оставлены намеренно ([N/M] прогресс + ok/x результат), причина — в комментарии конфига.
+  - Было: Его пишет и reporter в `playwright.config.ts`, и перенаправление в shell из AGENTS.md. Оставить один источник.
 - [x] **5.4 CI на GitHub Actions + выгрузка результатов в Allure TestOps.** Образец — репозиторий коллеги `kurgulana/ankor_autotests`, `.github/workflows/playwrightStaging.yml`. **Workflow создан (2026-11-12):** `.github/workflows/playwrightMain.yml` — ручной запуск, выбор ролей, роли параллельно с `--workers 1`, учётки из Secrets, `typecheck`, `allurectl watch` при наличии `ALLURE_TOKEN`, артефакты; скрипт запуска проверен локально на роли parent. Secrets заведены, первый запуск (parent) зелёный; `ALLURE_TOKEN` добавлен (2026-11-12). Полный запуск с выгрузкой (2026-11-12, launch 15744): 46 passed, 5 skipped, 0 failed; 50 результатов легли в свои ручные кейсы, logout owner — в автоматический кейс 74820. Лишний кейс 74819 (от `test.skip('title')` без allureId) удалён.
   - **Как там устроено:** запуск вручную (`workflow_dispatch`, параметры `ALLURE_JOB_RUN_ID` / `ALLURE_USERNAME` для запуска из TestOps), `allurectl watch -- npx playwright test` с репортером `allure-playwright`, затем `allurectl upload allure-results` в `https://rallyup.testops.cloud`, проект TestOps **366**; токен — GitHub Secret `ALLURE_TOKEN`.
   - **Что адаптировать под этот проект:**

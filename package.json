@@ -11,7 +11,7 @@
     "test:parent": "playwright test --project=parent --workers 1",
     "test:athlete": "playwright test --project=athlete --workers 1",
     "test:setup": "playwright test --project=setup --workers 1",
-    "test:all": "npx concurrently \"npm run test:owner --ignore-scripts\" \"npm run test:sysadmin --ignore-scripts\" \"npm run test:coach --ignore-scripts\" \"npm run test:parent --ignore-scripts\" \"npm run test:athlete --ignore-scripts\"",
+    "test:all": "npx concurrently -n owner,sysadmin,coach,parent,athlete \"npm run test:owner --ignore-scripts\" \"npm run test:sysadmin --ignore-scripts\" \"npm run test:coach --ignore-scripts\" \"npm run test:parent --ignore-scripts\" \"npm run test:athlete --ignore-scripts\"",
     "typecheck": "tsc --noEmit",
     "pretest:owner": "npm run typecheck",
     "pretest:sysadmin": "npm run typecheck",
