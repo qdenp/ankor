@@ -172,7 +172,7 @@
   - Убрать дубли с явными тестами: owner `@TC-71645`, parent `@TC-71643`/`@TC-72622`, athlete `@TC-72622`.
 - [ ] **2.3** [athlete/90-permissions.spec.ts:25](tests/specs/athlete/90-permissions.spec.ts#L25): весь блок прав пропущен. Пропускать только шаг Plan, остальные шаги включить.
 - [x] **2.4** Сделано (2026-11-12): план `Athlete Invited Plan` (owner, приглашён атлет) создан один раз через `tests/setup`; тест 72609 сначала проверяет, что карточка видна на Invited, потом — что в ней нет Edit (ссылки или кнопки). [athlete/13-plans.spec.ts:27](tests/specs/athlete/13-plans.spec.ts#L27): при пустой вкладке Invited ассерт проходит всегда. Сначала проверить, что карточка есть (предусловие: план, на который приглашён атлет).
-- [ ] **2.5** [coach/13-plans.spec.ts:35,56](tests/specs/coach/13-plans.spec.ts#L35):
+- [x] **2.5** Сделано (2026-11-12): после remove — `toHaveText(/Segments \(0\)/)`; `15 min` уже ищется в карточке плана (`getPlanCard`). [coach/13-plans.spec.ts:35,56](tests/specs/coach/13-plans.spec.ts#L35):
   - После remove проверять `Segments (0)`.
   - Длительность `15 min` искать внутри карточки `getPlanRow(planName)`, а не по всей странице.
 - [ ] **2.6** [12-evaluations.spec.ts](tests/specs/owner/12-evaluations.spec.ts):
