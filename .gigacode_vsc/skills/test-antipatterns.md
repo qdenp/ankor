@@ -11,7 +11,7 @@
 
 **Что искать:** Любое использование `page.waitForTimeout(ms)`. Почти всегда заменяется на ожидание элемента или ответа сервера.
 
-**В проекте:** сейчас нет (проверка: `grep -rn "waitForTimeout(" tests/`). Если появится — сразу флажить.
+**В проекте:** сейчас нет (проверка: `grep -rn "waitForTimeout(" tests/`). Если появится — сразу отмечать.
 
 **Частые замены:**
 - `waitForTimeout(5000)` после click → `await expect(element).toBeVisible()`
@@ -32,7 +32,7 @@ await combobox.click();
 await expect(page.getByRole('option').first()).toBeVisible({ timeout: TIMEOUTS.medium });
 ```
 
-**Не флажить:** Реально необходимые waits для real-time фич (нет UI индикатора). Пометить как acceptable:
+**Не считать нарушением:** Реально необходимые waits для real-time фич (нет UI индикатора). Пометить как acceptable:
 ```ts
 // ACCEPTABLE: No UI indicator for state — hard wait required
 await page.waitForTimeout(5000);
@@ -129,7 +129,7 @@ test('should create team', async ({ loginAs, page }) => {
 
 **В проекте:** `12-evaluations.spec.ts` — `afterEach` после каждого теста открывает Evaluations и ищет свои черновики, включая тест, который ничего не сохраняет (`should block rating above 5`).
 
-**Только флажить если:** Вызов явно лишний для конкретных тестов. Не флажить, если тесты действительно нуждаются в чистом состоянии.
+**Только отмечать если:** Вызов явно лишний для конкретных тестов. Не считать нарушением, если тесты действительно нуждаются в чистом состоянии.
 
 ---
 
@@ -178,8 +178,8 @@ await page.goto(url);
 
 **Различие с reliability #13:** Этот пункт — missing `await` на методах `page.*` и `locator.*`. Reliability #13 — missing `await` именно на `expect()` с Playwright matchers.
 
-**Не флажить:**
-- Намеренно fire-and-forget (крайне редко — если сомневаешься, флажь)
+**Не считать нарушением:**
+- Намеренно fire-and-forget (крайне редко — если сомневаешься, отмечай)
 - Внутри `Promise.all()` — они awaited wrapper'ом
 
 ---
@@ -216,7 +216,7 @@ await expect.soft(planPage.searchInput).toBeVisible();
 
 **Что искать:** `waitForTimeout(ms)` внутри `beforeEach`, `afterEach`, `beforeAll`, `afterAll`. Хук выполняется для каждого теста — задержка умножается. 5 с в `afterEach` × 20 тестов = 100 с простоя за прогон.
 
-**В проекте:** Пока нет, но если добавят в `beforeEach` / `afterEach` — сразу флажить.
+**В проекте:** Пока нет, но если добавят в `beforeEach` / `afterEach` — сразу отмечать.
 
 **BAD:**
 ```ts
@@ -235,7 +235,7 @@ test.afterEach(async () => {
 
 **Различие от #1:** Если wait в shared hook (общий код) → **#10** (умноженный эффект). Если в теле теста (single-use) → **#1**.
 
-**Не флажить:**
+**Не считать нарушением:**
 - Wait в хуке с комментарием, почему он нужен (rate limiting)
 - Ожидания, действительно нужные для очистки состояния (но предложить event-based альтернативы)
 
@@ -277,7 +277,7 @@ test("Test A", async ({ browser, baseURL }) => {
 });
 ```
 
-**Не флажить:**
+**Не считать нарушением:**
 - Переменные на describe scope, записываемые только в `beforeAll` (не per-test) — intended pattern для shared setup
 - Данные сущности, созданной тестом создания и переиспользуемой следующими тестами serial-серии (например, `createdParent` в `07-parents.spec.ts`) — это намеренный паттерн, см. REVIEW-PLAN 3.12
 

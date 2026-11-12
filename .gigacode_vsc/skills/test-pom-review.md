@@ -34,7 +34,7 @@ await expect(locator).toBeVisible({ timeout: TIMEOUTS.short });
 await expect(locator).not.toBeVisible({ timeout: TIMEOUTS.short });
 ```
 
-**Не флажить:**
+**Не считать нарушением:**
 - Явные таймауты на `waitFor()` / `waitForResponse()` намеренно tuned для конкретных медленных операций (file upload)
 - `waitForLoadState()` вызовы — это event-based, не time-based
 
@@ -84,7 +84,7 @@ this.profileButton = page
   .or(page.locator('[role="button"]:has(.MuiAvatar-root)'))
   .first();
 ```
-Цепочка с `:has(svg)` и `.first()` совпадает с любой кнопкой-иконкой — флажить как потенциально хрупкий. Кнопка профиля называется именем пользователя (например, `Parent User`), поэтому лучше привязка к имени из `CREDENTIALS` или `data-testid`.
+Цепочка с `:has(svg)` и `.first()` совпадает с любой кнопкой-иконкой — отмечать как потенциально хрупкий. Кнопка профиля называется именем пользователя (например, `Parent User`), поэтому лучше привязка к имени из `CREDENTIALS` или `data-testid`.
 
 **Стабильные альтернативы:**
 - `page.getByRole('button', { name: 'Submit' })` — accessibility-based
@@ -92,7 +92,7 @@ this.profileButton = page
 - `page.locator('[data-testid="value"]')` — test attribute
 - `page.getByText('Submit')` — стабильный видимый текст
 
-**Не флажить:**
+**Не считать нарушением:**
 - `.locator('[role="dialog"]')` или похожие ARIA-based — стабильны
 - Селекторы с `data-testid` или `data-test` атрибутами
 - `.first()` / `.last()` когда порядок гарантирован приложением
@@ -133,7 +133,7 @@ await expect(locator).not.toBeVisible();
 
 **Различие от #1:** Если метод имеет и hard wait, и error swallowing → **#4 (error swallowing)** — hidden failure хуже hidden wait.
 
-**Не флажить:**
+**Не считать нарушением:**
 - try/catch логирующий ошибку и re-throwing
 - try/catch вокруг cleanup кода в `afterEach`-style методах где фейл ожидаем
 
@@ -177,7 +177,7 @@ await expect(locator).not.toBeVisible({ timeout: TIMEOUTS.short });
 **Признаки:**
 - Метод 20+ строк
 - 4+ distinct Playwright actions (click, fill, goto, waitFor, etc.)
-- Метод включает assertions (`expect()`) — PO должен expose state, не ассертить
+- Метод включает assertions (`expect()`) — PO должен expose state, не проверяеть
 - Имя метода не четко описывает что делает
 
 **В проекте (`scorecard-template-page.ts`): `fillFirstCategory` / `addAndFillCategory` — ~40 строк, ветвление по количеству опций, логика продублирована в двух методах:**
@@ -202,7 +202,7 @@ if (optionCount > 0) {
 
 **FIX:** Разбить на меньшие single-purpose методы (`fillCategory(index, …)`, `selectLinkedVideo(name?)`), убрать недостижимую ветку и дублирование.
 
-**Не флажить:**
+**Не считать нарушением:**
 - Методы выполняющие single multi-step UI interaction (заполнение формы с 5 полями)
 - Методы genuinely one logical operation несмотря на длину
 
