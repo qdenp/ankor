@@ -1,7 +1,37 @@
 import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
+import type { Browser } from '@playwright/test';
 import { PlanPage } from '../../pages/plan-page';
-import { TIMEOUTS } from '../../config';
+import { SignInPage } from '../../pages/sign-in-page';
+import { CREDENTIALS, TIMEOUTS } from '../../config';
+
+/**
+ * Prebuilt-план публикуется для всех организаций того же вида спорта. Проверяем глазами owner (aiorg01, Lacrosse)
+ * в отдельном контексте браузера: сессия sysadmin не трогается.
+ */
+async function expectInOwnerPrebuilt(browser: Browser, baseURL: string | undefined, planName: string, visible: boolean): Promise<void> {
+  const ownerContext = await browser.newContext({ baseURL });
+  try {
+    const ownerTab = await ownerContext.newPage();
+    const signInPage = new SignInPage(ownerTab);
+    const ownerPlans = new PlanPage(ownerTab);
+    await signInPage.goto();
+    await signInPage.login(CREDENTIALS.owner.email, CREDENTIALS.owner.password);
+    await expect(ownerPlans.navHome, 'Owner should be logged in').toBeVisible({ timeout: TIMEOUTS.long });
+    await ownerPlans.goto();
+    await ownerPlans.goToPrebuilt();
+    await ownerPlans.search(planName);
+    await expect(ownerPlans.searchInput).toHaveValue(planName);
+    const card = ownerPlans.getPlanCard(planName);
+    if (visible) {
+      await expect(card, 'Prebuilt plan should be published to another organization').toBeVisible({ timeout: TIMEOUTS.long });
+    } else {
+      await expect(card, 'Unchecked plan should disappear from Prebuilt of another organization').toBeHidden({ timeout: TIMEOUTS.long });
+    }
+  } finally {
+    await ownerContext.close();
+  }
+}
 
 /**
  * 13 — Practice Plans for SysAdmin role.
@@ -9,6 +39,9 @@ import { TIMEOUTS } from '../../config';
  */
 test.describe('Sysadmin Plan Tests', () => {
   test.describe.configure({ mode: 'serial' });
+
+  // План создаёт только 72611, 72614 снимает Prebuilt на нём же (раньше 3 теста — 3 плана, REVIEW-PLAN 3.12)
+  let prebuiltPlanName: string | undefined;
 
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('sysadmin');
@@ -28,37 +61,19 @@ test.describe('Sysadmin Plan Tests', () => {
     await expect(planPage.orgPlansTab, 'Org Plans tab should be visible for sysadmin').toBeVisible();
   });
 
-  // 71716: Invite multiple users to plan
-  test('should invite multiple users to plan', async ({ page }) => {
+  /**
+   * TC-71716 Invite multiple user to plan by coach — тест открывал только диалог приглашения.
+   * TODO(71716): кейс — роль coach (перенести в coach/13-plans, на план из 71641), выбрать сразу 5–10
+   * пользователей, Send invites → уведомление «Invites saved. Emails sent: N»; письма не проверяем (AGENTS.md §12).
+   * Реальные приглашения уходят пользователям стенда — нужно решение, кого приглашать.
+   */
+  test('should invite multiple users to plan', async () => {
     await allure.allureId('71716');
-    const planPage = new PlanPage(page);
-
-    await planPage.goto();
-    await planPage.goToMyPlans();
-
-    const planName = `Sysadmin Plan ${Date.now()}`;
-    await planPage.clickNewPlan();
-    await planPage.fillPlanForm({ name: planName });
-    await planPage.addFirstDrill();
-    await planPage.savePlanAndReturnToMyPlans();
-
-    // Приглашаем пользователей
-    await planPage.search(planName);
-    await expect(planPage.searchInput).toHaveValue(planName);
-
-    const planCard = planPage.getPlanCard(planName);
-    await expect(planCard).toBeVisible({ timeout: TIMEOUTS.long });
-
-    // Открываем детали плана (View на карточке — ссылка)
-    await planPage.viewPlan(planName);
-
-    // В деталях плана нажимаем Invite users
-    await planPage.inviteUsers();
-    await expect(planPage.inviteDialogHeading, 'Invite users dialog should open').toBeVisible();
+    test.skip(true, 'TODO(71716): case is for coach and needs 5-10 real invites + "Invites saved" toast; the test only opened the dialog');
   });
 
-  // 72611: Prebuilt checkbox (sys admin)
-  test('sysadmin can create plan with Prebuilt checkbox', async ({ page }) => {
+  // 72611: Prebuilt checkbox (sys admin) → план опубликован в Prebuilt для организаций того же спорта
+  test('sysadmin can create plan with Prebuilt checkbox', async ({ page, browser, baseURL }) => {
     await allure.allureId('72611');
     const planPage = new PlanPage(page);
 
@@ -75,45 +90,34 @@ test.describe('Sysadmin Plan Tests', () => {
     await planPage.prebuiltCheckbox.check();
 
     await planPage.savePlanAndReturnToMyPlans();
+    prebuiltPlanName = planName;
 
-    // План должен появиться в Prebuilt табе
+    // План в Prebuilt у sysadmin и у другой организации того же спорта (owner, Lacrosse)
     await planPage.goToPrebuilt();
     await expect(planPage.getPlanCard(planName)).toBeVisible();
+    await expectInOwnerPrebuilt(browser, baseURL, planName, true);
   });
 
-  // 72614: Unchecking Prebuilt removes plan from Prebuilt tab
-  test('unchecking Prebuilt removes plan from Prebuilt tab', async ({ page }) => {
+  // 72614: Unchecking Prebuilt removes plan from Prebuilt everywhere — на плане из 72611
+  test('unchecking Prebuilt removes plan from Prebuilt tab', async ({ page, browser, baseURL }) => {
     await allure.allureId('72614');
+    expect(prebuiltPlanName, 'Requires the Prebuilt plan created by 72611 (serial mode)').toBeDefined();
+    const planName = prebuiltPlanName!;
     const planPage = new PlanPage(page);
 
     await planPage.goto();
-    await planPage.goToMyPlans();
-
-    const planName = `Prebuilt Test ${Date.now()}`;
-    await planPage.clickNewPlan();
-    await planPage.fillPlanForm({ name: planName });
-    await planPage.addFirstDrill();
-
-    // Отмечаем Prebuilt checkbox (доступен только sysadmin)
-    await planPage.prebuiltCheckbox.check();
-    await planPage.savePlanAndReturnToMyPlans();
-
-    // Проверяем что план в Prebuilt табе
     await planPage.goToPrebuilt();
-    const prebuiltCard = planPage.getPlanCard(planName);
-    await expect(prebuiltCard).toBeVisible();
+    await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // Открываем детали плана через View (View на карточке — ссылка)
+    // [step 1-3] Edit → снять «Make this a Prebuilt Plan» → сохранить
     await planPage.viewPlan(planName);
-
-    // В деталях плана нажимаем Edit
     await planPage.editPlanFromDetail();
-
     await planPage.prebuiltCheckbox.uncheck();
     await planPage.savePlanAndReturnToMyPlans();
 
-    // Проверяем что план исчез из Prebuilt таба
+    // [step 4] Плана нет в Prebuilt ни у sysadmin, ни у другой организации
     await planPage.goToPrebuilt();
-    await expect(planPage.getPlanCard(planName)).not.toBeVisible();
+    await expect(planPage.getPlanCard(planName)).toBeHidden();
+    await expectInOwnerPrebuilt(browser, baseURL, planName, false);
   });
 });
