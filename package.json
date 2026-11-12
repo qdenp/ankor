@@ -13,6 +13,7 @@
     "test:setup": "playwright test --project=setup --workers 1",
     "test:all": "npx concurrently -n owner,sysadmin,coach,parent,athlete \"npm run test:owner --ignore-scripts\" \"npm run test:sysadmin --ignore-scripts\" \"npm run test:coach --ignore-scripts\" \"npm run test:parent --ignore-scripts\" \"npm run test:athlete --ignore-scripts\"",
     "typecheck": "tsc --noEmit",
+    "lint": "node scripts/lint-tests.mjs",
     "pretest:owner": "npm run typecheck",
     "pretest:sysadmin": "npm run typecheck",
     "pretest:coach": "npm run typecheck",

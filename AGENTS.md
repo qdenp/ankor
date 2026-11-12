@@ -539,16 +539,10 @@ npm run typecheck
 # ⚠️ allure-playwright из локального конфига пишет на --list «skipped» на каждый тест — потом очистить allure-results
 npx playwright test --list
 
-# Нет прямых локаторов в тестах (должно быть пусто)
-grep -rnE "page\.(getByRole|getByText|locator|keyboard)" tests/specs
-
-# Нет хардкодных ожиданий (должно быть пусто)
-grep -rn "waitForTimeout(" tests/
-
-# Нет глушения ошибок (должно быть пусто)
-grep -rn "\.catch(() =>" tests/
+# Запрещённые шаблоны: локаторы в спеках, waitForTimeout, .catch(() =>) — scripts/lint-tests.mjs
+npm run lint
 ```
 
-Команды выше — для Git Bash. Как npm-скрипты они на Windows не работают: npm запускает скрипты через `cmd.exe`, где нет `grep`. Для автоматизации — ESLint (`eslint-plugin-playwright`) или скрипт на Node (REVIEW-PLAN 4.6).
+`npm run lint` — скрипт на Node: работает и на Windows (npm запускает скрипты через `cmd.exe`, где нет `grep`).
 
-**На GitHub те же проверки идут автоматически на каждый PR** — `.github/workflows/pr-checks.yml` (типы, `--list`, три grep выше; около минуты, без браузера и стенда). Красный PR не мержить. Это не ревью: логику тестов проверка не оценивает.
+**На GitHub те же проверки идут автоматически на каждый PR** — `.github/workflows/pr-checks.yml` (типы, `--list`, `npm run lint`; около минуты, без браузера и стенда). Красный PR не мержить. Это не ревью: логику тестов проверка не оценивает.
