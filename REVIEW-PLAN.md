@@ -332,6 +332,16 @@
   - Вариант Б: один процесс с проектами и детерминированным распределением.
 - [ ] **5.2 🔒 (опционально) Перейти на стандартный storageState.** Setup-проект на роль + `use.storageState` в проекте вместо собственного restore-механизма. Это меньше кода и закрывает п.1.2. Logout-тесты — в отдельном `browser.newContext()`.
 - [ ] **5.3 🔒 Проверить конфликт `test-output.log`.** Его пишет и reporter в `playwright.config.ts`, и перенаправление в shell из AGENTS.md. Оставить один источник.
+- [ ] **5.4 CI на GitHub Actions + выгрузка результатов в Allure TestOps.** Образец — репозиторий коллеги `kurgulana/ankor_autotests`, `.github/workflows/playwrightStaging.yml`.
+  - **Как там устроено:** запуск вручную (`workflow_dispatch`, параметры `ALLURE_JOB_RUN_ID` / `ALLURE_USERNAME` для запуска из TestOps), `allurectl watch -- npx playwright test` с репортером `allure-playwright`, затем `allurectl upload allure-results` в `https://rallyup.testops.cloud`, проект TestOps **366**; токен — GitHub Secret `ALLURE_TOKEN`.
+  - **Что адаптировать под этот проект:**
+    - запуск по ролям (`npm run test:<роль>` / `test:all`) вместо одного `npx playwright test`; `--workers 1` внутри роли;
+    - учётные данные — GitHub Secrets, из которых workflow собирает `.env.d333afta2q6llv` (в репозитории его нет);
+    - `npm run typecheck` первым шагом (уже есть как `pretest:*`);
+    - Node 24, `npm ci`, `npx playwright install chromium --with-deps`.
+  - **Связать результаты с тест-кейсами TestOps:** `allure-js-commons` — `allure.allureId('<test_case_id>')` и `epic/feature/story` в тестах (надёжнее тега `@TC-…` в названии; связано с 3.8).
+  - **Учесть данные стенда:** запуск из CI — это такие же прогоны со всеми созданиями записей (3.11, 3.12); не запускать по каждому push, только вручную или по расписанию.
+  - **Готово, когда:** прогон из GitHub Actions (или из TestOps) появляется в TestOps как launch с результатами, привязанными к тест-кейсам.
 
 ---
 
