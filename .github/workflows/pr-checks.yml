@@ -1,0 +1,65 @@
+# Быстрые проверки каждого PR: типы, загрузка спеков, запрещённые шаблоны (AGENTS.md §16).
+# Браузер не запускается, стенд не трогается, секреты не нужны — около минуты.
+# Это не ревью: ловит формальные нарушения, а не ошибки логики тестов.
+name: PR checks
+
+on:
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: pr-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      # tests/config.ts требует учётные данные при загрузке. Тесты здесь не запускаются,
+      # поэтому подставляются фиктивные значения — настоящие секреты PR-проверке не нужны.
+      ANKOR_OWNER_EMAIL: ci@example.com
+      ANKOR_OWNER_PASSWORD: ci
+      ANKOR_SYSADMIN_EMAIL: ci@example.com
+      ANKOR_SYSADMIN_PASSWORD: ci
+      ANKOR_COACH_EMAIL: ci@example.com
+      ANKOR_COACH_PASSWORD: ci
+      ANKOR_PARENT_EMAIL: ci@example.com
+      ANKOR_PARENT_PASSWORD: ci
+      ANKOR_ATHLETE_EMAIL: ci@example.com
+      ANKOR_ATHLETE_PASSWORD: ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: All specs load
+        # --reporter=list: без allure-playwright, иначе --list пишет «skipped» на каждый тест (AGENTS.md §16)
+        run: npx playwright test --list --reporter=list > /dev/null
+
+      - name: No locators in specs (only Page Object methods)
+        run: |
+          if grep -rnE "page\.(getByRole|getByText|locator|keyboard)" tests/specs; then
+            echo "::error::Локаторы в спеках запрещены — вынести в Page Object (AGENTS.md §4)"; exit 1
+          fi
+
+      - name: No hardcoded waits
+        run: |
+          if grep -rn "waitForTimeout(" tests/; then
+            echo "::error::waitForTimeout запрещён — ждать условие через expect/waitFor (AGENTS.md §3)"; exit 1
+          fi
+
+      - name: No swallowed errors
+        run: |
+          if grep -rn "\.catch(() =>" tests/; then
+            echo "::error::.catch(() => …) глушит ошибки — пусть тест падает с понятной ошибкой (AGENTS.md §3)"; exit 1
+          fi
