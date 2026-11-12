@@ -33,7 +33,8 @@ test.describe('Coach Plan Tests', () => {
     // [step 4] На добавленном drill нажать 3 dots → dropdown (edit, remove)
     // [step 5] Нажать remove → drill удалился
     await planPage.removeDrill();
-    await expect(planPage.segmentsHeading).toBeVisible({ timeout: TIMEOUTS.short });
+    // Счётчик сегментов, а не просто видимость заголовка: "Segments (1)" тоже виден, если drill не удалился
+    await expect(planPage.segmentsHeading, 'Drill should be removed from the plan').toHaveText(/Segments \(0\)/, { timeout: TIMEOUTS.short });
 
     // [step 6] Добавить drill снова
     await planPage.addFirstDrill();
