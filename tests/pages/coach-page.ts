@@ -29,7 +29,8 @@ export class CoachPage extends BasePage {
     super(page);
 
     this.heading = page.getByRole('heading', { name: 'Coaches', level: 3 });
-    this.newCoachButton = page.getByRole('button', { name: /New\s+Coach/i });
+    // На пустом списке есть вторая такая же кнопка (пустое состояние) — берём первую
+    this.newCoachButton = page.getByRole('button', { name: /New\s+Coach/i }).first();
     this.searchInput = page.getByRole('textbox', { name: /search.*name|search.*email/i });
     this.createButton = page.getByRole('button', { name: 'Create' });
 

@@ -116,8 +116,8 @@ export class PlanPage extends BasePage {
   /** Переход на страницу Plans через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.myPlansTab).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Нажатие кнопки New Plan */
@@ -137,26 +137,32 @@ export class PlanPage extends BasePage {
     await this.fillPlanForm(params);
     await this.saveButton.click();
     await expect(this.newPlanHeading).toBeHidden({ timeout: TIMEOUTS.medium });
+    // После сохранения — возврат к списку планов, он грузится заново
+    await this.waitForLoading();
   }
 
   /** Переключение на вкладку My Plans */
   async goToMyPlans(): Promise<void> {
     await this.myPlansTab.click();
+    await this.waitForLoading();
   }
 
   /** Переключение на вкладку Invited */
   async goToInvited(): Promise<void> {
     await this.invitedTab.click();
+    await this.waitForLoading();
   }
 
   /** Переключение на вкладку Prebuilt */
   async goToPrebuilt(): Promise<void> {
     await this.prebuiltTab.click();
+    await this.waitForLoading();
   }
 
   /** Переключение на вкладку Org Plans */
   async goToOrgPlans(): Promise<void> {
     await this.orgPlansTab.click();
+    await this.waitForLoading();
   }
 
   /** Добавить drill к плану */
@@ -196,6 +202,7 @@ export class PlanPage extends BasePage {
   async viewPlan(name: string): Promise<void> {
     const card = this.getPlanCard(name);
     await card.getByRole('button', { name: 'View' }).click();
+    await this.waitForLoading();
   }
 
   /** Кликнуть Invite Users в деталях плана */
@@ -206,12 +213,14 @@ export class PlanPage extends BasePage {
   /** Кликнуть Edit в деталях плана */
   async editPlanFromDetail(): Promise<void> {
     await this.planDetailEditLink.click();
+    await this.waitForLoading();
   }
 
   /** Кликнуть Edit на карточке плана */
   async editPlanFromCard(name: string): Promise<void> {
     const card = this.getPlanCard(name);
     await card.getByRole('link', { name: 'Edit' }).click();
+    await this.waitForLoading();
   }
 
   /** Кликнуть Duplicate на карточке плана */
@@ -239,6 +248,8 @@ export class PlanPage extends BasePage {
   async savePlanAndReturnToMyPlans(): Promise<void> {
     await this.saveButton.click();
     await expect(this.newPlanHeading).toBeHidden({ timeout: TIMEOUTS.long });
+    // После сохранения — возврат к списку планов, он грузится заново
+    await this.waitForLoading();
     await this.goToMyPlans();
     await expect(this.myPlansTab).toBeVisible();
   }

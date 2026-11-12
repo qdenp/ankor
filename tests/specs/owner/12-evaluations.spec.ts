@@ -8,15 +8,19 @@ test.describe('Owner Evaluation Tests', () => {
   const TEMPLATE_NAME = '!Default Template for Evaluation';
   const TEAM_NAME = 'Team01';
 
-  test.beforeEach(async ({ page, loginAs }) => {
+  // Время начала теста: cleanup удаляет только черновики, созданные после него
+  let testStartedAt: Date;
+
+  test.beforeEach(async ({ loginAs }) => {
+    testStartedAt = new Date();
     await loginAs('owner');
   });
 
   test.afterEach(async ({ page }) => {
-    // Cleanup: удалить все созданные оценки
+    // Cleanup: удалить черновики (In Progress), созданные этим тестом.
+    // Отправленные (Submit) оценки становятся отчётами — их в интерфейсе удалить нельзя.
     const evaluationPage = new EvaluationPage(page);
-    await evaluationPage.goto();
-    await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
+    await evaluationPage.deleteDraftsCreatedSince(testStartedAt);
   });
 
   /**
@@ -40,8 +44,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.rateCategory(3);
 
     // TC-91866 [step 6]: Save evaluation (NOT submit)
-    await evaluationPage.saveAsDraftButton.click();
-    await expect(page.getByRole('heading', { name: 'Evaluations' })).toBeVisible({ timeout: TIMEOUTS.medium });
+    await evaluationPage.saveAsDraft();
 
     // TC-91866: Verify evaluation appears in table as draft
     await expect(evaluationPage.getRow(TEMPLATE_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
@@ -121,8 +124,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.waitForSubmitEnabled();
 
     // Submit
-    await evaluationPage.submitButton.click();
-    await expect(page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    await evaluationPage.submit();
   });
 
   /**
@@ -154,8 +156,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.waitForSubmitEnabled();
 
     // Submit evaluation (TC-91857 [step 2])
-    await evaluationPage.submitButton.click();
-    await expect(page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    await evaluationPage.submit();
 
     // Verify evaluation appears in table
     await expect(evaluationPage.getRow(TEMPLATE_NAME), 'Expected evaluation to appear in table after submit').toBeVisible({ timeout: TIMEOUTS.long });
@@ -183,8 +184,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.rateCategory(4);
 
     // Submit
-    await evaluationPage.submitButton.click();
-    await expect(page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    await evaluationPage.submit();
 
     // Verify evaluation appears in table
     await expect(evaluationPage.getRow(TEMPLATE_NAME), 'Expected evaluation to appear in table').toBeVisible({ timeout: TIMEOUTS.long });
@@ -205,8 +205,7 @@ test.describe('Owner Evaluation Tests', () => {
     await expect(page.getByRole('button', { name: 'Edit Evaluation' })).toBeVisible({ timeout: TIMEOUTS.medium });
 
     // TC-91874 [step 4]: Click Back
-    await page.getByRole('link', { name: 'Back' }).click();
-    await expect(evaluationPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
+    await evaluationPage.backToList();
 
     // TC-91874 [step 6]: Click Edit via More actions
     const moreActions = evaluationPage.getRow(TEMPLATE_NAME).getByRole('button', { name: 'More actions' });
@@ -220,8 +219,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.updateCategoryRating(5);
 
     // TC-91877 [step 6]: Click Update
-    await evaluationPage.submitButton.click();
-    await expect(page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    await evaluationPage.submit();
 
     // TC-91877 [step 6.1]: Verify data saved
     await expect(evaluationPage.getRow(TEMPLATE_NAME), 'Expected updated evaluation in table').toBeVisible({ timeout: TIMEOUTS.long });
@@ -246,8 +244,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.rateCategory(5);
 
     // Submit
-    await evaluationPage.submitButton.click();
-    await expect(page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    await evaluationPage.submit();
 
     // Verify evaluation appears in table
     await expect(evaluationPage.getRow(TEMPLATE_NAME), `Expected evaluation with skill "${skillName}" to appear in table`).toBeVisible({ timeout: TIMEOUTS.long });

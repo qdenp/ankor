@@ -69,7 +69,7 @@ async closeDialog() {
 }
 ```
 
-**В проекте:** Проверить все методы в `base-page.ts` и конкретных PO. Особенно обёртки `selectOption`, `click` и методы с несколькими действиями подряд (`createScorecard`, `deleteEvaluation`, `fillAthleteForm`).
+**В проекте:** Проверить все методы в `base-page.ts` и конкретных PO. Особенно обёртки `selectOption`, `click` и методы с несколькими действиями подряд (`createScorecard`, `deleteDraftsCreatedSince`, `fillAthleteForm`).
 
 **Аннотация:**
 ```ts

@@ -25,7 +25,8 @@ export class SkillPage extends BasePage {
     super(page);
 
     this.heading = page.getByRole('heading', { name: 'Skills', level: 3 });
-    this.createSkillButton = page.getByRole('button', { name: /Create.*Skill|New.*Skill/i });
+    // На пустом списке есть вторая такая же кнопка (пустое состояние) — берём первую
+    this.createSkillButton = page.getByRole('button', { name: /Create.*Skill|New.*Skill/i }).first();
     this.newSkillHeading = page.getByRole('heading', { name: 'New Skill', level: 3 });
     this.searchInput = page.getByRole('textbox', { name: /search.*skill|search.*name/i });
 

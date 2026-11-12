@@ -27,7 +27,8 @@ export class ScorecardTemplatePage extends BasePage {
   constructor(page: Page) {
     super(page);
 
-    this.newScorecardButton = page.getByRole('button', { name: 'New template' });
+    // На пустом списке есть вторая такая же кнопка (пустое состояние) — берём первую
+    this.newScorecardButton = page.getByRole('button', { name: 'New template' }).first();
     this.createButton = page.getByRole('button', { name: 'Create' });
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
@@ -47,8 +48,8 @@ export class ScorecardTemplatePage extends BasePage {
   /** Переход на страницу Scorecard Templates через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.newScorecardButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Нажатие кнопки New template */
@@ -170,8 +171,9 @@ export class ScorecardTemplatePage extends BasePage {
     }
 
     await this.createButton.click();
-    // Ждём редирект на /scorecards
+    // Ждём редирект на /scorecards и загрузку списка
     await expect(this.page).toHaveURL(/\/scorecards/, { timeout: TIMEOUTS.long });
+    await this.waitForLoading();
   }
 
   /** Получить локатор строки шаблона в таблице */
@@ -193,6 +195,7 @@ export class ScorecardTemplatePage extends BasePage {
     await actionMenu.click();
     await this.page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(this.scorecardNameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Переключение статуса Active/Inactive */
@@ -205,5 +208,6 @@ export class ScorecardTemplatePage extends BasePage {
     }
     await this.saveButton.click();
     await expect(this.page).toHaveURL(/\/scorecards/, { timeout: TIMEOUTS.long });
+    await this.waitForLoading();
   }
 }

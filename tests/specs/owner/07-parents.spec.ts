@@ -49,8 +49,8 @@ test.describe('Owner Parent Tests', () => {
     });
     await parentPage.selectRelationship('Mother');
     await parentPage.selectAthlete('Athlete User');
-    // Диалог уже открыт — просто кликаем Create через PO
-    await parentPage.clickCreateInDialog();
+    // Create → диалог закрылся → список загрузился
+    await parentPage.submitNewParent();
 
     // Родитель в списке (search ищет по имени, не по email)
     await parentPage.search(parent.firstName);

@@ -95,9 +95,16 @@ export class ParentPage extends BasePage {
     await this.athleteOptions.filter({ hasText: athleteName }).first().click();
   }
 
-  /** Нажать Create в диалоге создания */
+  /** Нажать Create в диалоге создания (без ожиданий — например, для проверки валидации пустой формы) */
   async clickCreateInDialog(): Promise<void> {
     await this.page.getByRole('button', { name: 'Create' }).first().click();
+  }
+
+  /** Создать родителя из заполненного диалога: Create → диалог закрылся → список загрузился заново */
+  async submitNewParent(): Promise<void> {
+    await this.clickCreateInDialog();
+    await expect(this.newParentHeading).toBeHidden({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Создание Parent */
@@ -114,9 +121,7 @@ export class ParentPage extends BasePage {
     await this.fillParentForm(params);
     await this.selectRelationship(params.relationship);
     await this.selectAthlete(params.athleteName);
-    await this.clickCreateInDialog();
-    // Ждём загрузки страницы списка после создания
-    await this.waitForLoading();
+    await this.submitNewParent();
   }
 
   /** Поиск по email (клиентская фильтрация, Enter не нужен) */

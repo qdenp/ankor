@@ -44,13 +44,21 @@ export class EvaluationPage extends BasePage {
   // Create button (visible/hidden check)
   readonly createButton: Locator;
 
+  // List navigation and row deletion
+  readonly backLink: Locator;
+  readonly paginationSummary: Locator;
+  readonly deleteMenuItem: Locator;
+  readonly deleteDialog: Locator;
+  readonly confirmDeleteButton: Locator;
+
   constructor(page: Page) {
     super(page);
 
     this.heading = page.getByRole('heading', { name: 'New evaluation' }).or(
       page.getByRole('heading', { name: 'Evaluations', level: 3 })
     );
-    this.newEvaluationButton = page.getByRole('button', { name: 'Create evaluation' });
+    // На пустом списке есть вторая кнопка «Create evaluation» (пустое состояние) — обе открывают форму
+    this.newEvaluationButton = page.getByRole('button', { name: 'Create evaluation' }).first();
     this.submitButton = page.getByRole('button', { name: 'Submit' });
     this.saveAsDraftButton = page.getByRole('button', { name: 'Save as draft' });
     this.editButton = page.getByRole('button', { name: 'Edit' });
@@ -96,13 +104,22 @@ export class EvaluationPage extends BasePage {
 
     // Create button (visible/hidden check)
     this.createButton = page.getByRole('button', { name: /Create|New/i });
+
+    // List navigation and row deletion
+    this.backLink = page.getByRole('link', { name: 'Back' });
+    // "1-10 of 72 evaluations"; при ≤10 записях (одна страница) подписи нет
+    this.paginationSummary = page.getByText(/of \d+ evaluations/);
+    this.deleteMenuItem = page.getByRole('menuitem', { name: 'Delete' });
+    // Диалог подтверждения: "Delete Team01? This action cannot be undone." [Cancel] [Delete]
+    this.deleteDialog = page.getByRole('dialog');
+    this.confirmDeleteButton = this.deleteDialog.getByRole('button', { name: 'Delete', exact: true });
   }
 
   /** Переход на страницу Evaluations через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.newEvaluationButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Нажатие кнопки New Evaluation */
@@ -205,8 +222,8 @@ export class EvaluationPage extends BasePage {
   /** Переход на страницу Evaluation Reports */
   async gotoReports(): Promise<void> {
     await this.sidebarReportLink.click();
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.page.getByRole('heading', { name: 'Evaluation Reports', level: 3 })).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Проверить что evaluation report существует в таблице */
@@ -226,9 +243,32 @@ export class EvaluationPage extends BasePage {
     await this.selectScorecardTemplate(params.templateName);
     await this.selectTeam(params.teamName);
     await this.addSkill(params.skillName);
+    await this.submit();
+  }
 
+  /**
+   * Отправить оценку (Submit) и дождаться списка.
+   * ВНИМАНИЕ: Submit создаёт Evaluation Report, который в интерфейсе удалить нельзя —
+   * вызывать только в тестах, которым нужна именно отправленная оценка/отчёт.
+   */
+  async submit(): Promise<void> {
     await this.submitButton.click();
     await expect(this.page).toHaveURL(/\/evaluations/, { timeout: TIMEOUTS.long });
+    await this.waitForLoading();
+  }
+
+  /** Сохранить оценку как черновик (In Progress) и дождаться списка. Черновик удаляется — см. deleteDraftsCreatedSince */
+  async saveAsDraft(): Promise<void> {
+    await this.saveAsDraftButton.click();
+    await expect(this.page.getByRole('heading', { name: 'Evaluations', level: 3 })).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
+  }
+
+  /** Вернуться со страницы оценки в список (ссылка Back) */
+  async backToList(): Promise<void> {
+    await this.backLink.click();
+    await expect(this.newEvaluationButton).toBeVisible({ timeout: TIMEOUTS.long });
+    await this.waitForLoading();
   }
 
   /** Получить локатор строки оценки в таблице.
@@ -246,39 +286,56 @@ export class EvaluationPage extends BasePage {
     return this.getRow(name).getByRole('button', { name: 'Edit' });
   }
 
-  /** Удалить оценку через More actions → Delete */
-  async deleteEvaluation(templateName: string): Promise<void> {
-    const row = this.getRow(templateName);
-    await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
-    const moreActions = row.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
-    await moreActions.click();
-    await expect(this.page.getByRole('menuitem', { name: 'Delete' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await this.page.getByRole('menuitem', { name: 'Delete' }).click();
-    // Confirm delete — ищем кнопку подтверждения
-    const confirmButton = this.page.getByRole('button', { name: /Delete|Confirm|Yes/i }).first();
-    await expect(confirmButton).toBeVisible({ timeout: TIMEOUTS.medium });
-    await confirmButton.click();
-    // Вернуться на страницу списка
-    await expect(this.page.getByRole('heading', { name: 'Evaluations' })).toBeVisible({ timeout: TIMEOUTS.long });
+  /**
+   * Сколько оценок в списке (данные уже загружены).
+   * Берётся из подписи "1-10 of N evaluations"; при ≤10 записях подписи нет — тогда считаем строки данных.
+   */
+  async countEvaluations(): Promise<number> {
+    if (await this.paginationSummary.count()) {
+      const match = (await this.paginationSummary.first().innerText()).match(/of (\d+) evaluations/);
+      return match ? Number(match[1]) : 0;
+    }
+    return Math.max(0, (await this.tableRows.count()) - 1); // минус строка заголовка
   }
 
-  /** Удалить все оценки по имени шаблона (cleanup) */
-  async deleteAllByTemplate(templateName: string): Promise<void> {
-    let remaining = true;
-    while (remaining) {
-      const rows = this.page.getByRole('row', { name: templateName });
-      const count = await rows.count();
-      if (count === 0) {
-        remaining = false;
-        break;
-      }
-      const row = rows.first();
-      await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
-      await row.getByRole('button', { name: 'More actions' }).click();
-      await this.page.getByRole('menuitem', { name: 'Delete' }).click();
-      const confirmButton = this.page.getByRole('button', { name: /Delete|Confirm|Yes/i }).first();
-      await confirmButton.click();
+  /**
+   * Cleanup: удалить черновики (In Progress), созданные начиная с `since` (точность колонки CREATED — минута).
+   * Чужие и более старые записи не трогает. Отправленные оценки в этом списке не видны (они в Evaluation Reports).
+   * Новые записи — в начале списка, поэтому достаточно первой страницы.
+   */
+  async deleteDraftsCreatedSince(since: Date): Promise<void> {
+    // Запас в 1 минуту: CREATED ставит сервер, `since` — машина с тестами; часы могут расходиться
+    const fromMinute = new Date(since.getTime() - 60_000);
+    fromMinute.setSeconds(0, 0);
+    await this.goto();
+
+    const drafts = this.tableRows.filter({ hasText: 'In Progress' });
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const texts = await drafts.allInnerTexts();
+      const index = texts.findIndex((text) => {
+        const created = EvaluationPage.parseCreated(text);
+        return created !== null && created >= fromMinute;
+      });
+      if (index < 0) return;
+
+      const before = await this.countEvaluations();
+      await drafts.nth(index).getByRole('button', { name: 'More actions' }).click();
+      await this.deleteMenuItem.click();
+      await this.confirmDeleteButton.click();
+      await expect(this.deleteDialog).toBeHidden({ timeout: TIMEOUTS.medium });
+      await this.waitForLoading();
+      await expect.poll(() => this.countEvaluations(), { timeout: TIMEOUTS.long }).toBe(before - 1);
     }
+    throw new Error('deleteDraftsCreatedSince: more than 20 drafts created by one test — check the test');
+  }
+
+  /** Дата из колонки CREATED строки: "Nov 09, 2026 at 11:48pm" (часовой пояс браузера = системный) */
+  private static parseCreated(rowText: string): Date | null {
+    const m = rowText.match(/([A-Z][a-z]{2}) (\d{1,2}), (\d{4}) at (\d{1,2}):(\d{2})(am|pm)/);
+    if (!m) return null;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let hours = Number(m[4]) % 12;
+    if (m[6] === 'pm') hours += 12;
+    return new Date(Number(m[3]), months.indexOf(m[1]), Number(m[2]), hours, Number(m[5]));
   }
 }

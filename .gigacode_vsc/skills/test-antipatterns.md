@@ -68,7 +68,7 @@ await element.waitFor({ state: 'visible' });
 await moreActions.click(); // click сам ждёт visible + enabled
 ```
 
-**Где проверять:** Методы PO (`openEditCoach`, `openEditParent`, `deleteEvaluation` и т.п.), методы `base-page.ts`.
+**Где проверять:** Методы PO (`openEditCoach`, `openEditParent`, `deleteDraftsCreatedSince` и т.п.), методы `base-page.ts`.
 
 **Аннотация:**
 ```ts
@@ -162,15 +162,15 @@ await loginAs('owner');
 
 **Что искать:** `beforeEach`/`afterEach`, которые чистят или готовят данные для всех тестов файла, хотя нужны не всем.
 
-**В проекте:** `12-evaluations.spec.ts` — `afterEach` удаляет все оценки шаблона после каждого теста, включая тест, который ничего не сохраняет (`should block rating above 5`).
+**В проекте:** `12-evaluations.spec.ts` — `afterEach` после каждого теста открывает Evaluations и ищет свои черновики, включая тест, который ничего не сохраняет (`should block rating above 5`).
 
 **Только флажить если:** Вызов явно лишний для конкретных тестов. Не флажить, если тесты действительно нуждаются в чистом состоянии.
 
 **Аннотация:**
 ```ts
-// LOW: Deletes all evaluations after every test — not all tests create one
+// LOW: Cleanup runs after every test — not all tests create an evaluation
 // FIX: Clean up only in tests that save an evaluation
-await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
+await evaluationPage.deleteDraftsCreatedSince(testStartedAt);
 ```
 
 ---
@@ -286,14 +286,14 @@ expect(athletePage.newAthleteButton).toBeTruthy();
 ```ts
 test.afterEach(async ({ page }) => {
     await page.waitForTimeout(5000);
-    await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
+    await evaluationPage.deleteDraftsCreatedSince(testStartedAt);
 });
 ```
 
 **GOOD:**
 ```ts
 test.afterEach(async () => {
-    await evaluationPage.deleteAllByTemplate(TEMPLATE_NAME);
+    await evaluationPage.deleteDraftsCreatedSince(testStartedAt);
 });
 ```
 

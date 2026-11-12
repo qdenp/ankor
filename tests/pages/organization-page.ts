@@ -50,6 +50,7 @@ export class OrganizationPage extends BasePage {
   /** Переход на список организаций (SysAdmin) */
   async gotoOrganizationsList(): Promise<void> {
     await this.page.goto('/settings/organization', { waitUntil: 'domcontentloaded' });
+    await this.waitForLoading();
   }
 
   /** Нажать Edit */

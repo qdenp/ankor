@@ -53,8 +53,8 @@ export class TeamPage extends BasePage {
   /** Переход на страницу Teams через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Нажатие кнопки New Team */

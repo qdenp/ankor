@@ -44,9 +44,10 @@ export class DrillPage extends BasePage {
         page.getByRole('heading', { name: 'Edit drill' })
       )
     );
+    // На пустом списке есть вторая такая же кнопка (пустое состояние) — берём первую
     this.newDrillButton = page.getByRole('button', { name: 'Create drill' }).or(
       page.getByRole('button', { name: 'New drill' })
-    );
+    ).first();
     this.createButton = page.getByRole('button', { name: 'Create' }).or(
       page.getByRole('button', { name: 'Save' })
     );
@@ -87,8 +88,8 @@ export class DrillPage extends BasePage {
   async goto(): Promise<void> {
     const drillNav = this.page.getByRole('link', { name: /drills|Drills/i, exact: false });
     await drillNav.click();
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await this.waitForLoading();
   }
 
   /** Нажатие кнопки Create drill */
@@ -164,6 +165,8 @@ export class DrillPage extends BasePage {
   /** Нажатие кнопки Create/Save */
   async clickCreate(): Promise<void> {
     await this.createButton.click();
+    // После успешного создания — детальная страница дрилла; при ошибке валидации форма остаётся (спиннера нет)
+    await this.waitForLoading();
   }
 
   /** Получить локатор строки дрила в таблице */
@@ -178,6 +181,7 @@ export class DrillPage extends BasePage {
   async goToDrillsList(): Promise<void> {
     await this.page.getByRole('link', { name: 'Drills' }).click();
     await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.long });
+    await this.waitForLoading();
   }
 
   /** Открыть detail дрила */
@@ -189,6 +193,7 @@ export class DrillPage extends BasePage {
     await expect(viewButton).toBeVisible({ timeout: TIMEOUTS.medium });
     await viewButton.click();
     await expect(this.page.getByRole('heading', { name: drillName, exact: false })).toBeVisible({ timeout: TIMEOUTS.long });
+    await this.waitForLoading();
   }
 
   /** Ждать появления YouTube iframe на странице деталей дрила */

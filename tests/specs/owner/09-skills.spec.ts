@@ -33,7 +33,8 @@ test.describe('Owner Skill Tests', () => {
 
     // --- Шаг 4: Заполнить все поля ---
     // --- Шаг 5: Вставить видео URL youtube ---
-    await skillPage.fillSkillForm({
+    // --- Шаг 6: Создать (createSkill ждёт возврата к списку и его загрузки) ---
+    await skillPage.createSkill({
       name: skillName,
       category: 'Shooting',
       level: 'Beginner',
@@ -41,10 +42,6 @@ test.describe('Owner Skill Tests', () => {
       videoUrl: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
     });
 
-    // --- Шаг 6: Создать ---
-    await skillPage.createButton.click();
-
-    // Ждём обновления страницы после создания
     await expect(skillPage.heading).toBeVisible({ timeout: TIMEOUTS.long });
     await expect(page).toHaveURL(/skills/);
 
