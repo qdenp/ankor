@@ -27,21 +27,10 @@ testops_find_testresults(projectId="ID_ПРОЕКТА")
 
 ## ⚠️ ОБЯЗАТЕЛЬНО ВЫПОЛНИ ПЕРЕД ЛЮБЫМ НОВЫМ ТЕСТОВЫМ СЦЕНАРИЕМ
 
-### Шаг 1: Прочитать ВСЕ скиллы
-```
-glob(".gigacode_vsc/skills/**")
-```
-Прочитать КАЖДЫЙ файл в папке `.gigacode_vsc/skills/`:
-- `01-test-scenario-analyst.md` — Анализ требований, проверка дублей, план шагов
-- `02-test-step-planner.md` — Детальная таблица шагов с PO методами
-- `03-test-code-writer.md` — Написание кода, запуск, рефакторинг до PASS
-- `04-test-review-and-fixes.md` — Финальный ревью, правки, отдача результата
-- `05-test-harvester.md` — Анализ и улучшение
-- `test-reliability.md` — Чек-лист надёжности (17 паттернов)
-- `test-antipatterns.md` — Чек-лист анти-паттернов (11 паттернов)
-- `test-pom-review.md` — Чек-лист PO (6 проверок)
-- `testops-integration.md` — TestOps: поиск тест-кейсов, настройка токена
-- `06-SKIP-…`, `07-SKIP-…` — заготовки, сейчас не используются
+### Шаг 1: Прочитать скиллы текущего шага
+Сразу — `01-test-scenario-analyst.md`, `02-test-step-planner.md`, `03-test-code-writer.md`.
+Чек-листы `test-reliability.md`, `test-antipatterns.md`, `test-pom-review.md` — только на шаге 04.
+`testops-integration.md` — когда нужен кейс из TestOps. Полная таблица — AGENTS.md §1 «Что читать и когда».
 
 ### Шаг 2: Создать todo list
 Создать todo list с КАЖДЫМ шагом цепочки:
@@ -67,7 +56,7 @@ glob(".gigacode_vsc/skills/**")
 - ❌ Пропускать скиллы
 - ❌ Пропускать todo items
 - ❌ Пропускать скилл 04
-- ❌ Писать код без чтения всех скиллов
+- ❌ Писать код без чтения скиллов 01–03
 
 ### 🔴 ПРАВИЛО:
 Каждый новый тестовый сценарий = полный цикл 01→02→03→04.
