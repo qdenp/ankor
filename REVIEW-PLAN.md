@@ -222,7 +222,7 @@
   - **coach:** `02-homepage` → `03-homepage`, как у athlete/parent.
   - Logout-тесты (`99-auth`) должны идти последними в серии роли: переименовать, например, в `99-logout.spec.ts`.
 - [~] **3.8 Единый формат ID тест-кейсов.**
-  - Перейти на `test('…', { tag: '@TC-XXXXX' }, …)`.
+  - [ ] **Связать результаты с кейсами TestOps** (проверено через MCP 2026-11-12): `test_case_id` = ID кейса в TestOps (71600 есть, 91877 — нет), но `@TC-…` в названии TestOps не распознаёт — кейс 71600 `automated: false`, а кейс коллеги 70936 привязан (`automated: true`) через `allure.allureId('70936')` / `@allure.id:70936` в названии. Сделать: добавить `allure-js-commons`, в каждом тесте `allure.allureId('<test_case_id>')`; у результата может быть только один ID — тесты на несколько кейсов (06-coaches, тест отчёта оценок и др.) разделить. Без этого 5.4 бесполезен.
   - [x] Заменить allure_id на test_case_id — сделано (2026-11-12) по выгрузке `report (1).csv`: 16 номеров `91XXX` в 06-coaches, 08-teams, 10-drills, 12-evaluations, owner/13-plans; `71835` (нет в TestOps) → 72683 (YouTube в дрилле); `72612` → 72604 (owner «non-sysadmin roles do not see Prebuilt checkbox»).
   - [x] `sysadmin/13-plans` «sysadmin sees all plan tabs»: `72679` (Home page) → **72617** «Prebuilt Plans and Org Plans tabs visible to Administrator / Owner / System Administrator» (от пользователя; в CSV-выгрузке этого кейса нет — выгрузка неполная).
 - [x] **3.9 Убрать `test.use({ storageState: undefined })`** — сейчас это no-op. Либо реально сбрасывать контекст, либо удалить вместе с описанием в AGENTS.md §9. Сделано (2026-11-12): убрано из 01-signin, описание исправлено в AGENTS.md §9 и fixtures.ts.
