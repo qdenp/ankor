@@ -10,6 +10,7 @@
     "test:coach": "playwright test --project=coach --workers 1",
     "test:parent": "playwright test --project=parent --workers 1",
     "test:athlete": "playwright test --project=athlete --workers 1",
+    "test:setup": "playwright test --project=setup --workers 1",
     "test:all": "npx concurrently \"npm run test:owner --ignore-scripts\" \"npm run test:sysadmin --ignore-scripts\" \"npm run test:coach --ignore-scripts\" \"npm run test:parent --ignore-scripts\" \"npm run test:athlete --ignore-scripts\"",
     "typecheck": "tsc --noEmit",
     "pretest:owner": "npm run typecheck",
@@ -17,6 +18,7 @@
     "pretest:coach": "npm run typecheck",
     "pretest:parent": "npm run typecheck",
     "pretest:athlete": "npm run typecheck",
+    "pretest:setup": "npm run typecheck",
     "pretest:all": "npm run typecheck"
   },
   "keywords": [],
@@ -27,6 +29,7 @@
     "@playwright/test": "^1.64.1",
     "@types/node": "^24.19.2",
     "allure-commandline": "^2.46.1",
+    "allure-js-commons": "^3.14.0",
     "allure-playwright": "^3.14.0",
     "concurrently": "^9.1.2",
     "dotenv": "^18.0.9",

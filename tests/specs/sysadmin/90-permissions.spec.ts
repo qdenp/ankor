@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { OrganizationPage } from '../../pages/organization-page';
 import { SkillPage } from '../../pages/skill-page';
@@ -37,6 +38,7 @@ test.describe('SysAdmin Permission Tests', () => {
   });
 
   test('should have full CRUD access to all modules and see all organizations', async ({ page }) => {
+    await allure.allureId('71889');
     const homePage = new HomePage(page);
     const orgPage = new OrganizationPage(page);
     const skillPage = new SkillPage(page);

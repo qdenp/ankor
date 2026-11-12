@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { DrillPage } from '../../pages/drill-page';
 import { TIMEOUTS } from '../../config';
@@ -24,6 +25,7 @@ test.describe('Owner Drill Tests', () => {
    * - Visibility: organization
    */
   test('should create drill with all fields', async ({ page }) => {
+    await allure.allureId('74151');
     const drillPage = new DrillPage(page);
 
     // Генерируем уникальное имя для drill
@@ -70,6 +72,7 @@ test.describe('Owner Drill Tests', () => {
    * - Owner/Admin: НЕ должен редактировать Public drill
    */
   test('should create drill and verify role permissions', async ({ page }) => {
+    await allure.allureId('72684');
     const drillPage = new DrillPage(page);
 
     // TC-72684 [step 2]: Зайти Owner/Admin, открыть Create Drill
@@ -110,6 +113,7 @@ test.describe('Owner Drill Tests', () => {
     * TC-72683 [step 1-2]: Open drill detail with YouTube URL → verify play button
    */
   test('should view drill detail with YouTube video', async ({ page }) => {
+    await allure.allureId('72683');
     const drillPage = new DrillPage(page);
 
     // Создать drill с YouTube URL — используем DRILL_NAME из TC-74151

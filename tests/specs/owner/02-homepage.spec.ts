@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { HomePage } from '../../pages/home-page';
 
@@ -20,6 +21,7 @@ test.describe('Owner Home Page Tests', () => {
   });
 
   test('should display org-wide dashboard counters on Home page', async ({ page }) => {
+    await allure.allureId('71823');
     const homePage = new HomePage(page);
 
     await homePage.goto();

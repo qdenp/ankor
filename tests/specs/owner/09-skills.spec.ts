@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { SkillPage } from '../../pages/skill-page';
 import { TIMEOUTS } from '../../config';
@@ -15,6 +16,7 @@ test.describe('Owner Skill Tests', () => {
 
   /** @TC-74217 Create skill */
   test('should validate empty form, create skill and see in library', async ({ page }) => {
+    await allure.allureId('74217');
     const skillPage = new SkillPage(page);
     const timestamp = Date.now();
     const skillName = `Skill${timestamp}`;

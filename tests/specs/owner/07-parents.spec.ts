@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { ParentPage } from '../../pages/parent-page';
 import { SignInPage } from '../../pages/sign-in-page';
@@ -23,6 +24,7 @@ test.describe('Owner Parent Tests', () => {
 
   /** @TC-71252 Create parent from add manual */
   test('should validate empty form, create parent and login as parent', async ({ page, browser, baseURL }) => {
+    await allure.allureId('71252');
     const parentPage = new ParentPage(page);
     const timestamp = Date.now();
     const parent = {
@@ -80,6 +82,7 @@ test.describe('Owner Parent Tests', () => {
 
   /** @TC-71256 Edit parent */
   test('should edit parent and verify changes', async ({ page }) => {
+    await allure.allureId('71256');
     expect(createdParent, 'Requires the parent created by the previous test (serial mode)').toBeDefined();
     const parent = createdParent!;
     const parentPage = new ParentPage(page);

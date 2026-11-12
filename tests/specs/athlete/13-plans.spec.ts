@@ -1,6 +1,6 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
-import { createPlanTabTests, ROLE_TAB_EXPECTATIONS } from '../../factories/plan-tabs.factory';
 
 /**
  * 13 — Practice Plans for Athlete role.
@@ -14,7 +14,8 @@ test.describe('Athlete Plan Tests', () => {
   });
 
   // 72609: Athlete cannot edit invited plan
-  test('@TC-72609 athlete cannot edit invited plan', async ({ page }) => {
+  test('athlete cannot edit invited plan', async ({ page }) => {
+    await allure.allureId('72609');
     const planPage = new PlanPage(page);
 
     // [step 1] Зайти атлетом, перейти в Plan > Invited
@@ -27,7 +28,8 @@ test.describe('Athlete Plan Tests', () => {
   });
 
   // 72622: Athlete does not see Org Plans tab
-  test('@TC-72622 athlete does not see Org Plans tab', async ({ page }) => {
+  test('athlete does not see Org Plans tab', async ({ page }) => {
+    await allure.allureId('72622');
     const planPage = new PlanPage(page);
 
     // [step 1] Перейти в Practice Plans
@@ -37,5 +39,3 @@ test.describe('Athlete Plan Tests', () => {
     await expect(planPage.orgPlansTab).not.toBeVisible();
   });
 });
-
-createPlanTabTests(test, 'athlete', ROLE_TAB_EXPECTATIONS.athlete);

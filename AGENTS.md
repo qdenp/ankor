@@ -247,10 +247,23 @@ test('91859 should create plan', () => { ... });
 test('13 should create plan', () => { ... });
 ```
 
-Allure ID допустим через аннотацию:
+### Привязка к тест-кейсу TestOps — `allure.allureId`
+
+Первая строка теста — номер кейса (`test_case_id` из TestOps, не allure_id 91XXX). По нему TestOps записывает результат прогона в кейс.
+
 ```ts
-test('@TC-91859 should create plan and see in My Plans', () => { ... });
+import * as allure from 'allure-js-commons';
+
+test('should create plan and see in My Plans', async ({ page }) => {
+  await allure.allureId('72600');
+  ...
+});
 ```
+
+- Один тест — один кейс: у результата только один ID. Тест на несколько кейсов — разделить.
+- `@TC-…` в названии TestOps **не** распознаёт — не использовать.
+- Тест без номера при выгрузке создаёт в TestOps новый автоматический кейс — номер ставить всем тестам, у которых есть кейс; тесты без кейса не держать.
+- Тест покрывает кейс не полностью — номер ставить, тест пропускать: `test.skip(true, 'TODO(<id>): …')` **после** `allureId` (иначе метка не запишется), над тестом — комментарий `TODO(<id>)`, чего не хватает.
 
 ### Правила нумерации файлов
 
@@ -260,10 +273,9 @@ test('@TC-91859 should create plan and see in My Plans', () => { ... });
 
 | № | Пункт меню | Файл |
 |---|------------|------|
-| 00 | Подготовка | `00-create-users.spec.ts` |
 | 01 | Авторизация (страница входа) | `01-signin.spec.ts` |
 | 02 | Home (главная страница роли) | `02-homepage.spec.ts` |
-| 03 | Регистрация | `03-signup.spec.ts` |
+| 03 | Регистрация (join-код) | `03-signup.spec.ts` |
 | 04 | Organizations | `04-organization.spec.ts` |
 | 05 | Athletes | `05-athletes.spec.ts` |
 | 06 | Coaches | `06-coaches.spec.ts` |
@@ -278,10 +290,11 @@ test('@TC-91859 should create plan and see in My Plans', () => { ... });
 | 15 | Manage Users | `15-manage-users.spec.ts` |
 | 16 | Notifications | `16-notifications.spec.ts` |
 | 90 | Права роли (сквозная проверка разделов) | `90-permissions.spec.ts` |
-| 99 | Логин и logout под ролью | `99-auth.spec.ts` |
+| 99 | Выход (logout) — только owner | `99-auth.spec.ts` |
 
 **Правила:**
-- ✅ `99-auth` — всегда последний файл роли: logout отзывает сессию, и всё, что идёт после него, логинится заново (§8)
+- ✅ `99-auth` — всегда последний файл owner: logout отзывает сессию, и всё, что идёт после него, логинится заново (§8). Кнопка выхода одна для всех ролей, поэтому logout проверяется только у owner; вход отдельно не проверяется — его проходит каждый тест через `loginAs`, а вход через форму — `01-signin`
+- ✅ Подготовка данных для нового стенда — `tests/setup/create-users.spec.ts`, отдельный проект `setup` (`npm run test:setup`), в `test:all` и CI не входит
 - ✅ Нумерация одинаковая для всех ролей
 - ✅ Каждая роль содержит только те файлы, которые ей доступны
 - ✅ Файлы с одной ролью в одной папке идут последовательно (`serial`)
@@ -344,7 +357,7 @@ test.describe('Owner Plan Tests', () => {
 
 - Всегда используй `loginAs(role)` fixture из `fixtures.ts`
 - Логаут — `logout()` fixture (через `BasePage.logout()`)
-- Ручной `signInPage.login()` только в `00-create-users.spec.ts` (data setup)
+- Ручной `signInPage.login()` только в `01-signin` (проверка формы входа) и `tests/setup/create-users.spec.ts` (подготовка данных)
 
 ### ⚠️ Logout в конце serial-последовательности
 
@@ -403,7 +416,7 @@ test.describe('Owner Auth Tests', () => {
 - Проверять правки инфраструктуры — на спеках, которые ничего не создают (`*-homepage`, `*-permissions`).
 
 ### Основные тестовые пользователи
-- Пользователи ролей из `.env` уже созданы на стенде; `00-create-users.spec.ts` выключен (`describe.skip`) и нужен только для разворачивания нового стенда
+- Пользователи ролей из `.env` уже созданы на стенде; `tests/setup/create-users.spec.ts` (`npm run test:setup`) нужен только для разворачивания нового стенда
 - Тесты не должны менять этих пользователей (имя, email, связи) — на них держатся тесты ролей
 - Каждый email может быть использован только один раз — повторная попытка создаст ошибку
 - Порядок создания: Athlete → Coach → Parent (так как Parent требует Athlete)
@@ -440,14 +453,14 @@ tests/
 ├── config.ts           # URL, константы, credentials (из .env.d333afta2q6llv)
 ├── fixtures.ts         # Фикстуры: loginAs(role), logout(), кэш сессий
 ├── .auth/              # Кэш сессий по ролям (gitignored)
-├── factories/          # Генераторы однотипных тестов (plan-tabs.factory.ts)
 ├── pages/              # Page Objects (base-page.ts + по одному на раздел)
 │   ├── base-page.ts
 │   ├── sign-in-page.ts
 │   ├── athlete-page.ts
 │   └── ...
+├── setup/              # Подготовка данных для нового стенда (проект setup, npm run test:setup)
 └── specs/              # Тесты по папкам ролей
-    ├── owner/          # 00-create-users … 13-plans, 90-permissions, 99-auth
+    ├── owner/          # 01-signin … 13-plans, 90-permissions, 99-auth
     ├── sysadmin/       # 04-organization, 13-plans, 90-permissions
     ├── coach/
     ├── parent/
@@ -500,6 +513,7 @@ npx playwright show-report
 npm run typecheck
 
 # Тесты находятся (нет ошибок загрузки)
+# ⚠️ allure-playwright из локального конфига пишет на --list «skipped» на каждый тест — потом очистить allure-results
 npx playwright test --list
 
 # Нет прямых локаторов в тестах (должно быть пусто)

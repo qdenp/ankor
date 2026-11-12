@@ -20,7 +20,8 @@ testops_find_testresults(projectId="ID_ПРОЕКТА")
 **❌ ЗАПРЕЩЕНО:**
 - ❌ Искать тест-кейсы через grep по файлам
 - ❌ Придумывать TC-номера — бери из TestOps через MCP
-- ❌ Использовать `@TC-91XXX` — только `@TC-XXXXX` (test_case_id из CSV)
+- ❌ Писать номер кейса в названии теста (`@TC-…`) — только `await allure.allureId('<test_case_id>')` первой строкой теста (AGENTS.md §6)
+- ❌ Использовать allure_id 91XXX — только test_case_id
 
 ---
 

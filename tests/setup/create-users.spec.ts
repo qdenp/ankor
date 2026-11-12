@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { SignInPage } from '../../pages/sign-in-page';
-import { AthletePage } from '../../pages/athlete-page';
-import { CoachPage } from '../../pages/coach-page';
-import { ParentPage } from '../../pages/parent-page';
-import { CREDENTIALS, TIMEOUTS } from '../../config';
+import { SignInPage } from '../pages/sign-in-page';
+import { AthletePage } from '../pages/athlete-page';
+import { CoachPage } from '../pages/coach-page';
+import { ParentPage } from '../pages/parent-page';
+import { CREDENTIALS, TIMEOUTS } from '../config';
 
 /**
  * Тест для создания пользователей через интерфейс сайта.
@@ -13,9 +13,10 @@ import { CREDENTIALS, TIMEOUTS } from '../../config';
  *
  * Каждый email может быть использован только один раз.
  * Тест проверяет, существуют ли пользователи, и создаёт только отсутствующих.
- * Пропускается в CI (describe.skip) — пользователи создаются вручную на стенде.
+ * Не тест, а подготовка данных для нового стенда: отдельный проект setup, в test:all и CI не входит.
+ * Запуск: npm run test:setup
  */
-test.describe.skip('Create Test Users', () => {
+test.describe('Create Test Users', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('should create coach, parent, athlete via their respective pages', async ({ page }) => {

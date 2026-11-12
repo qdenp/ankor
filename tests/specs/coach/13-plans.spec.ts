@@ -1,7 +1,7 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
 import { TIMEOUTS } from '../../config';
-import { createPlanTabTests, ROLE_TAB_EXPECTATIONS } from '../../factories/plan-tabs.factory';
 
 /**
  * 13 — Practice Plans for Coach role.
@@ -15,7 +15,8 @@ test.describe('Coach Plan Tests', () => {
   });
 
   // 71641: Create plan with drill notes and duration
-  test('@TC-71641 should create plan with drill notes and duration', async ({ page }) => {
+  test('should create plan with drill notes and duration', async ({ page }) => {
+    await allure.allureId('71641');
     const planPage = new PlanPage(page);
 
     // [step 1] Зайти в Plan и нажать +
@@ -56,5 +57,3 @@ test.describe('Coach Plan Tests', () => {
     await expect(planPage.getPlanCard(planName)).toContainText('15 min');
   });
 });
-
-createPlanTabTests(test, 'coach', ROLE_TAB_EXPECTATIONS.coach);

@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { TeamPage } from '../../pages/team-page';
 
@@ -10,6 +11,7 @@ test.describe('Owner Team Tests', () => {
 
   // 71851: Create team
   test('should create new team', async ({ loginAs, page }) => {
+    await allure.allureId('71851');
     const teamPage = new TeamPage(page);
 
     await loginAs('owner');

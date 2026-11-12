@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
 import { TIMEOUTS } from '../../config';
@@ -14,7 +15,8 @@ test.describe('Sysadmin Plan Tests', () => {
   });
 
   // 72617: Prebuilt Plans and Org Plans tabs visible to Administrator / Owner / System Administrator
-  test('@TC-72617 sysadmin sees all plan tabs', async ({ page }) => {
+  test('sysadmin sees all plan tabs', async ({ page }) => {
+    await allure.allureId('72617');
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -27,7 +29,8 @@ test.describe('Sysadmin Plan Tests', () => {
   });
 
   // 71716: Invite multiple users to plan
-  test('@TC-71716 should invite multiple users to plan', async ({ page }) => {
+  test('should invite multiple users to plan', async ({ page }) => {
+    await allure.allureId('71716');
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -55,7 +58,8 @@ test.describe('Sysadmin Plan Tests', () => {
   });
 
   // 72611: Prebuilt checkbox (sys admin)
-  test('@TC-72611 sysadmin can create plan with Prebuilt checkbox', async ({ page }) => {
+  test('sysadmin can create plan with Prebuilt checkbox', async ({ page }) => {
+    await allure.allureId('72611');
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -78,7 +82,8 @@ test.describe('Sysadmin Plan Tests', () => {
   });
 
   // 72614: Unchecking Prebuilt removes plan from Prebuilt tab
-  test('@TC-72614 unchecking Prebuilt removes plan from Prebuilt tab', async ({ page }) => {
+  test('unchecking Prebuilt removes plan from Prebuilt tab', async ({ page }) => {
+    await allure.allureId('72614');
     const planPage = new PlanPage(page);
 
     await planPage.goto();

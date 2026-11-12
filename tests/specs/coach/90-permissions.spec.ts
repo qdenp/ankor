@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { SkillPage } from '../../pages/skill-page';
 import { DrillPage } from '../../pages/drill-page';
@@ -33,6 +34,7 @@ test.describe('Coach Permission Tests', () => {
   });
 
   test('should have CRUD access to Athlete/Parent/Team/EasyJoin/Eval/Plan and view-only to Skill/Drill/Scorecard/Coach', async ({ page }) => {
+    await allure.allureId('71844');
     const homePage = new HomePage(page);
     const skillPage = new SkillPage(page);
     const drillPage = new DrillPage(page);

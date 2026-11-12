@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { OrganizationPage } from '../../pages/organization-page';
 import { TIMEOUTS } from '../../config';
@@ -13,8 +14,14 @@ test.describe('Owner Organization Tests', () => {
     await loginAs('owner');
   });
 
-  // View organization profile
+  /**
+   * 71116 owner / admin view own organization — пока проверяется только, что страница открылась без редиректа на вход.
+   * TODO(71116): не хватает шагов кейса — проверить данные своей организации в профиле
+   * (название, вид спорта и др. по шагам кейса) и что чужие организации не видны.
+   */
   test('should view organization profile', async ({ page }) => {
+    await allure.allureId('71116');
+    test.skip(true, 'TODO(71116): checks only that the page opens; organization profile data is not verified yet');
     const orgPage = new OrganizationPage(page);
 
     await orgPage.goto();
@@ -24,7 +31,8 @@ test.describe('Owner Organization Tests', () => {
   });
 
   // 71924: Edit own organization
-  test('@TC-71924 should edit organization name and revert', async ({ page }) => {
+  test('should edit organization name and revert', async ({ page }) => {
+    await allure.allureId('71924');
     const orgPage = new OrganizationPage(page);
 
     await orgPage.goto();

@@ -1,6 +1,6 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
-import { createPlanTabTests, ROLE_TAB_EXPECTATIONS } from '../../factories/plan-tabs.factory';
 
 /**
  * 13 — Practice Plans for Parent role.
@@ -14,7 +14,8 @@ test.describe('Parent Plan Tests', () => {
   });
 
   // 71643: Parent can view plans
-  test('@TC-71643 parent can view plans', async ({ page }) => {
+  test('parent can view plans', async ({ page }) => {
+    await allure.allureId('71643');
     const planPage = new PlanPage(page);
 
     // [step 1] Зайти родителем в Plans
@@ -29,7 +30,8 @@ test.describe('Parent Plan Tests', () => {
   });
 
   // 72622: Parent does not see Org Plans tab
-  test('@TC-72622 parent does not see Org Plans tab', async ({ page }) => {
+  test('parent does not see Org Plans tab', async ({ page }) => {
+    await allure.allureId('72622');
     const planPage = new PlanPage(page);
 
     // [step 1] Перейти в Practice Plans
@@ -39,5 +41,3 @@ test.describe('Parent Plan Tests', () => {
     await expect(planPage.orgPlansTab).not.toBeVisible();
   });
 });
-
-createPlanTabTests(test, 'parent', ROLE_TAB_EXPECTATIONS.parent);

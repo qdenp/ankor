@@ -109,5 +109,11 @@ export default defineConfig({
         'tests/specs/sysadmin/**',
       ],
     },
+    {
+      // Подготовка данных для нового стенда (не тест): только через npm run test:setup, в test:all и CI не входит
+      name: 'setup',
+      testDir: './tests/setup',
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 });

@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { OrganizationPage } from '../../pages/organization-page';
 import { TIMEOUTS } from '../../config';
@@ -14,7 +15,8 @@ test.describe('SysAdmin Organization Tests', () => {
   });
 
   // 71922: SysAdmin sees all organizations
-  test('@TC-71922 sysadmin sees all organizations', async ({ page }) => {
+  test('sysadmin sees all organizations', async ({ page }) => {
+    await allure.allureId('71922');
     const orgPage = new OrganizationPage(page);
 
     await orgPage.gotoOrganizationsList();
@@ -30,9 +32,10 @@ test.describe('SysAdmin Organization Tests', () => {
   // 71957: Edit organization as SysAdmin
   // Выключен в 5c316fe как flaky: "organization not found". Вероятная причина — getOrgRowByEmail
   // ищет строку только на первой странице DataGrid, без поиска; организация может уйти на другую страницу.
-  test.skip('@TC-71957 sysadmin can edit organization name and revert', {
+  test.skip('sysadmin can edit organization name and revert', {
     annotation: { type: 'skip', description: 'Flaky: organization row not found on the first DataGrid page (5c316fe). Fix: locate the org via search before editing.' },
   }, async ({ page }) => {
+    await allure.allureId('71957');
     const orgPage = new OrganizationPage(page);
     const targetEmail = 'dtimokhin+aiorg01@aexsoft.com';
 

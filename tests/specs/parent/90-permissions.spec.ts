@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { SkillPage } from '../../pages/skill-page';
 import { DrillPage } from '../../pages/drill-page';
@@ -23,6 +24,7 @@ test.describe('Parent Permission Tests', () => {
   });
 
   test('should have view-only access to Skills, Drills, Evaluations and view-only Evaluation Reports', async ({ page }) => {
+    await allure.allureId('71846');
     const homePage = new HomePage(page);
     const skillPage = new SkillPage(page);
     const drillPage = new DrillPage(page);

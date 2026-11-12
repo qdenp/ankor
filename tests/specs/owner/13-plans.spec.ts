@@ -1,7 +1,7 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
 import { TIMEOUTS } from '../../config';
-import { createPlanTabTests, ROLE_TAB_EXPECTATIONS } from '../../factories/plan-tabs.factory';
 
 /**
  * 13 — Practice Plans (пункт меню Practice Plans).
@@ -15,7 +15,8 @@ test.describe('Owner Plan Tests', () => {
   });
 
   // 72600: Create Plan as Administrator / Owner
-  test('@TC-72600 should create plan and see in My Plans', async ({ page }) => {
+  test('should create plan and see in My Plans', async ({ page }) => {
+    await allure.allureId('72600');
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -38,7 +39,8 @@ test.describe('Owner Plan Tests', () => {
   });
 
   // 71645: View Plan Owner / Admin
-  test('@TC-71645 should see all plan tabs as owner', async ({ page }) => {
+  test('should see all plan tabs as owner', async ({ page }) => {
+    await allure.allureId('71645');
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -51,7 +53,8 @@ test.describe('Owner Plan Tests', () => {
   });
 
   // 72604: Non-sysadmin no Prebuilt checkbox
-  test('@TC-72604 non-sysadmin roles do not see Prebuilt checkbox', async ({ page }) => {
+  test('non-sysadmin roles do not see Prebuilt checkbox', async ({ page }) => {
+    await allure.allureId('72604');
     const planPage = new PlanPage(page);
 
     await planPage.goto();
@@ -63,6 +66,3 @@ test.describe('Owner Plan Tests', () => {
     await planPage.cancelButton.click();
   });
 });
-
-// Tab visibility tests via factory
-createPlanTabTests(test, 'owner', ROLE_TAB_EXPECTATIONS.owner);

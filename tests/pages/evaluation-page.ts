@@ -289,6 +289,22 @@ export class EvaluationPage extends BasePage {
     await this.waitForLoading();
   }
 
+  /** Открыть меню действий (⋮) самого нового черновика — в нём Edit и Delete */
+  async openNewestDraftMenu(): Promise<void> {
+    await this.tableRows.filter({ hasText: 'In Progress' }).first().getByRole('button', { name: 'More actions' }).click();
+  }
+
+  /** Закрыть открытое меню действий без выбора пункта */
+  async closeMenu(): Promise<void> {
+    await this.page.keyboard.press('Escape');
+  }
+
+  /** Открыть отчёт по адресу (например, сохранённому другим тестом серии) */
+  async openReport(url: string): Promise<void> {
+    await this.page.goto(url);
+    await this.waitForLoading();
+  }
+
   /** Проверить что evaluation report существует в таблице */
   async verifyReportExists(templateName: string): Promise<void> {
     // Report row should contain the template name

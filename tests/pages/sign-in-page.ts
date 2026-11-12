@@ -11,6 +11,7 @@ import { PAGES } from '../config';
  * - textbox "Password"
  * - button "Sign In"
  * - link "Forgot password?" -> /forgot-password
+ * - alert "Invalid login credentials" (после неверного email/пароля)
  * - link "Join an existing organization" -> /sign-up
  * - link "Create an organization profile" -> /org-signup
  */
@@ -23,6 +24,7 @@ export class SignInPage extends BasePage {
   readonly joinOrgLink: Locator;
   readonly createOrgLink: Locator;
   readonly showPasswordToggle: Locator;
+  readonly errorAlert: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -35,6 +37,7 @@ export class SignInPage extends BasePage {
     this.joinOrgLink = page.getByRole('link', { name: 'Join an existing organization' });
     this.createOrgLink = page.getByRole('link', { name: 'Create an organization profile' });
     this.showPasswordToggle = page.getByRole('button', { name: 'Show password' });
+    this.errorAlert = page.getByRole('alert');
   }
 
   /** Переход на страницу входа */

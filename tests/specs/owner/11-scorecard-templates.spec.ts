@@ -1,3 +1,4 @@
+import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { ScorecardTemplatePage } from '../../pages/scorecard-template-page';
 import { TIMEOUTS } from '../../config';
@@ -12,53 +13,50 @@ function generateTemplateName(): string {
 test.describe('Owner Score Card Template Tests', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test.beforeEach(async ({ page, loginAs }) => {
+  // Шаблон, созданный первым тестом; второй тест деактивирует именно его (новый не создаёт)
+  let createdTemplateName: string | undefined;
+
+  test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
   });
 
-  /**
-    * @TC-71292 Should create a basic Score Card Template
-    * @TC-71393 Should mark template as inactive
-   * Объединённый тест: создаёт шаблон → деактивирует → проверяет
-   */
-  test('should create and deactivate a basic Score Card Template', async ({ page }) => {
+  /** TC-71292 Create Template */
+  test('should create a basic Score Card Template', async ({ page }) => {
+    await allure.allureId('71292');
     const templateName = generateTemplateName();
-    const categoryName = 'Fundamentals';
-    const skillName = 'Dribbling';
     const templatePage = new ScorecardTemplatePage(page);
 
-    // Navigate to scorecard templates
     await templatePage.goto();
-
-    // Create new template
     await templatePage.createScorecard({
       name: templateName,
-      categoryName,
-      skillName,
+      categoryName: 'Fundamentals',
+      skillName: 'Dribbling',
     });
 
-    // Verify template appears in table
     await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to appear in table`).toBeVisible({ timeout: TIMEOUTS.long });
-
-    // Mark as inactive
-    await templatePage.toggleActive(templateName, false);
-
-    // Verify template shows as inactive
-    const row = templatePage.getRow(templateName);
-    await expect(row, `Expected template "${templateName}" to remain visible after marking inactive`).toBeVisible({ timeout: TIMEOUTS.long });
+    createdTemplateName = templateName;
   });
 
-  /**
-    * @TC-71293 Should create template with 2+ categories
-   */
+  /** TC-71393 Make inactive (на шаблоне из TC-71292) */
+  test('should mark the template as inactive', async ({ page }) => {
+    await allure.allureId('71393');
+    expect(createdTemplateName, 'Requires the template created by the previous test (serial mode)').toBeDefined();
+    const templateName = createdTemplateName!;
+    const templatePage = new ScorecardTemplatePage(page);
+
+    await templatePage.goto();
+    await templatePage.toggleActive(templateName, false);
+
+    await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to remain visible after marking inactive`).toBeVisible({ timeout: TIMEOUTS.long });
+  });
+
+  /** TC-71293 Create Template with 2+ category */
   test('should create template with 2+ categories and deactivate', async ({ page }) => {
+    await allure.allureId('71293');
     const templateName = generateTemplateName();
     const templatePage = new ScorecardTemplatePage(page);
 
-    // Navigate to scorecard templates
     await templatePage.goto();
-
-    // Create template with 2 categories
     await templatePage.createScorecard({
       name: templateName,
       categoryName: 'Fundamentals',
@@ -68,14 +66,10 @@ test.describe('Owner Score Card Template Tests', () => {
       ],
     });
 
-    // Verify template appears in table
     await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to appear in table`).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // Deactivate template
     await templatePage.toggleActive(templateName, false);
 
-    // Verify template still visible after deactivation
-    const row = templatePage.getRow(templateName);
-    await expect(row, `Expected template "${templateName}" to remain visible after marking inactive`).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(templatePage.getRow(templateName), `Expected template "${templateName}" to remain visible after marking inactive`).toBeVisible({ timeout: TIMEOUTS.long });
   });
 });

@@ -47,7 +47,7 @@ Authorization: api-token <TOKEN>
 ## Маппинг TC из CSV → TestOps
 - `allure_id` из CSV (91XXX/93XXX) = ID тест-кейса в TestOps
 - `test_case_id` из CSV = внутренний ID тест-кейса
-- В тестах используй `@TC-XXXXX` (test_case_id), НЕ allure_id
+- В тестах — `await allure.allureId('XXXXX')` первой строкой (test_case_id), НЕ allure_id. `@TC-…` в названии TestOps не распознаёт (AGENTS.md §6)
 
 ## Примеры
 - TC 91859 (allure_id) → 72600 (test_case_id) → Create Plan as Administrator/Owner
