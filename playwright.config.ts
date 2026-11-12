@@ -44,7 +44,14 @@ export default defineConfig({
   // `> test-output.log` из команды запуска: outputFile у line не поддерживается.
   reporter: process.env.CI
     ? [['html', { outputFolder: `reports/html/${role}` }]]
-    : [['line'], ['list'], ['allure-playwright'], ['html', { outputFolder: `reports/html/${role}` }]],
+    : [
+        ['line'],
+        ['list'],
+        // Короткая сводка в реальном времени по всем ролям: reports/progress.txt
+        ['./tests/reporters/progress-reporter.ts'],
+        ['allure-playwright'],
+        ['html', { outputFolder: `reports/html/${role}` }],
+      ],
 
   /* Shared settings for all projects */
   use: {

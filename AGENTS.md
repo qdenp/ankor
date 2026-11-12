@@ -25,7 +25,11 @@ npm run test:all 2>&1 > test-output.log
 ### Мониторинг
 
 ```
-# Чтение файла через Read tool:
+# Короткая сводка по всем ролям (обновляется после каждого теста):
+# Read tool → reports/progress.txt → строка на роль: N/M, ok/x/-, текущий тест; ниже — упавшие попытки с ошибкой
+# Первая строка RUNNING / FINISHED — идёт ли ещё прогон
+
+# Подробности — полный лог через Read tool:
 # Read tool → test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
 # Формат: [N/M] — тест N из M стартовал (line), ok N / x N / - N — прошёл / упал / пропущен (list)
 # test:all: перед каждой строкой имя роли — [owner], [coach] …; одна роль в логе — поиск по [coach]

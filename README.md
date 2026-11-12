@@ -31,6 +31,7 @@ npm run test:owner        # одна роль: owner | sysadmin | coach | parent
 npm run test:all          # все роли параллельно (~10 мин)
 npm run test:owner -- --grep "should edit parent"   # один тест; "--" обязателен
 npx playwright show-report reports/html/owner       # HTML-отчёт роли (у каждой роли своя папка)
+# во время прогона: reports/progress.txt — сводка по ролям (N/M, ok/x/-, текущий тест, упавшие попытки)
 ```
 
 - Перед каждым `npm run test:*` автоматически запускается `npm run typecheck`. При ошибке типов тесты не стартуют.
