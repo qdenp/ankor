@@ -249,6 +249,12 @@ export class EvaluationPage extends BasePage {
     return this.ratingInput;
   }
 
+  /** Ввести значение в открытое поле оценки и подтвердить Enter (для проверки валидации, напр. «6») */
+  async typeRatingAndConfirm(value: string): Promise<void> {
+    await this.ratingInput.fill(value);
+    await this.page.keyboard.press('Enter');
+  }
+
   /** Переход на страницу Evaluation Reports */
   async gotoReports(): Promise<void> {
     await this.sidebarReportLink.click();

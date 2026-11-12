@@ -102,8 +102,7 @@ test.describe('Owner Coach Tests', () => {
     await coachPage.search('View Coach');
     const row = coachPage.getRowByName('View Coach');
     await expect(row).toBeVisible({ timeout: TIMEOUTS.long });
-    const viewButton = row.getByRole('button', { name: 'View' });
-    await expect(viewButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(coachPage.getViewButton('View Coach')).toBeVisible({ timeout: TIMEOUTS.medium });
 
     // TC-72057 [step 1.3] exp: Есть также new coach
     await expect(coachPage.newCoachButton).toBeVisible({ timeout: TIMEOUTS.medium });
@@ -127,13 +126,7 @@ test.describe('Owner Coach Tests', () => {
     // TC-71991 [step 2]: Нажать edit на выбранном юзере
     // Ищем coach
     await coachPage.search('View Coach');
-    const row2 = coachPage.getRowByName('View Coach');
-    await expect(row2).toBeVisible({ timeout: TIMEOUTS.long });
-    const moreActions = row2.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
-    await moreActions.click();
-    await expect(coachPage.page.getByRole('menuitem', { name: 'Edit' })).toBeVisible({ timeout: TIMEOUTS.medium });
-    await coachPage.page.getByRole('menuitem', { name: 'Edit' }).click();
+    await coachPage.openEditCoach('View Coach');
 
     // TC-71991 [step 2.1] exp: открылась форма с редактированием first name, last name, email, phone
     await expect(coachPage.firstNameInput).toBeVisible({ timeout: TIMEOUTS.medium });

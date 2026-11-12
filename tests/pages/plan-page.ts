@@ -47,6 +47,7 @@ export class PlanPage extends BasePage {
 
   // Plan detail actions (after View)
   readonly inviteUsersButton: Locator;
+  readonly inviteDialogHeading: Locator;
   readonly planDetailEditLink: Locator;
 
   // Toast / success notification
@@ -93,6 +94,7 @@ export class PlanPage extends BasePage {
 
     // Plan detail actions (after clicking View)
     this.inviteUsersButton = page.getByRole('button', { name: 'Invite users' }).first();
+    this.inviteDialogHeading = page.getByRole('heading', { name: /Invite/i });
     this.planDetailEditLink = page.getByRole('link', { name: 'Edit' }).first();
 
     // Drill edit dialog
@@ -198,10 +200,10 @@ export class PlanPage extends BasePage {
     await this.removeDrillOption.click();
   }
 
-  /** Кликнуть View на карточке плана */
+  /** Открыть детали плана: View на карточке — это ссылка (link), не кнопка */
   async viewPlan(name: string): Promise<void> {
     const card = this.getPlanCard(name);
-    await card.getByRole('button', { name: 'View' }).click();
+    await card.getByRole('link', { name: 'View' }).click();
     await this.waitForLoading();
   }
 

@@ -46,14 +46,12 @@ test.describe('Sysadmin Plan Tests', () => {
     const planCard = planPage.getPlanCard(planName);
     await expect(planCard).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // Нажимаем View (это ссылка, не кнопка), чтобы открыть детали плана
-    const viewLink = planCard.getByRole('link', { name: 'View' });
-    await expect(viewLink).toBeVisible({ timeout: TIMEOUTS.medium });
-    await viewLink.click();
+    // Открываем детали плана (View на карточке — ссылка)
+    await planPage.viewPlan(planName);
 
     // В деталях плана нажимаем Invite users
-    await planPage.inviteUsersButton.click();
-    await expect(page.getByRole('heading', { name: /Invite/i }), 'Invite users dialog should open').toBeVisible({ timeout: TIMEOUTS.medium });
+    await planPage.inviteUsers();
+    await expect(planPage.inviteDialogHeading, 'Invite users dialog should open').toBeVisible({ timeout: TIMEOUTS.medium });
   });
 
   // 72611: Prebuilt checkbox (sys admin)
@@ -100,10 +98,8 @@ test.describe('Sysadmin Plan Tests', () => {
     const prebuiltCard = planPage.getPlanCard(planName);
     await expect(prebuiltCard).toBeVisible({ timeout: TIMEOUTS.medium });
 
-    // Открываем детали плана через View (в Prebuilt табе View - это ссылка)
-    const viewLink = prebuiltCard.getByRole('link', { name: 'View' });
-    await expect(viewLink).toBeVisible({ timeout: TIMEOUTS.medium });
-    await viewLink.click();
+    // Открываем детали плана через View (View на карточке — ссылка)
+    await planPage.viewPlan(planName);
 
     // В деталях плана нажимаем Edit
     await planPage.editPlanFromDetail();

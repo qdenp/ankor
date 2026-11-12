@@ -192,8 +192,13 @@ export class DrillPage extends BasePage {
     const viewButton = drillCard.getByRole('button', { name: 'View' });
     await expect(viewButton).toBeVisible({ timeout: TIMEOUTS.medium });
     await viewButton.click();
-    await expect(this.page.getByRole('heading', { name: drillName, exact: false })).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(this.getDetailHeading(drillName)).toBeVisible({ timeout: TIMEOUTS.long });
     await this.waitForLoading();
+  }
+
+  /** Заголовок детальной страницы дрилла (= имя дрилла); на неё попадаем после создания и по View */
+  getDetailHeading(drillName: string): Locator {
+    return this.page.getByRole('heading', { name: drillName });
   }
 
   /** Ждать появления YouTube iframe на странице деталей дрила */

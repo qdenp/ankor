@@ -56,7 +56,7 @@ test.describe('Owner Drill Tests', () => {
     // TC-74151 [step 6]: Создать
     await drillPage.clickCreate();
     // После создания дрила — редирект на detail page (heading = имя дрила)
-    await expect(page.getByRole('heading', { name: DRILL_NAME })).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(drillPage.getDetailHeading(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
 
     // TC-74151 [step 6.2]: в библиотеке отображен drill — вернуться в список
     await drillPage.goToDrillsList();
@@ -96,7 +96,7 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.fillMaxPlayers('12');
     await drillPage.clickCreate();
     // После создания — detail page
-    await expect(page.getByRole('heading', { name: DRILL_NAME })).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(drillPage.getDetailHeading(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
 
     // Вернуться в список
     await drillPage.goToDrillsList();
@@ -124,7 +124,7 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.fillYoutubeUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
     await drillPage.clickCreate();
     // После создания — detail page
-    await expect(page.getByRole('heading', { name: DRILL_NAME })).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(drillPage.getDetailHeading(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
 
     // Вернуться в список (для openDrillDetail нужен доступ из списка)
     await drillPage.goToDrillsList();

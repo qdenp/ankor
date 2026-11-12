@@ -122,10 +122,15 @@ export class CoachPage extends BasePage {
     return this.coachRows.filter({ hasText: name }).first();
   }
 
-  /** Открыть edit coach через More actions (search уже применён) */
-  async openEditCoach(email: string): Promise<void> {
-    // Ищем coach по email в строке таблицы (search уже применён тестом)
-    const row = this.page.getByRole('row', { name: email, exact: false }).first();
+  /** Кнопка View в строке коуча (по имени) */
+  getViewButton(name: string): Locator {
+    return this.getRowByName(name).getByRole('button', { name: 'View' });
+  }
+
+  /** Открыть edit coach через More actions (search уже применён); identifier — email или имя из строки */
+  async openEditCoach(identifier: string): Promise<void> {
+    // Ищем coach в строке таблицы (search уже применён тестом)
+    const row = this.page.getByRole('row', { name: identifier }).first();
     await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
     const moreActions = row.getByRole('button', { name: 'More actions' });
     await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });

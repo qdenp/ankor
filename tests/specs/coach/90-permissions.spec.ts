@@ -77,7 +77,7 @@ test.describe('Coach Permission Tests', () => {
 
     // [step 7] Easy join - CRUD (page loads)
     await homePage.goToEasyJoin();
-    await expect(page.locator('h1, h2, h3').first(), 'Easy Join page should load').toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(homePage.pageHeading, 'Easy Join page should load').toBeVisible({ timeout: TIMEOUTS.long });
 
     // [step 8] Evaluation - CRUD (Create button visible)
     await evaluationPage.goto();

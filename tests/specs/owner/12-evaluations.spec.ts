@@ -77,8 +77,7 @@ test.describe('Owner Evaluation Tests', () => {
     // Wait for input to appear and enter 6
     const ratingInput = evaluationPage.getRatingInput();
     await expect(ratingInput, 'Expected rating input to appear').toBeVisible({ timeout: TIMEOUTS.medium });
-    await ratingInput.fill('6');
-    await page.keyboard.press('Enter');
+    await evaluationPage.typeRatingAndConfirm('6');
 
     // Value should be blocked or reset — wait for input to disappear (validation)
     await expect(ratingInput, 'Expected rating input to be hidden after validation').toBeHidden({ timeout: TIMEOUTS.medium });
