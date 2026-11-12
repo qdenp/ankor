@@ -50,6 +50,12 @@ export class PlanPage extends BasePage {
   readonly inviteDialogHeading: Locator;
   readonly planDetailEditButton: Locator;
 
+  // Invite users dialog
+  readonly inviteDialog: Locator;
+  readonly inviteSearchInput: Locator;
+  readonly inviteUserOptions: Locator;
+  readonly sendInvitesButton: Locator;
+
   // Toast / success notification
   readonly toast: Locator;
 
@@ -96,6 +102,12 @@ export class PlanPage extends BasePage {
     this.inviteUsersButton = page.getByRole('button', { name: 'Invite users' }).first();
     this.inviteDialogHeading = page.getByRole('heading', { name: /Invite/i });
     this.planDetailEditButton = page.getByRole('button', { name: 'Edit', exact: true });
+
+    // Invite users dialog: поиск по имени (по email не находит), строка пользователя — кнопка с чекбоксом
+    this.inviteDialog = page.getByRole('dialog', { name: 'Invite users' });
+    this.inviteSearchInput = this.inviteDialog.getByRole('textbox', { name: 'Search users' });
+    this.inviteUserOptions = this.inviteDialog.getByRole('list').getByRole('button');
+    this.sendInvitesButton = this.inviteDialog.getByRole('button', { name: 'Send invites' });
 
     // Drill edit dialog
     this.drillSaveButton = page.getByRole('button', { name: /save|create/i }).first();
@@ -210,6 +222,26 @@ export class PlanPage extends BasePage {
   /** Кликнуть Invite Users в деталях плана */
   async inviteUsers(): Promise<void> {
     await this.inviteUsersButton.click();
+  }
+
+  /** Пригласить пользователя в открытый план (детали плана): поиск по имени → отметить → Send invites */
+  async inviteUser(userName: string): Promise<void> {
+    await this.inviteUsers();
+    await expect(this.inviteDialog).toBeVisible();
+    await this.inviteSearchInput.fill(userName);
+    // Имя в строке пользователя — отдельный абзац ("Athlete User"): точное совпадение,
+    // иначе подстрока совпала бы и с "Athlete User2"
+    // Локатор в has ищется внутри строки, поэтому строится от page, а не от диалога
+    await this.inviteUserOptions.filter({ has: this.page.getByText(userName, { exact: true }) }).click();
+    await expect(this.sendInvitesButton).toBeEnabled();
+    await this.sendInvitesButton.click();
+    await expect(this.inviteDialog).toBeHidden({ timeout: TIMEOUTS.long });
+  }
+
+  /** Edit на карточке конкретного плана — ссылка или кнопка (planCardEditLink — первая Edit на всей странице) */
+  getPlanCardEditLink(name: string): Locator {
+    const card = this.getPlanCard(name);
+    return card.getByRole('link', { name: 'Edit' }).or(card.getByRole('button', { name: 'Edit' }));
   }
 
   /** Кликнуть Edit в деталях плана */

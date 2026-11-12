@@ -5,7 +5,8 @@ import { CoachPage } from '../pages/coach-page';
 import { ParentPage } from '../pages/parent-page';
 import { OrgSignUpPage } from '../pages/org-signup-page';
 import { OrganizationPage } from '../pages/organization-page';
-import { CREDENTIALS, ORGANIZATIONS, TIMEOUTS } from '../config';
+import { PlanPage } from '../pages/plan-page';
+import { CREDENTIALS, ORGANIZATIONS, PLANS, TIMEOUTS } from '../config';
 
 /**
  * Тест для создания пользователей через интерфейс сайта.
@@ -130,5 +131,30 @@ test.describe('Create Test Users', () => {
     await orgPage.waitForDataGridLoaded();
     await orgPage.search(org.adminEmail);
     await expect(orgPage.getOrgRowByEmail(org.adminEmail)).toBeVisible({ timeout: TIMEOUTS.long });
+  });
+
+  /**
+   * План owner, в который приглашён атлет — для тестов вкладки Invited (athlete/13-plans, 72609).
+   * Запускать один раз: npm run test:setup -- --grep "invite athlete"
+   */
+  test('should create a plan and invite athlete', async ({ page }) => {
+    const plan = PLANS.athleteInvited;
+    const signInPage = new SignInPage(page);
+    const planPage = new PlanPage(page);
+
+    await signInPage.goto();
+    await signInPage.login(CREDENTIALS.owner.email, CREDENTIALS.owner.password);
+    await expect(page).not.toHaveURL(/sign-in/);
+
+    await planPage.goto();
+    await planPage.clickNewPlan();
+    await planPage.fillPlanForm({ name: plan.name });
+    await planPage.addFirstDrill();
+    await planPage.savePlanAndReturnToMyPlans();
+
+    await planPage.search(plan.name);
+    await expect(planPage.getPlanCard(plan.name)).toBeVisible({ timeout: TIMEOUTS.long });
+    await planPage.viewPlan(plan.name);
+    await planPage.inviteUser(plan.invitee);
   });
 });
