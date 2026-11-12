@@ -189,7 +189,7 @@
   - Привести названия к реальным проверкам (например, «sees Create buttons…» вместо «full CRUD access»).
   - Добавить проверки «только своя организация» (owner) и «все организации» (sysadmin).
   - Перед каждым `toBeHidden` ждать загрузки страницы, иначе негативная проверка проходит раньше рендера.
-- [ ] **2.10** [11-scorecard-templates.spec.ts:48,79](tests/specs/owner/11-scorecard-templates.spec.ts#L48): проверять статус Inactive в строке.
+- [x] **2.10** Сделано (2026-11-12): после деактивации строка шаблона содержит `Inactive` (колонка Status), в обоих тестах. [11-scorecard-templates.spec.ts:48,79](tests/specs/owner/11-scorecard-templates.spec.ts#L48): проверять статус Inactive в строке.
 - [x] **2.11** Закрыт в 3.8: неверный пароль проверяет текст ошибки `Invalid login credentials`; тест пустой формы и describe `Sign Up` удалены. [01-signin.spec.ts](tests/specs/owner/01-signin.spec.ts):
   - Для невалидных данных и пустой формы проверять сообщения об ошибке.
   - Удалить дублирующий describe `Sign Up`.
