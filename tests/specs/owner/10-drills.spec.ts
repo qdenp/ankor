@@ -62,7 +62,7 @@ test.describe('Owner Drill Tests', () => {
 
     // TC-74151 [step 6.2]: в библиотеке отображен drill — вернуться в список
     await drillPage.goToDrillsList();
-    await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(drillPage.getCard(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
   /**
@@ -105,7 +105,7 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.goToDrillsList();
 
     // TC-72684 [step 1.1]: Verify drill appears in table
-    await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(drillPage.getCard(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
   /**
@@ -132,7 +132,7 @@ test.describe('Owner Drill Tests', () => {
 
     // Вернуться в список (для openDrillDetail нужен доступ из списка)
     await drillPage.goToDrillsList();
-    await expect(drillPage.getRow(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(drillPage.getCard(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
 
     // TC-72683 [step 1]: Открыть detail дрила
     await drillPage.openDrillDetail(DRILL_NAME);

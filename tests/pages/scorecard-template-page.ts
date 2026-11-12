@@ -178,10 +178,8 @@ export class ScorecardTemplatePage extends BasePage {
 
   /** Получить локатор строки шаблона в таблице */
   getRow(name: string): Locator {
-    const byRole = this.page.getByRole('row', { name });
-    const byCell = this.page.locator('tr', { hasText: name }).first();
-    const byText = this.page.getByText(name, { exact: false }).first();
-    return byRole.or(byCell).or(byText).first();
+    // Только строка таблицы: getByText находил имя и во всплывающем уведомлении «…created»
+    return this.page.getByRole('row', { name }).first();
   }
 
   /** Открытие action menu (3 точки) и выбор Edit */

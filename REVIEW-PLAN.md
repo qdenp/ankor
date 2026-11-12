@@ -196,7 +196,7 @@
 - [x] **2.12** Закрыт: первый тест — `test.skip` с TODO(71116) (профиль не проверяется); откат имени — к константе `ORGANIZATIONS` (PR #2), поэтому упавший прогон чинится следующим, `finally` не нужен. [04-organization.spec.ts](tests/specs/owner/04-organization.spec.ts):
   - Первый тест проверяет только «не sign-in» — проверять профиль.
   - Откат имени перенести в `afterEach`/`finally`.
-- [ ] **2.13** `getRow = byRole.or(byCell).or(getByText(name))` (drill, evaluation, scorecard): ветка `getByText` находит имя в toast и заголовках. Убрать её. Строка таблицы — только `getByRole('row')` с фильтром.
+- [x] **2.13** Сделано (2026-11-12): scorecard — только `getByRole('row')`; drill — список карточками, `getCard` по `article` (раньше работала только ветка getByText); evaluation — неиспользуемые `getRow`/`getEditButton` удалены; шаблон в AGENTS.md §4 заменён. `getRow = byRole.or(byCell).or(getByText(name))` (drill, evaluation, scorecard): ветка `getByText` находит имя в toast и заголовках. Убрать её. Строка таблицы — только `getByRole('row')` с фильтром.
 - [x] **2.14** (причина skip добавлена аннотацией, видна в отчётах; остальная часть пункта — в этапе 2) [sysadmin/04-organization.spec.ts:31](tests/specs/sysadmin/04-organization.spec.ts#L31): у `test.skip` нет причины — добавить её. Тест `@TC-71922` проверяет только загрузку страницы, а обещает «все организации».
 
 ---
