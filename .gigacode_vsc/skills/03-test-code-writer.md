@@ -1,207 +1,28 @@
-# Скилл: Писатель Тестового Кода
+# Скилл 03: код теста и PO, прогон до PASS
 
-## Назначение
-Написание кода теста и методов page object, запуск тестов и первичный рефакторинг до получения работающего теста.
+**Вход:** утверждённая таблица 02. **Выход:** тест, проходящий локально.
 
-## Когда использовать
-После того как Планировщик Шагов Теста составил детальный план и пользователь его утвердил.
+## Образцы — реальный код проекта (не копировать из документации)
+| Что | Где смотреть |
+|---|---|
+| Спек: `loginAs`, `serial`, `allureId`, хранилище сущностей | `tests/specs/owner/06-coaches.spec.ts` |
+| Вход другого пользователя в отдельном контексте | `tests/specs/owner/07-parents.spec.ts` |
+| Тест с пропуском и TODO | `tests/specs/owner/10-drills.spec.ts` (72684) |
+| PO: поля в конструкторе, ожидание загрузки, геттеры строк | `tests/pages/manage-users-page.ts` |
+| Карточки списка (`getCard`) | `tests/pages/drill-page.ts` |
+| Данные стенда: создать → сохранить → деактивировать | `tests/helpers/test-data-store.ts`, `tests/helpers/deactivate-user.ts` |
 
-## Порядок выполнения
+## Шаги
+1. **PO** (если нужно): новые локаторы — `readonly`-поля, присвоить в конструкторе; методы-действия ждут результат (`waitForLoading()` после перехода и сохранения). Общий PO — сначала diff и одобрение (AGENTS §2).
+2. **Спек:** импорт `test, expect` из `../../fixtures`; первая строка теста — `await allure.allureId('<id>')`; `loginAs(role)`; название — поведение без номеров (AGENTS §6). Создаёт данные — по AGENTS §9 (уникальные имена, `+temp-` у email, уборка, `rememberEntity`).
+3. **Проверки до прогона:** `npm run typecheck` и `npm run lint` (локаторы в спеке, `waitForTimeout`, `.catch`, `expect(await …)`, `toBeTruthy`). `--list` не запускать: пишет «skipped» в `allure-results`.
+4. **Прогон локально** (не CI): `npm run test:<роль> -- --grep "<название>"` с `timeout` (AGENTS §0). Сначала убедиться, что новый ассерт **падает**, если проверяемого нет (иначе это ложный PASS).
+5. **Падение — минимальная правка по причине:**
+   - локатор не найден / таймаут → посмотреть реальную страницу (snapshot), поправить PO;
+   - пустая таблица / старые данные → не хватает `waitForLoading()`;
+   - редирект на sign-in → данные пользователя, роль;
+   - мигает → ожидание условия, не `waitForTimeout`; ретраи уже есть (`retries: 2`).
+6. Не проходит после 3 попыток — остановиться и спросить пользователя.
 
-### Шаг 0: Per-test breakdown table (до написания кода)
-
-Для каждого теста составить таблицу:
-
-| Step | UI / PO method | Why | PO method (existing / new) |
-|------|----------------|-----|----------------------------|
-| Login | fixture | One login per test | `loginAs(role)` (AGENTS.md §8) |
-| Create athlete | PO method | Precondition | athletePage.createAthlete() — **new** |
-| Verify count | UI assertion | Outcome | expect(athletePage.athleteRows).toHaveCount(N) — existing |
-
-**Правило:** каждый UI row должен быть justified. Если шаг — precondition → PO method. Если шаг — action under test → UI через PO. Если шаг — assertion → web-first expect через PO свойство.
-
-### Шаг 1: Создание/обновление Page Objects (если нужно)
-- Добавить новые локаторы в конструктор PO (readonly)
-- Добавить новые методы в PO (только действия, без ассертов)
-- Следовать точному шаблону PO из AGENTS.md
-
-### Шаг 2: Написание тестового файла
-- Создать новый тестовый файл или дополнить существующий
-- Использовать правильный импорт: `import { test, expect } from '../../fixtures'`
-- Настроить serial mode при необходимости
-- Добавить beforeEach с loginAs, если требуется аутентификация
-- Написать тест с описательным именем (без номеров тикетов в строке test())
-- Первой строкой теста — `await allure.allureId('<test_case_id>')` (импорт `import * as allure from 'allure-js-commons'`); один тест — один кейс (AGENTS.md §6)
-
-### Шаг 3: Проверка качества кода
-Перед запуском:
-- [ ] Все локаторы в PO, а не в тесте
-- [ ] Используются web-first ассерты (expect с авто-ретраем)
-- [ ] Нет waitForTimeout
-- [ ] Нет try/catch для глушения ошибок
-- [ ] Нет хардкодных таймаутов
-- [ ] Имя теста описательное, без номеров
-- [ ] Правильный импорт фикстур
-- [ ] Serial mode настроен, если тесты изменяют состояние
-- [ ] Методы PO возвращают Promise<void>, а не boolean
-- [ ] `npm run typecheck` — без ошибок (новые поля PO объявлены в классе, опции методов Playwright существуют)
-
-### Шаг 4: Запуск тестов
-```bash
-npm run typecheck
-npx playwright test tests/specs/{role}/{file}.spec.ts --list
-```
-Убедиться, что ошибок типов нет и тесты обнаружены. `npm run test:{role}` и так запускает `typecheck` перед тестами (хук `pretest:{role}`) и при ошибке типов тесты не стартуют.
-
-```bash
-npm run test:{role}   # owner, sysadmin, coach, parent, athlete, или all
-```
-Запустить тестовый файл через npm script (AGENTS.md §15).
-
-### Шаг 5: Анализ результатов и рефакторинг
-
-**Если тест ПРОХОДИТ:**
-- Перейти к Шагу 6 — финальная проверка
-
-**Если тест НЕ ПРОХОДИТ:**
-Анализировать ошибку и вносить минимальные исправления:
-
-#### Категория 1: Локатор не найден
-- **Симптом:** `Locator does not exist` или `Timeout exceeded`
-- **Действие:** Проверить селектор, убедиться, что элемент на странице, скорректировать PO
-
-#### Категория 2: Ассерт не прошёл
-- **Симптом:** `Expected to have text 'X' but got 'Y'`
-- **Действие:** Проверить ожидаемое значение, проблемы с таймингом, скорректировать ассерт
-
-#### Категория 3: Проблема навигации/маршрута
-- **Симптом:** `URL should be '/x' but was '/y'`
-- **Действие:** Проверить шаг навигации, маршрут, дополнительные шаги
-
-#### Категория 4: Проблема пользователя/аутентификации
-- **Симптом:** `Redirected to sign-in` или `403 Forbidden`
-- **Действие:** Проверить существование пользователя, email, роли/права
-
-#### Категория 5: Нестабильный/сетевой сбой
-- **Симптом:** `Network error`, `timeout`, прерывистые сбои
-- **Действие:** Пусть ретраи обработают (retries: 2 в конфиге), при сохранении — добавить `locator.waitFor()`
-
-### Шаг 6: Повторный запуск после исправления
-```bash
-npm run test:{role} -- --grep "название теста"
-```
-`--` обязателен: без него npm заберёт `--grep` себе и запустит все тесты роли.
-Перезапустить конкретный упавший тест для проверки исправления.
-
-### Шаг 7: Финальная проверка
-- Если тест прошёл → **отдать работающий тест**
-- Если тест снова упал → повторить Шаги 5-6 (максимум 3 попытки)
-- Если > 3 попыток → остановиться и запросить clarification у пользователя
-
----
-
-## Код шаблоны
-
-### Новый тестовый файл (PO-only asserts)
-```ts
-import { test, expect } from '../../fixtures';
-import { AthletePage } from '../../pages/athlete-page';
-import { TIMEOUTS } from '../../config';
-
-test.describe('Owner Athletes Tests', () => {
-  test.describe.configure({ mode: 'serial' });
-
-  test.beforeEach(async ({ loginAs }) => {
-    await loginAs('owner');
-  });
-
-  test('should create athlete and see in list', async ({ page }) => {
-    const athletePage = new AthletePage(page);
-    
-    // Шаг 1: Переход
-    await athletePage.goto();
-    
-    // Шаг 2: Взаимодействие через PO методы
-    await athletePage.createAthlete({
-      firstName: 'Test',
-      lastName: 'Athlete',
-      email: 'test.athlete@example.com',
-      password: 'Password123',
-      confirmPassword: 'Password123',
-      graduationYear: '2010',
-      team: 'Team01',
-      gender: 'Female',
-    });
-    
-    // Шаг 3: Проверка (web-first ассерты ТОЛЬКО через PO свойства)
-    await expect(athletePage.getAthleteRow('test.athlete@example.com')).toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(athletePage.heading).toBeVisible();
-    await expect(page).toHaveURL(/athletes/);
-  });
-});
-```
-
-### Новый метод Page Object (Действие)
-```ts
-async createAthlete(params: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  graduationYear: string;
-  team: string;
-  gender: string;
-}): Promise<void> {
-  await this.clickNewAthlete();
-  await this.fillAthleteForm(params);
-  await this.createButton.click();
-  await expect(this.newAthleteHeading).toBeHidden({ timeout: TIMEOUTS.medium });
-}
-```
-
-### Новый локатор Page Object
-```ts
-// В конструкторе:
-readonly heading = page.getByRole('heading', { name: 'Athletes', level: 3 });
-readonly newAthleteButton = page.getByRole('button', { name: /^New\s+\w+$/i }).first();
-readonly searchInput = page.getByRole('textbox', { name: /search.*name|search.*email/i });
-readonly createButton = page.getByRole('button', { name: 'Create' });
-```
-
-### Поиск строк в таблице (Надёжный паттерн)
-```ts
-getAthleteRow(email: string): Locator {
-  return this.athleteRows.filter({ hasText: email }).first(); // строка в hasText — подстрока без учёта регистра
-}
-```
-
----
-
-## Правила
-- ВСЕГДА строго следовать правилам AGENTS.md
-- ВСЕГДА использовать web-first ассерты
-- Не проверять бизнес-результат в методах PO (ждать состояние через `expect` можно — AGENTS.md §4)
-- Не использовать `page.locator()` / `page.getByRole()` / `page.getByText()` напрямую в тестах — только методы и свойства PO
-- ВСЕГДА делать так, чтобы методы PO возвращали `Promise<void>`
-- ВСЕГДА объявлять локаторы как `readonly` в конструкторе
-- Использовать TIMEOUTS из config.ts, если нужен явный wait (редко)
-- Использовать надёжные паттерны локаторов (getByRole > data-test > getByText > CSS селекторы)
-- Вносить минимальные изменения для исправления ошибок
-- Не глушить ошибки через try/catch или .catch()
-- Если тест не проходит после 3 попыток → остановиться и спросить пользователя
-
----
-
-## Формат вывода
-После каждого запуска отчитываться:
-1. **Page Objects изменены:** [список файлов и что добавлено]
-2. **Тестовый файл:** [новый или существующий, путь, что добавлено]
-3. **Результат запуска:** PASS / FAIL
-4. **Если FAIL:** [ошибка + внесённые исправления]
-5. **Статус:** "Тест проходит → переходим к Ревью и Правкам" или "Нужны правки → повторный запуск"
-
----
-
-## Следующий скилл
-После получения проходящего теста → передать результат в **04-test-review-and-fixes** (Ревью и Правки).
+## Отчёт
+Изменённые PO и спек; результат прогона (PASS/FAIL, что исправлено); что тест создал на стенде. Дальше — `04-test-review-and-fixes.md`.
