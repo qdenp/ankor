@@ -51,7 +51,7 @@ test.describe('Sysadmin Plan Tests', () => {
 
     // В деталях плана нажимаем Invite users
     await planPage.inviteUsers();
-    await expect(planPage.inviteDialogHeading, 'Invite users dialog should open').toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(planPage.inviteDialogHeading, 'Invite users dialog should open').toBeVisible();
   });
 
   // 72611: Prebuilt checkbox (sys admin)
@@ -67,14 +67,14 @@ test.describe('Sysadmin Plan Tests', () => {
     await planPage.addFirstDrill();
 
     // Sysadmin видит Prebuilt checkbox в форме создания
-    await expect(planPage.prebuiltCheckbox).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(planPage.prebuiltCheckbox).toBeVisible();
     await planPage.prebuiltCheckbox.check();
 
     await planPage.savePlanAndReturnToMyPlans();
 
     // План должен появиться в Prebuilt табе
     await planPage.goToPrebuilt();
-    await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(planPage.getPlanCard(planName)).toBeVisible();
   });
 
   // 72614: Unchecking Prebuilt removes plan from Prebuilt tab
@@ -96,7 +96,7 @@ test.describe('Sysadmin Plan Tests', () => {
     // Проверяем что план в Prebuilt табе
     await planPage.goToPrebuilt();
     const prebuiltCard = planPage.getPlanCard(planName);
-    await expect(prebuiltCard).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(prebuiltCard).toBeVisible();
 
     // Открываем детали плана через View (View на карточке — ссылка)
     await planPage.viewPlan(planName);
@@ -109,6 +109,6 @@ test.describe('Sysadmin Plan Tests', () => {
 
     // Проверяем что план исчез из Prebuilt таба
     await planPage.goToPrebuilt();
-    await expect(planPage.getPlanCard(planName)).not.toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(planPage.getPlanCard(planName)).not.toBeVisible();
   });
 });

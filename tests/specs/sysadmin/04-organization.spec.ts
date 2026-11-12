@@ -48,7 +48,7 @@ test.describe('SysAdmin Organization Tests', () => {
 
     // Click Edit on the target organization row
     await orgPage.clickEditOnRow(targetOrgRow);
-    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable();
 
     // Verify the input shows the current name
     await expect(orgPage.nameInput).toHaveValue(originalName);
@@ -70,7 +70,7 @@ test.describe('SysAdmin Organization Tests', () => {
 
     // Click Edit to verify name changed
     await orgPage.clickEditOnRow(newOrgRow);
-    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable();
     await expect(orgPage.nameInput, 'Name input should show new name').toHaveValue(newName);
 
     // Revert cleanup: go back to list, search by new name, edit, revert to original
@@ -85,7 +85,7 @@ test.describe('SysAdmin Organization Tests', () => {
 
     // Click Edit to revert
     await orgPage.clickEditOnRow(orgRowToEdit);
-    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable();
 
     await orgPage.fillOrgForm({ name: originalName });
     await orgPage.save();
@@ -101,7 +101,7 @@ test.describe('SysAdmin Organization Tests', () => {
     await expect(revertedOrgRow, 'Reverted org row should be visible').toBeVisible({ timeout: TIMEOUTS.long });
 
     await orgPage.clickEditOnRow(revertedOrgRow);
-    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable({ timeout: TIMEOUTS.medium });
+    await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable();
     await expect(orgPage.nameInput, 'Name input should show original name').toHaveValue(originalName);
   });
 });

@@ -88,14 +88,14 @@ export class DrillPage extends BasePage {
   async goto(): Promise<void> {
     const drillNav = this.page.getByRole('link', { name: /drills|Drills/i, exact: false });
     await drillNav.click();
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.heading).toBeVisible();
     await this.waitForLoading();
   }
 
   /** Нажатие кнопки Create drill */
   async clickNewDrill(): Promise<void> {
     await this.newDrillButton.click();
-    await expect(this.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.nameInput).toBeVisible();
   }
 
   /** Заполнение имени дрила */
@@ -113,7 +113,7 @@ export class DrillPage extends BasePage {
     await this.segmentSelect.click();
     // Segment dropdown uses listbox with option elements
     const segmentOption = this.page.getByRole('option', { name: segment, exact: true }).first();
-    await expect(segmentOption).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(segmentOption).toBeVisible();
     await segmentOption.click();
   }
 
@@ -150,16 +150,16 @@ export class DrillPage extends BasePage {
   /** Добавление skill mapping через popup */
   async addSkillMapping(skillName: string): Promise<void> {
     await this.addSkillMappingButton.click();
-    await expect(this.skillMappingPopupTitle).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.skillMappingPopupTitle).toBeVisible();
 
     // Выбрать скилл — кликаем на текст навыка
     const skillText = this.page.getByRole('button', { name: skillName, exact: true });
-    await expect(skillText).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(skillText).toBeVisible();
     await skillText.click();
 
     // Сохранить
     await this.doneButton.click();
-    await expect(this.skillMappingPopup).toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(this.skillMappingPopup).toBeHidden();
   }
 
   /** Нажатие кнопки Create/Save */
@@ -188,9 +188,9 @@ export class DrillPage extends BasePage {
   async openDrillDetail(drillName: string): Promise<void> {
     // Drill card — article с кнопкой "View"
     const drillCard = this.page.getByRole('article', { name: drillName, exact: false }).first();
-    await expect(drillCard).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(drillCard).toBeVisible();
     const viewButton = drillCard.getByRole('button', { name: 'View' });
-    await expect(viewButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(viewButton).toBeVisible();
     await viewButton.click();
     await expect(this.getDetailHeading(drillName)).toBeVisible({ timeout: TIMEOUTS.long });
     await this.waitForLoading();

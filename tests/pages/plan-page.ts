@@ -118,14 +118,14 @@ export class PlanPage extends BasePage {
   /** Переход на страницу Plans через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await expect(this.myPlansTab).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.myPlansTab).toBeVisible();
     await this.waitForLoading();
   }
 
   /** Нажатие кнопки New Plan */
   async clickNewPlan(): Promise<void> {
     await this.newPlanButton.click();
-    await expect(this.newPlanHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newPlanHeading).toBeVisible();
   }
 
   /** Заполнение формы создания Plan */
@@ -138,7 +138,7 @@ export class PlanPage extends BasePage {
     await this.clickNewPlan();
     await this.fillPlanForm(params);
     await this.saveButton.click();
-    await expect(this.newPlanHeading).toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(this.newPlanHeading).toBeHidden();
     // После сохранения — возврат к списку планов, он грузится заново
     await this.waitForLoading();
   }
@@ -179,7 +179,7 @@ export class PlanPage extends BasePage {
   async editDrill(params: { notes?: string; duration?: string }): Promise<void> {
     await this.drillMenuButton.click();
     await this.editDrillOption.click();
-    await expect(this.drillNotesInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.drillNotesInput).toBeVisible();
     if (params.notes) {
       await this.drillNotesInput.fill(params.notes);
     }
@@ -240,7 +240,7 @@ export class PlanPage extends BasePage {
   /** Добавить первый drill к плану (открыть диалог, добавить первый доступный, закрыть) */
   async addFirstDrill(): Promise<void> {
     await this.addDrillButton.click();
-    await expect(this.addDrillsHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.addDrillsHeading).toBeVisible();
     await this.addDrillConfirmButton.click();
     await this.doneButton.click();
     await expect(this.segmentsHeading).toBeVisible({ timeout: TIMEOUTS.short });

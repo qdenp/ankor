@@ -98,7 +98,7 @@ export class BasePage {
     await this.profileButton.click({ timeout: TIMEOUTS.medium });
     
     // Wait for dropdown menu
-    await expect(this.logoutMenuItem).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.logoutMenuItem).toBeVisible();
   }
 
   /** Выход из системы */

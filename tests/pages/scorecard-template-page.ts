@@ -48,14 +48,14 @@ export class ScorecardTemplatePage extends BasePage {
   /** Переход на страницу Scorecard Templates через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await expect(this.newScorecardButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newScorecardButton).toBeVisible();
     await this.waitForLoading();
   }
 
   /** Нажатие кнопки New template */
   async clickNewScorecard(): Promise<void> {
     await this.newScorecardButton.click();
-    await expect(this.scorecardNameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.scorecardNameInput).toBeVisible();
   }
 
   /** Заполнение поля Scorecard name */
@@ -84,7 +84,7 @@ export class ScorecardTemplatePage extends BasePage {
     // Проверяем есть ли опции в dropdown
     await videoSelect.click();
     // Ждём появления опций вместо waitForTimeout
-    await expect(this.page.getByRole('option').first()).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.page.getByRole('option').first()).toBeVisible();
 
     // Проверяем есть ли опции
     const options = this.page.getByRole('option');
@@ -113,7 +113,7 @@ export class ScorecardTemplatePage extends BasePage {
     await this.addCategoryButton.click();
     // Ждём появления новой категории вместо waitForTimeout
     const newCategoryInputs = this.page.getByRole('textbox', { name: 'Category name' });
-    await expect(newCategoryInputs.last()).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(newCategoryInputs.last()).toBeVisible();
 
     // После добавления — последняя категория будет активной
     await newCategoryInputs.last().fill(params.categoryName);
@@ -126,7 +126,7 @@ export class ScorecardTemplatePage extends BasePage {
 
     await videoSelect.click();
     // Ждём появления опций вместо waitForTimeout
-    await expect(this.page.getByRole('option').first()).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.page.getByRole('option').first()).toBeVisible();
 
     const options = this.page.getByRole('option');
     const optionCount = await options.count();
@@ -194,7 +194,7 @@ export class ScorecardTemplatePage extends BasePage {
     );
     await actionMenu.click();
     await this.page.getByRole('menuitem', { name: 'Edit' }).click();
-    await expect(this.scorecardNameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.scorecardNameInput).toBeVisible();
     await this.waitForLoading();
   }
 

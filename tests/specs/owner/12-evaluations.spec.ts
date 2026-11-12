@@ -52,7 +52,7 @@ test.describe('Owner Evaluation Tests', () => {
     // TC-71561: Verify form is open (same flow, just verify form state before save)
     await evaluationPage.goto();
     await evaluationPage.clickNewEvaluation();
-    await expect(evaluationPage.scorecardTemplateSelect).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(evaluationPage.scorecardTemplateSelect).toBeVisible();
   });
 
   /**
@@ -71,16 +71,16 @@ test.describe('Owner Evaluation Tests', () => {
 
     // Click on rating cell "—" → becomes number input
     const categoryCell = evaluationPage.getRatingCell();
-    await expect(categoryCell).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(categoryCell).toBeVisible();
     await categoryCell.click();
 
     // Wait for input to appear and enter 6
     const ratingInput = evaluationPage.getRatingInput();
-    await expect(ratingInput, 'Expected rating input to appear').toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(ratingInput, 'Expected rating input to appear').toBeVisible();
     await evaluationPage.typeRatingAndConfirm('6');
 
     // Value should be blocked or reset — wait for input to disappear (validation)
-    await expect(ratingInput, 'Expected rating input to be hidden after validation').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(ratingInput, 'Expected rating input to be hidden after validation').toBeHidden();
 
     // Verify the cell no longer shows '6' (blocked)
     await expect(categoryCell, 'Expected rating cell to not contain 6').not.toContainText('6', { timeout: TIMEOUTS.short });

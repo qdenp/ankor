@@ -53,7 +53,7 @@ test.describe('Coach Plan Tests', () => {
     await expect(planPage.searchInput).toHaveValue(planName);
     await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.long });
     // Проверяем что duration виден на карточке ЭТОГО плана (раньше искался по всей странице)
-    await expect(planPage.getPlanCard(planName)).toContainText('15 min', { timeout: TIMEOUTS.medium });
+    await expect(planPage.getPlanCard(planName)).toContainText('15 min');
   });
 });
 

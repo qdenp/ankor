@@ -1,6 +1,5 @@
 import { test, expect } from '../../fixtures';
 import { TeamPage } from '../../pages/team-page';
-import { TIMEOUTS } from '../../config';
 
 /**
  * 08 — Teams (пункт меню Teams).
@@ -26,6 +25,6 @@ test.describe('Owner Team Tests', () => {
 
     // Проверяем, что команда создалась и отображается в таблице
     await teamPage.search(teamName);
-    await expect(teamPage.getTeamRow(teamName)).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(teamPage.getTeamRow(teamName)).toBeVisible();
   });
 });

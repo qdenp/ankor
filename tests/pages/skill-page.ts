@@ -44,13 +44,13 @@ export class SkillPage extends BasePage {
   /** Переход на страницу Skills */
   async goto(): Promise<void> {
     await super.goto('/skills');
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.heading).toBeVisible();
   }
 
   /** Нажать Create Skill */
   async clickCreateSkill(): Promise<void> {
     await this.createSkillButton.click();
-    await expect(this.newSkillHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newSkillHeading).toBeVisible();
   }
 
   /** Заполнение формы создания Skill */

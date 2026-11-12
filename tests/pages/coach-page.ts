@@ -54,13 +54,13 @@ export class CoachPage extends BasePage {
   /** Переход на страницу Coaches */
   async goto(): Promise<void> {
     await super.goto('/coaches');
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.heading).toBeVisible();
   }
 
   /** Нажатие кнопки New Coach */
   async clickNewCoach(): Promise<void> {
     await this.newCoachButton.click();
-    await expect(this.newCoachHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newCoachHeading).toBeVisible();
   }
 
   /** Заполнение формы создания Coach */
@@ -131,11 +131,11 @@ export class CoachPage extends BasePage {
   async openEditCoach(identifier: string): Promise<void> {
     // Ищем coach в строке таблицы (search уже применён тестом)
     const row = this.page.getByRole('row', { name: identifier }).first();
-    await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(row).toBeVisible();
     const moreActions = row.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(moreActions).toBeVisible();
     await moreActions.click();
-    await expect(this.page.getByRole('menuitem', { name: 'Edit' })).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.page.getByRole('menuitem', { name: 'Edit' })).toBeVisible();
     await this.page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(this.page.getByRole('heading', { name: /Edit.*Coach/i })).toBeVisible({ timeout: TIMEOUTS.long });
   }
@@ -147,7 +147,7 @@ export class CoachPage extends BasePage {
     phone?: string;
   }): Promise<void> {
     // Email нельзя редактировать — проверить что readonly
-    await expect(this.emailInput).toHaveAttribute('readonly', { timeout: TIMEOUTS.medium });
+    await expect(this.emailInput).toHaveAttribute('readonly');
 
     // Редактировать first name, last name, phone
     await this.firstNameInput.fill(params.firstName);
@@ -158,7 +158,7 @@ export class CoachPage extends BasePage {
 
     // Сохранить
     const saveButton = this.page.getByRole('button', { name: 'Save' });
-    await expect(saveButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(saveButton).toBeVisible();
     await saveButton.click();
     // Ждём загрузки страницы списка после редактирования
     await this.waitForLoading();

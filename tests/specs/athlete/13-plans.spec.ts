@@ -1,6 +1,5 @@
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
-import { TIMEOUTS } from '../../config';
 import { createPlanTabTests, ROLE_TAB_EXPECTATIONS } from '../../factories/plan-tabs.factory';
 
 /**
@@ -24,7 +23,7 @@ test.describe('Athlete Plan Tests', () => {
 
     // [step 2] Открыть план, на который атлет только приглашён (не владелец)
     // Проверяем что на карточке плана нет кнопки Edit
-    await expect(planPage.planCardEditLink, 'Edit link should not be visible on invited plan card').not.toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(planPage.planCardEditLink, 'Edit link should not be visible on invited plan card').not.toBeVisible();
   });
 
   // 72622: Athlete does not see Org Plans tab
@@ -35,7 +34,7 @@ test.describe('Athlete Plan Tests', () => {
     await planPage.goto();
 
     // [step 1.1] exp нет вкладки Org Plans
-    await expect(planPage.orgPlansTab).not.toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(planPage.orgPlansTab).not.toBeVisible();
   });
 });
 

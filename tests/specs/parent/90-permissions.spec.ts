@@ -32,39 +32,39 @@ test.describe('Parent Permission Tests', () => {
     // [step 1] Skill / drill - view only
     await homePage.goToSkills();
     await expect(skillPage.heading, 'Skills heading should be visible').toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(skillPage.createSkillButton, 'Create Skill button should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(skillPage.createSkillButton, 'Create Skill button should be hidden for parent').toBeHidden();
 
     await homePage.goToDrills();
     await expect(drillPage.heading, 'Drills heading should be visible').toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(drillPage.newDrillButton, 'Create drill button should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(drillPage.newDrillButton, 'Create drill button should be hidden for parent').toBeHidden();
 
     // [step 2] Evaluation - view only (sidebar link hidden for parent)
-    await expect(homePage.navEvaluations, 'Evaluations sidebar link should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(homePage.navEvaluations, 'Evaluations sidebar link should be hidden for parent').toBeHidden();
 
     // [step 3] Evaluation report - view only (sidebar link visible, Create hidden)
     await expect(homePage.navEvaluationReports, 'Evaluation Reports sidebar link should be visible for parent').toBeVisible();
     await evaluationPage.gotoReports();
-    await expect(evaluationPage.createButton, 'Create button should be hidden on Evaluation Reports page').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(evaluationPage.createButton, 'Create button should be hidden on Evaluation Reports page').toBeHidden();
 
     // [step 4] Plan — view only (no Create, no edit)
     await planPage.goto();
 
     // My Plans tab — visible, Create button NOT visible
     await expect(planPage.myPlansTab, 'My Plans tab should be visible').toBeVisible();
-    await expect(planPage.newPlanButton, 'Create Plan button should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(planPage.newPlanButton, 'Create Plan button should be hidden for parent').toBeHidden();
 
     // Invited tab — visible
     await planPage.goToInvited();
     await expect(planPage.invitedTab, 'Invited tab should be visible').toBeVisible();
 
     // Prebuilt tab — NOT visible for parent
-    await expect(planPage.prebuiltTab, 'Prebuilt tab should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(planPage.prebuiltTab, 'Prebuilt tab should be hidden for parent').toBeHidden();
 
     // Org Plans tab — NOT visible (TC-72622)
-    await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for parent').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for parent').toBeHidden();
 
     // Direct access to /practice-plans/new — blocked
     await page.goto('/practice-plans/new');
-    await expect(page, 'Direct access to new plan should be blocked').toHaveURL(/sign-in|dashboard|practice-plans/, { timeout: TIMEOUTS.medium });
+    await expect(page, 'Direct access to new plan should be blocked').toHaveURL(/sign-in|dashboard|practice-plans/);
   });
 });

@@ -46,14 +46,14 @@ test.describe('Coach Permission Tests', () => {
     // [step 1] Skill / drill - view only
     await homePage.goToSkills();
     await expect(skillPage.heading, 'Skills heading should be visible').toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(skillPage.createSkillButton, 'Create Skill button should be hidden for coach').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(skillPage.createSkillButton, 'Create Skill button should be hidden for coach').toBeHidden();
 
     await homePage.goToDrills();
     await expect(drillPage.heading, 'Drills heading should be visible').toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(drillPage.newDrillButton, 'Create drill button should be hidden for coach').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(drillPage.newDrillButton, 'Create drill button should be hidden for coach').toBeHidden();
 
     // [step 2] Scorecard Templates - view only (sidebar link hidden for coach)
-    await expect(homePage.navScorecards, 'Score Cards Template sidebar link should be hidden for coach').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(homePage.navScorecards, 'Score Cards Template sidebar link should be hidden for coach').toBeHidden();
 
     // [step 3] Athlete - CRUD (Create button visible)
     await athletePage.goto();
@@ -68,7 +68,7 @@ test.describe('Coach Permission Tests', () => {
     // [step 5] Coach - view only (no Create button)
     await coachPage.goto();
     await expect(coachPage.heading, 'Coaches heading should be visible').toBeVisible({ timeout: TIMEOUTS.long });
-    await expect(coachPage.newCoachButton, 'New Coach button should be hidden for coach').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(coachPage.newCoachButton, 'New Coach button should be hidden for coach').toBeHidden();
 
     // [step 6] Team - CRUD (Create button visible)
     await teamPage.goto();
@@ -98,6 +98,6 @@ test.describe('Coach Permission Tests', () => {
     await expect(planPage.prebuiltTab, 'Prebuilt tab should be visible for coach').toBeVisible();
 
     // Org Plans tab — NOT visible for coach (TC-72623)
-    await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for coach').toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for coach').toBeHidden();
   });
 });

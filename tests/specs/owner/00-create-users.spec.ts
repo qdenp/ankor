@@ -64,7 +64,7 @@ test.describe.skip('Create Test Users', () => {
     }
 
     // Проверяем coach через PO метод
-    await expect(coachPage.getCoachRow(CREDENTIALS.coach.email)).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(coachPage.getCoachRow(CREDENTIALS.coach.email)).toBeVisible();
 
     // --- Создаём Parent (если не существует) ---
     await parentPage.goto();
@@ -83,6 +83,6 @@ test.describe.skip('Create Test Users', () => {
     }
 
     // Проверяем parent через PO метод
-    await expect(parentPage.getParentRow(CREDENTIALS.parent.email)).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(parentPage.getParentRow(CREDENTIALS.parent.email)).toBeVisible();
   });
 });

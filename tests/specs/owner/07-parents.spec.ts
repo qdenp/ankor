@@ -37,7 +37,7 @@ test.describe('Owner Parent Tests', () => {
 
     // Нажать Create без заполнения → форма должна остаться открытой
     await parentPage.clickCreateInDialog();
-    await expect(parentPage.newParentHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(parentPage.newParentHeading).toBeVisible();
 
     // --- Шаг 4-5: заполнить и создать ---
     await parentPage.fillParentForm({

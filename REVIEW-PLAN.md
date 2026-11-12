@@ -225,8 +225,8 @@
   - Перейти на `test('…', { tag: '@TC-XXXXX' }, …)`.
   - [x] Заменить allure_id на test_case_id — сделано (2026-11-12) по выгрузке `report (1).csv`: 16 номеров `91XXX` в 06-coaches, 08-teams, 10-drills, 12-evaluations, owner/13-plans; `71835` (нет в TestOps) → 72683 (YouTube в дрилле); `72612` → 72604 (owner «non-sysadmin roles do not see Prebuilt checkbox»).
   - [x] `sysadmin/13-plans` «sysadmin sees all plan tabs»: `72679` (Home page) → **72617** «Prebuilt Plans and Org Plans tabs visible to Administrator / Owner / System Administrator» (от пользователя; в CSV-выгрузке этого кейса нет — выгрузка неполная).
-- [ ] **3.9 Убрать `test.use({ storageState: undefined })`** — сейчас это no-op. Либо реально сбрасывать контекст, либо удалить вместе с описанием в AGENTS.md §9.
-- [ ] **3.10 Удалить явные `{ timeout: TIMEOUTS.medium }`** там, где они равны дефолтному expect timeout (10 с).
+- [x] **3.9 Убрать `test.use({ storageState: undefined })`** — сейчас это no-op. Либо реально сбрасывать контекст, либо удалить вместе с описанием в AGENTS.md §9. Сделано (2026-11-12): убрано из 01-signin, описание исправлено в AGENTS.md §9 и fixtures.ts.
+- [x] **3.10 Удалить явные `{ timeout: TIMEOUTS.medium }`** там, где они равны дефолтному expect timeout (10 с). Сделано (2026-11-12): 137 мест в 27 файлах (только expect-матчеры; в click/waitFor оставлены). Найдено: `saveAsDraft()` ждал 10 с, а сохранение оценки занимает до ~10 с — дан `TIMEOUTS.long`, как у `submit()`.
 - [ ] **3.11 Минимизировать создание данных на стенде.**
   - **Ограничение стенда:** удалять можно Teams; у оценок в меню есть Delete (работает ли — не проверено). Пользователей любых ролей (athletes, coaches, parents) удалить нельзя — только деактивировать через Manage Users, после чего они пропадают из своих списков.
   - **Правило:** новые пользователи создаются только в тестах, проверяющих само создание (TC-71252 Create parent, TC-91891 Add coach). Edit/View/права — на уже существующей сущности или созданной ранее в той же serial-серии.

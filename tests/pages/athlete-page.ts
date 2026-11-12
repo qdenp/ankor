@@ -63,13 +63,13 @@ export class AthletePage extends BasePage {
   /** Переход на страницу Athletes */
   async goto(): Promise<void> {
     await super.goto('/athletes');
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.heading).toBeVisible();
   }
 
   /** Нажатие кнопки New Athlete */
   async clickNewAthlete(): Promise<void> {
     await this.newAthleteButton.click();
-    await expect(this.newAthleteHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newAthleteHeading).toBeVisible();
   }
 
   /** Заполнение формы создания Athlete */
@@ -112,7 +112,7 @@ export class AthletePage extends BasePage {
     await this.clickNewAthlete();
     await this.fillAthleteForm(params);
     await this.createButton.click();
-    await expect(this.newAthleteHeading).toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(this.newAthleteHeading).toBeHidden();
     // Ждём загрузки страницы списка после создания
     await this.waitForLoading();
   }

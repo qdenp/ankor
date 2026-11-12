@@ -6,10 +6,8 @@ import { CREDENTIALS, PAGES, TIMEOUTS } from '../../config';
  * 01 — Тесты авторизации (Sign In / Sign Up)
  */
 
+// Браузер каждого теста и так чистый: storageState в конфиге не задан, а тесты ниже не вызывают loginAs.
 test.describe('Sign In', () => {
-  // Сброс storageState — тесты sign-in требуют чистый браузер
-  test.use({ storageState: undefined });
-
   test('should display sign in page', async ({ page }) => {
     const signInPage = new SignInPage(page);
     await signInPage.goto();
@@ -67,7 +65,7 @@ test.describe('Sign In', () => {
     await signInPage.goToForgotPassword();
 
     // Проверяем, что перенаправило на страницу восстановления
-    await expect(page).toHaveURL(/(forgot|reset|password)/i, { timeout: TIMEOUTS.medium });
+    await expect(page).toHaveURL(/(forgot|reset|password)/i);
   });
 
   test('should navigate to create organization', async ({ page }) => {
@@ -76,13 +74,11 @@ test.describe('Sign In', () => {
     await signInPage.goToCreateOrg();
 
     // Проверяем, что перенаправило на страницу создания организации
-    await expect(page).toHaveURL(/org-signup/i, { timeout: TIMEOUTS.medium });
+    await expect(page).toHaveURL(/org-signup/i);
   });
 });
 
 test.describe('Sign Up', () => {
-  test.use({ storageState: undefined });
-
   test('should display sign up page', async ({ page }) => {
     const signInPage = new SignInPage(page);
     await signInPage.goto();

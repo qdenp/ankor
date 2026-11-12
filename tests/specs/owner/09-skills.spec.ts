@@ -29,7 +29,7 @@ test.describe('Owner Skill Tests', () => {
     // --- Шаг 3.1: Title, category и level обязательны ---
     await skillPage.createButton.click();
     // Форма должна остаться открытой (заголовок New Skill виден)
-    await expect(skillPage.newSkillHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(skillPage.newSkillHeading).toBeVisible();
 
     // --- Шаг 4: Заполнить все поля ---
     // --- Шаг 5: Вставить видео URL youtube ---
@@ -53,8 +53,8 @@ test.describe('Owner Skill Tests', () => {
     // --- Шаг 6.3: skill принадлежит виду спорта организации ---
     // Проверяем что в карточке есть категория (Shooting) и уровень (Beginner)
     const card = skillPage.getSkillCard(skillName);
-    await expect(card).toContainText('Shooting', { timeout: TIMEOUTS.medium });
-    await expect(card).toContainText('Beginner', { timeout: TIMEOUTS.medium });
+    await expect(card).toContainText('Shooting');
+    await expect(card).toContainText('Beginner');
 
     // --- Шаг 6.4: Видимость дрилс - organization ---
     // (проверено через категорию и уровень в карточке skill)

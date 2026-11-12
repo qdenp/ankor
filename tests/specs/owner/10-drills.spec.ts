@@ -38,7 +38,7 @@ test.describe('Owner Drill Tests', () => {
     // TC-74151 [step 3]: Ничего не заполнять и нажать create → валидация
     await drillPage.clickCreate();
     // Имя должно остаться (валидация сработала)
-    await expect(drillPage.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(drillPage.nameInput).toBeVisible();
 
     // TC-74151 [step 4]: Заполнить все поля
     await drillPage.fillName(DRILL_NAME);
@@ -77,15 +77,15 @@ test.describe('Owner Drill Tests', () => {
     await drillPage.clickNewDrill();
 
     // TC-72684 [step 2.1]: exp доступны поля: name, description, segment, duration, min/max players, min/max age, Skills, YouTube URL
-    await expect(drillPage.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.descriptionInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.segmentSelect).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.durationInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.minPlayersInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.maxPlayersInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.minAgeInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.maxAgeInput).toBeVisible({ timeout: TIMEOUTS.medium });
-    await expect(drillPage.youtubeUrlInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(drillPage.nameInput).toBeVisible();
+    await expect(drillPage.descriptionInput).toBeVisible();
+    await expect(drillPage.segmentSelect).toBeVisible();
+    await expect(drillPage.durationInput).toBeVisible();
+    await expect(drillPage.minPlayersInput).toBeVisible();
+    await expect(drillPage.maxPlayersInput).toBeVisible();
+    await expect(drillPage.minAgeInput).toBeVisible();
+    await expect(drillPage.maxAgeInput).toBeVisible();
+    await expect(drillPage.youtubeUrlInput).toBeVisible();
 
     // Заполнить и создать drill — используем DRILL_NAME из TC-74151
     await drillPage.fillName(DRILL_NAME);

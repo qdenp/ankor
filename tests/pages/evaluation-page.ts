@@ -148,14 +148,14 @@ export class EvaluationPage extends BasePage {
   /** Переход на страницу Evaluations через левое меню */
   async goto(): Promise<void> {
     await this.sidebarLink.click();
-    await expect(this.newEvaluationButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newEvaluationButton).toBeVisible();
     await this.waitForLoading();
   }
 
   /** Нажатие кнопки New Evaluation */
   async clickNewEvaluation(): Promise<void> {
     await this.newEvaluationButton.click();
-    await expect(this.scorecardTemplateSelect).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.scorecardTemplateSelect).toBeVisible();
   }
 
   /** Выбор Score Card Template */
@@ -163,7 +163,7 @@ export class EvaluationPage extends BasePage {
     await this.scorecardTemplateSelect.click();
     await expect(this.page.getByRole('option', { name: templateName })).toBeVisible({ timeout: TIMEOUTS.long });
     await this.page.getByRole('option', { name: templateName }).click();
-    await expect(this.filterByTeamSelect).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.filterByTeamSelect).toBeVisible();
   }
 
   /** Выбор команды в Filter by team */
@@ -183,40 +183,40 @@ export class EvaluationPage extends BasePage {
     // Ждём появления кнопки Add +
     await expect(this.addSkillButton).toBeVisible({ timeout: TIMEOUTS.long });
     await this.addSkillButton.click();
-    await expect(this.subskillsPopupTitle).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.subskillsPopupTitle).toBeVisible();
 
     // Найти и выбрать скилл — кликаем на текст навыка
     const skillText = this.page.getByRole('button', { name: skillName, exact: true });
-    await expect(skillText).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(skillText).toBeVisible();
     await skillText.click();
 
     // Сохранить
     await this.doneButton.click();
-    await expect(this.subskillsPopup).toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(this.subskillsPopup).toBeHidden();
   }
 
   /** Выставление оценки для скилла в popup */
   async setSubskillRating(skillName: string, rating: number): Promise<void> {
     // Rating buttons найдены для всех скиллов — берём первый найденный
     const ratingButton = this.page.getByRole('button', { name: String(rating) }).first();
-    await expect(ratingButton).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(ratingButton).toBeVisible();
     await ratingButton.click();
   }
 
   /** Сохранение оценок в popup */
   async saveSubskillRatings(): Promise<void> {
     await this.saveSubskillsButton.click();
-    await expect(this.subskillsPopup).toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(this.subskillsPopup).toBeHidden();
   }
 
   /** Клик на rating-ячейку категории ("—") и ввод оценки */
   async rateCategory(rating: number): Promise<void> {
     const cell = this.categoryRatingCells.first();
-    await expect(cell).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(cell).toBeVisible();
     await cell.click();
     // Ждём появления input
     const input = this.ratingInput;
-    await expect(input).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(input).toBeVisible();
     await input.fill(String(rating));
     await this.page.keyboard.press('Tab');
   }
@@ -225,11 +225,11 @@ export class EvaluationPage extends BasePage {
   async updateCategoryRating(rating: number): Promise<void> {
     // Клик на ячейку с текущей оценкой (не на "—")
     const ratingCell = this.page.getByRole('gridcell').filter({ hasText: /^\d+$/ }).first();
-    await expect(ratingCell).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(ratingCell).toBeVisible();
     await ratingCell.click();
     // Ждём появления input
     const input = this.ratingInput;
-    await expect(input).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(input).toBeVisible();
     await input.fill(String(rating));
     await this.page.keyboard.press('Tab');
   }
@@ -258,7 +258,7 @@ export class EvaluationPage extends BasePage {
   /** Переход на страницу Evaluation Reports */
   async gotoReports(): Promise<void> {
     await this.sidebarReportLink.click();
-    await expect(this.reportsHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.reportsHeading).toBeVisible();
     await this.waitForLoading();
   }
 
@@ -325,7 +325,8 @@ export class EvaluationPage extends BasePage {
   /** Сохранить оценку как черновик (In Progress) и дождаться списка. Черновик удаляется — см. deleteDraftsCreatedSince */
   async saveAsDraft(): Promise<void> {
     await this.saveAsDraftButton.click();
-    await expect(this.page.getByRole('heading', { name: 'Evaluations', level: 3 })).toBeVisible({ timeout: TIMEOUTS.medium });
+    // Сохранение — несколько запросов подряд (создание + сетка оценок), до ~10 с: ждём как submit()
+    await expect(this.page.getByRole('heading', { name: 'Evaluations', level: 3 })).toBeVisible({ timeout: TIMEOUTS.long });
     await this.waitForLoading();
   }
 
@@ -387,7 +388,7 @@ export class EvaluationPage extends BasePage {
       await drafts.nth(index).getByRole('button', { name: 'More actions' }).click();
       await this.deleteMenuItem.click();
       await this.confirmDeleteButton.click();
-      await expect(this.deleteDialog).toBeHidden({ timeout: TIMEOUTS.medium });
+      await expect(this.deleteDialog).toBeHidden();
       await this.waitForLoading();
       await expect.poll(() => this.countEvaluations(), { timeout: TIMEOUTS.long }).toBe(before - 1);
     }

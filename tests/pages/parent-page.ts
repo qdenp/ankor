@@ -59,13 +59,13 @@ export class ParentPage extends BasePage {
   /** Переход на страницу Parents */
   async goto(): Promise<void> {
     await super.goto('/parents');
-    await expect(this.heading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.heading).toBeVisible();
   }
 
   /** Нажатие кнопки New Parent */
   async clickNewParent(): Promise<void> {
     await this.newParentButton.click();
-    await expect(this.newParentHeading).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.newParentHeading).toBeVisible();
   }
 
   /** Заполнение формы создания Parent */
@@ -103,7 +103,7 @@ export class ParentPage extends BasePage {
   /** Создать родителя из заполненного диалога: Create → диалог закрылся → список загрузился заново */
   async submitNewParent(): Promise<void> {
     await this.clickCreateInDialog();
-    await expect(this.newParentHeading).toBeHidden({ timeout: TIMEOUTS.medium });
+    await expect(this.newParentHeading).toBeHidden();
     await this.waitForLoading();
   }
 
@@ -143,11 +143,11 @@ export class ParentPage extends BasePage {
   /** Открыть edit parent через More actions (search уже применён тестом, identifier — имя) */
   async openEditParent(identifier: string): Promise<void> {
     const row = this.page.getByRole('row', { name: identifier, exact: false }).first();
-    await expect(row).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(row).toBeVisible();
     const moreActions = row.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(moreActions).toBeVisible();
     await moreActions.click();
-    await expect(this.page.getByRole('menuitem', { name: 'Edit' })).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.page.getByRole('menuitem', { name: 'Edit' })).toBeVisible();
     await this.page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(this.page.getByRole('heading', { name: /Edit.*Parent/i })).toBeVisible({ timeout: TIMEOUTS.long });
   }
@@ -158,7 +158,7 @@ export class ParentPage extends BasePage {
     lastName: string;
   }): Promise<void> {
     // Email нельзя редактировать — проверить что readonly
-    await expect(this.emailInput).toHaveAttribute('readonly', { timeout: TIMEOUTS.medium });
+    await expect(this.emailInput).toHaveAttribute('readonly');
 
     // Редактировать first name, last name
     await this.firstNameInput.fill(params.firstName);

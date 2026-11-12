@@ -81,8 +81,8 @@ async function restoreAuthFromCache(page: Page, storagePath: string): Promise<vo
  * - Если кэш валиден — восстанавливает сессию из storageState в текущий контекст
  * - Если кэш невалиден (logout отозвал сессию или токен истёк) — UI-логин + обновление кэша
  *
- * Тесты sign-in/sign-up используют test.use({ storageState: undefined })
- * для сброса кэша и чистого браузера.
+ * Тесты sign-in/sign-up не вызывают loginAs: браузер каждого теста и так чистый
+ * (новый контекст на тест, storageState в конфиге не задан).
  */
 
 // Роль, которая в данный момент залогинена (нужно для корректной инвалидации кэша при logout)

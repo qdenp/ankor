@@ -57,12 +57,12 @@ export class OrganizationPage extends BasePage {
   async clickEdit(): Promise<void> {
     await expect(this.editButton).toBeVisible({ timeout: TIMEOUTS.long * 2 });
     await this.editButton.click();
-    await expect(this.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.nameInput).toBeVisible();
   }
 
   /** Заполнить форму организации */
   async fillOrgForm(params: { name: string }): Promise<void> {
-    await expect(this.nameInput).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.nameInput).toBeVisible();
     await this.nameInput.fill(params.name);
   }
 
@@ -111,13 +111,13 @@ export class OrganizationPage extends BasePage {
   /** Кликнуть Edit на строке DataGrid (через More actions menu) */
   async clickEditOnRow(row: Locator): Promise<void> {
     const moreActions = row.getByRole('button', { name: 'More actions' });
-    await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(moreActions).toBeVisible();
     await moreActions.click();
     await this.page.getByRole('menuitem', { name: 'Edit' }).click();
   }
 
   /** Проверка что страница загружена (heading visible) */
   async expectPageLoaded(): Promise<void> {
-    await expect(this.page.locator('h1, h2, h3').first()).toBeVisible({ timeout: TIMEOUTS.medium });
+    await expect(this.page.locator('h1, h2, h3').first()).toBeVisible();
   }
 }
