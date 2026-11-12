@@ -4,6 +4,7 @@ import { test, expect } from '../../fixtures';
 import { EvaluationPage } from '../../pages/evaluation-page';
 import { SignInPage } from '../../pages/sign-in-page';
 import { EVALUATED_ATHLETE, TIMEOUTS } from '../../config';
+import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
 
 const TEMPLATE_NAME = '!Default Template for Evaluation';
 const TEAM_NAME = 'Team01';
@@ -42,8 +43,7 @@ test.describe('Owner Evaluation Tests', () => {
 
   // Время начала теста: cleanup удаляет только черновики, созданные после него
   let testStartedAt: Date;
-  // Отчёт, созданный тестом TC-71562; TC-71528 проверяет его же (отчёты в интерфейсе не удаляются)
-  let submittedReportUrl: string | undefined;
+  // Отчёт TC-71562 проверяет и TC-71528 — через хранилище, в том числе отчёт прошлого прогона (REVIEW-PLAN 3.12)
 
   test.beforeEach(async ({ loginAs }) => {
     testStartedAt = new Date();
@@ -246,7 +246,7 @@ test.describe('Owner Evaluation Tests', () => {
     await openNewReportAfter(evaluationPage, page, newestReportBefore);
     await expect(evaluationPage.reportContent).toContainText(TEMPLATE_NAME);
     await expect(evaluationPage.reportContent).toContainText(today);
-    submittedReportUrl = page.url();
+    rememberEntity('owner', 'evaluation-report', { url: page.url() });
   });
 
   /**
@@ -256,10 +256,10 @@ test.describe('Owner Evaluation Tests', () => {
    */
   test('should apply the category rating to all subskills in the report', async ({ page }) => {
     await allure.allureId('71528');
-    expect(submittedReportUrl, 'Requires the report created by the previous test (serial mode)').toBeDefined();
+    const reportUrl = recallEntity<{ url: string }>('owner', 'evaluation-report', 'should generate an evaluation report after submit').url;
     const evaluationPage = new EvaluationPage(page);
 
-    await evaluationPage.openReport(submittedReportUrl!);
+    await evaluationPage.openReport(reportUrl);
     for (const subskill of ['Skill1', 'Skill2', 'Skill3', 'Skill4']) {
       await expect(evaluationPage.reportContent, `${subskill} should have the category rating 4.0`).toContainText(new RegExp(`${subskill}\\s*4\\.0`));
     }

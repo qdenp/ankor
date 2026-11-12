@@ -11,6 +11,8 @@ pw-test-results/
 reports/
 test-results/
 tests/.auth/
+# Сущности, созданные тестами, для переиспользования между прогонами (tests/helpers/test-data-store.ts)
+tests/.data/
 
 # Environment
 .env

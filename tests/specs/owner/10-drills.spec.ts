@@ -2,12 +2,13 @@ import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { DrillPage } from '../../pages/drill-page';
 import { TIMEOUTS } from '../../config';
+import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
 
 /**
  * Дрилл создаёт только TC-74151 (удалить дрилл на стенде нельзя): уникальное имя сохраняется сюда,
  * TC-72683 открывает этот же дрилл. Раньше каждый тест файла создавал свой дрилл с тем же именем (REVIEW-PLAN 2.8).
  */
-let DRILL_NAME: string;
+const CREATE_DRILL_TEST = 'should create drill with all fields';
 const SEGMENT = 'Shooting';
 
 test.describe('Owner Drill Tests', () => {
@@ -29,7 +30,7 @@ test.describe('Owner Drill Tests', () => {
     const drillPage = new DrillPage(page);
 
     // Генерируем уникальное имя для drill
-    DRILL_NAME = `Test Drill ${Date.now()}`;
+    const DRILL_NAME = `Test Drill ${Date.now()}`;
 
     // TC-74151 [step 1]: Перейти в Drills
     await drillPage.goto();
@@ -66,6 +67,7 @@ test.describe('Owner Drill Tests', () => {
     // TC-74151 [step 6.2]: в библиотеке отображен drill — вернуться в список
     await drillPage.goToDrillsList();
     await expect(drillPage.getCard(DRILL_NAME)).toBeVisible({ timeout: TIMEOUTS.long });
+    rememberEntity('owner', 'drill', { name: DRILL_NAME });
   });
 
   /**
@@ -103,7 +105,7 @@ test.describe('Owner Drill Tests', () => {
    */
   test('should view drill detail with YouTube video', async ({ page }) => {
     await allure.allureId('72683');
-    expect(DRILL_NAME, 'Requires the drill created by TC-74151 (serial mode)').toBeDefined();
+    const DRILL_NAME = recallEntity<{ name: string }>('owner', 'drill', CREATE_DRILL_TEST).name;
     const drillPage = new DrillPage(page);
 
     // [step 1] Открыть detail дрила с YouTube URL

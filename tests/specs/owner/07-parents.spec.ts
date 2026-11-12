@@ -4,6 +4,7 @@ import { ParentPage } from '../../pages/parent-page';
 import { SignInPage } from '../../pages/sign-in-page';
 import { HomePage } from '../../pages/home-page';
 import { TIMEOUTS } from '../../config';
+import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
 
 /**
  * 07 — Parents CRUD для Owner role.
@@ -16,7 +17,8 @@ test.describe('Owner Parent Tests', () => {
    * Родитель, созданный в первом тесте. Второй тест редактирует именно его.
    * Уникальное имя нужно, потому что поиск в таблице Parents работает только по имени, не по email.
    */
-  let createdParent: { firstName: string; email: string; password: string } | undefined;
+  // Родителя создаёт только 71252; edit берёт его из хранилища — и из прошлого прогона (REVIEW-PLAN 3.12)
+  type Parent = { firstName: string; email: string };
 
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
@@ -57,7 +59,7 @@ test.describe('Owner Parent Tests', () => {
     // Родитель в списке (search ищет по имени, не по email)
     await parentPage.search(parent.firstName);
     await expect(parentPage.getParentRow(parent.firstName)).toBeVisible({ timeout: TIMEOUTS.long });
-    createdParent = parent;
+    rememberEntity('owner', 'parent', { firstName: parent.firstName, email: parent.email });
 
     // --- Шаг 6-8: логин как созданный parent ---
     // В отдельном контексте браузера: сессия owner в основном контексте не трогается,
@@ -83,8 +85,7 @@ test.describe('Owner Parent Tests', () => {
   /** @TC-71256 Edit parent */
   test('should edit parent and verify changes', async ({ page }) => {
     await allure.allureId('71256');
-    expect(createdParent, 'Requires the parent created by the previous test (serial mode)').toBeDefined();
-    const parent = createdParent!;
+    const parent = recallEntity<Parent>('owner', 'parent', 'should validate empty form, create parent and login as parent');
     const parentPage = new ParentPage(page);
 
     // --- Шаг 1-2: найти созданного parent по уникальному имени ---
@@ -109,5 +110,7 @@ test.describe('Owner Parent Tests', () => {
     // --- Шаг 6: проверить что информация обновилась ---
     await parentPage.search(newFirstName);
     await expect(parentPage.getParentRow(newFirstName)).toBeVisible({ timeout: TIMEOUTS.long });
+    // Имя изменилось — следующий прогон ищет родителя по новому имени
+    rememberEntity('owner', 'parent', { ...parent, firstName: newFirstName });
   });
 });
