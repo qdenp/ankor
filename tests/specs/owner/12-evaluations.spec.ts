@@ -309,6 +309,10 @@ test.describe('Owner Evaluation Workout', () => {
     await openNewReportAfter(evaluationPage, page, newestReportBefore);
     const reportUrl = page.url();
 
+    // Это отчёт этого теста: общая оценка в Overview — 2.0, как поставлено. Самый новый отчёт мог бы оказаться
+    // чужим, если кто-то отправил оценку в те же секунды; у отчёта 71562 там 4.0
+    await expect(evaluationPage.reportContent, 'Newest report should be the one rated 2 by this test').toContainText(/Overview[\s\S]*?metrics\.\s*2\.0/);
+
     // [step 3] Owner: в отчёте атлета есть рекомендованные дриллы
     await expect(evaluationPage.reportContent).toContainText(EVALUATED_ATHLETE.name);
     await expect(evaluationPage.recommendedDrillsHeading).toBeVisible();
