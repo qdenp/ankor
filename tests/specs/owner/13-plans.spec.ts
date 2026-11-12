@@ -34,7 +34,7 @@ test.describe('Owner Plan Tests', () => {
     // Проверяем, что план создан и отображается — используем поиск
     await planPage.search(planName);
     await expect(planPage.searchInput).toHaveValue(planName);
-    await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 
   // 71645: View Plan Owner / Admin

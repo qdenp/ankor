@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './base-page';
 import { PAGES, TIMEOUTS } from '../config';
 
@@ -7,39 +7,35 @@ import { PAGES, TIMEOUTS } from '../config';
  * Содержит разные элементы в зависимости от роли пользователя.
  */
 export class HomePage extends BasePage {
-  readonly sidebar: ReturnType<this['page']['getByRole']>;
-  readonly userProfile: ReturnType<this['page']['getByRole']>;
-  readonly logoutButton: ReturnType<this['page']['getByRole']>;
+  readonly sidebar: Locator;
 
   // Dashboard cards (System Administrator view)
-  readonly totalAthletesCard: ReturnType<this['page']['getByRole']>;
-  readonly submittedEvaluationsCard: ReturnType<this['page']['getByRole']>;
-  readonly sharedPlansCard: ReturnType<this['page']['getByRole']>;
-  readonly activeCoachesCard: ReturnType<this['page']['getByRole']>;
+  readonly totalAthletesCard: Locator;
+  readonly submittedEvaluationsCard: Locator;
+  readonly sharedPlansCard: Locator;
+  readonly activeCoachesCard: Locator;
 
   // Athlete Home page elements
-  readonly welcomeHeading: ReturnType<this['page']['getByRole']>;
-  readonly todayWorkoutHeading: ReturnType<this['page']['getByRole']>;
-  readonly sessionSummaryHeading: ReturnType<this['page']['getByText']>;
-  readonly totalEvaluationsMetric: ReturnType<this['page']['getByText']>;
-  readonly sharedPlansMetric: ReturnType<this['page']['getByText']>;
-  readonly assignedDrillsMetric: ReturnType<this['page']['getByText']>;
-  readonly lastEvaluationMetric: ReturnType<this['page']['getByText']>;
+  readonly welcomeHeading: Locator;
+  readonly todayWorkoutHeading: Locator;
+  readonly sessionSummaryHeading: Locator;
+  readonly totalEvaluationsMetric: Locator;
+  readonly sharedPlansMetric: Locator;
+  readonly assignedDrillsMetric: Locator;
+  readonly lastEvaluationMetric: Locator;
 
   // Coach Home page elements
-  readonly coachWelcomeHeading: ReturnType<this['page']['getByRole']>;
-  readonly teamSnapshotHeading: ReturnType<this['page']['getByRole']>;
-  readonly teamsMetric: ReturnType<this['page']['getByRole']>;
-  readonly athletesMetric: ReturnType<this['page']['getByRole']>;
-  readonly evaluationsMetric: ReturnType<this['page']['getByRole']>;
-  readonly practicePlansMetric: ReturnType<this['page']['getByRole']>;
+  readonly coachWelcomeHeading: Locator;
+  readonly teamSnapshotHeading: Locator;
+  readonly teamsMetric: Locator;
+  readonly athletesMetric: Locator;
+  readonly evaluationsMetric: Locator;
+  readonly practicePlansMetric: Locator;
 
   constructor(page: Page) {
     super(page);
 
     this.sidebar = page.getByRole('navigation', { name: /navigation/i });
-    this.userProfile = page.getByRole('button', { name: /profile|user|account|username/i }).first();
-    this.logoutButton = page.getByRole('menuitem', { name: /sign out|logout|выйти/i });
 
     // Dashboard cards
     this.totalAthletesCard = page.getByRole('heading', { name: /total athletes/i });
@@ -71,29 +67,4 @@ export class HomePage extends BasePage {
     await this.waitForLoadState();
   }
 
-  /** Выход из аккаунта */
-  async logout(): Promise<void> {
-    await this.userProfile.click();
-    await this.logoutButton.click();
-  }
-
-  /** Получение значения счётчика атлетов */
-  async getTotalAthletesCount(): Promise<string> {
-    return this.totalAthletesCard.textContent() ?? '';
-  }
-
-  /** Получение значения счётчика submitted evaluations */
-  async getSubmittedEvaluationsCount(): Promise<string> {
-    return this.submittedEvaluationsCard.textContent() ?? '';
-  }
-
-  /** Получение значения счётчика shared plans */
-  async getSharedPlansCount(): Promise<string> {
-    return this.sharedPlansCard.textContent() ?? '';
-  }
-
-  /** Получение значения счётчика активных коучей */
-  async getActiveCoachesCount(): Promise<string> {
-    return this.activeCoachesCard.textContent() ?? '';
-  }
 }

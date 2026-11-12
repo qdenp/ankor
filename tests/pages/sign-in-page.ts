@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 import { BasePage } from './base-page';
 import { PAGES } from '../config';
 
@@ -15,14 +15,14 @@ import { PAGES } from '../config';
  * - link "Create an organization profile" -> /org-signup
  */
 export class SignInPage extends BasePage {
-  readonly welcomeHeading: ReturnType<this['page']['getByRole']>;
-  readonly emailInput: ReturnType<this['page']['getByRole']>;
-  readonly passwordInput: ReturnType<this['page']['getByRole']>;
-  readonly signInButton: ReturnType<this['page']['getByRole']>;
-  readonly forgotPasswordLink: ReturnType<this['page']['getByRole']>;
-  readonly joinOrgLink: ReturnType<this['page']['getByRole']>;
-  readonly createOrgLink: ReturnType<this['page']['getByRole']>;
-  readonly showPasswordToggle: ReturnType<this['page']['getByRole']>;
+  readonly welcomeHeading: Locator;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly signInButton: Locator;
+  readonly forgotPasswordLink: Locator;
+  readonly joinOrgLink: Locator;
+  readonly createOrgLink: Locator;
+  readonly showPasswordToggle: Locator;
 
   constructor(page: Page) {
     super(page);

@@ -9,28 +9,28 @@ export class BasePage {
   readonly page: Page;
 
   // Header / Profile elements
-  readonly profileButton: ReturnType<this['page']['getByRole']>;
-  readonly logoutMenuItem: ReturnType<this['page']['getByRole']>;
+  readonly profileButton: Locator;
+  readonly logoutMenuItem: Locator;
 
   // Page heading (for verifying page loaded)
-  readonly pageHeading: ReturnType<this['page']['locator']>;
+  readonly pageHeading: Locator;
 
   // Sidebar navigation links
-  readonly navOrganizations: ReturnType<this['page']['getByRole']>;
-  readonly navAthletes: ReturnType<this['page']['getByRole']>;
-  readonly navCoaches: ReturnType<this['page']['getByRole']>;
-  readonly navParents: ReturnType<this['page']['getByRole']>;
-  readonly navTeams: ReturnType<this['page']['getByRole']>;
-  readonly navSkills: ReturnType<this['page']['getByRole']>;
-  readonly navDrills: ReturnType<this['page']['getByRole']>;
-  readonly navScorecards: ReturnType<this['page']['getByRole']>;
-  readonly navEvaluations: ReturnType<this['page']['getByRole']>;
-  readonly navEvaluationReports: ReturnType<this['page']['getByRole']>;
-  readonly navPracticePlans: ReturnType<this['page']['getByRole']>;
-  readonly navEasyJoin: ReturnType<this['page']['getByRole']>;
-  readonly navNotifications: ReturnType<this['page']['getByRole']>;
-  readonly navPlans: ReturnType<this['page']['getByRole']>;
-  readonly navHome: ReturnType<this['page']['getByRole']>;
+  readonly navOrganizations: Locator;
+  readonly navAthletes: Locator;
+  readonly navCoaches: Locator;
+  readonly navParents: Locator;
+  readonly navTeams: Locator;
+  readonly navSkills: Locator;
+  readonly navDrills: Locator;
+  readonly navScorecards: Locator;
+  readonly navEvaluations: Locator;
+  readonly navEvaluationReports: Locator;
+  readonly navPracticePlans: Locator;
+  readonly navEasyJoin: Locator;
+  readonly navNotifications: Locator;
+  readonly navPlans: Locator;
+  readonly navHome: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -75,16 +75,6 @@ export class BasePage {
     await this.waitForLoading();
   }
 
-  /** Текущий URL страницы */
-  async getUrl(): Promise<string> {
-    return this.page.url();
-  }
-
-  /** Текущий путь страницы */
-  async getPathname(): Promise<string> {
-    return new URL(this.page.url()).pathname;
-  }
-
   /** Ожидание загрузки страницы */
   async waitForLoadState(): Promise<void> {
     await this.waitForLoading();
@@ -103,31 +93,6 @@ export class BasePage {
     } else {
       await this.page.getByRole('option', { name: label }).click();
     }
-  }
-
-  /** Ожидание появления элемента */
-  async waitForElement(locator: Locator, timeout?: number): Promise<void> {
-    await locator.waitFor({ timeout, state: 'visible' });
-  }
-
-  /** Ожидание исчезновения элемента */
-  async waitForElementGone(locator: Locator, timeout?: number): Promise<void> {
-    await locator.waitFor({ timeout, state: 'hidden' });
-  }
-
-  /** Получение текста элемента */
-  async getText(locator: Locator): Promise<string> {
-    return locator.textContent() ?? '';
-  }
-
-  /** Нажатие на элемент */
-  async click(locator: Locator): Promise<void> {
-    await locator.click();
-  }
-
-  /** Получение количества элементов */
-  async getCount(locator: Locator): Promise<number> {
-    return locator.count();
   }
 
   /** Клик по профилю в хедере и ожидание меню */

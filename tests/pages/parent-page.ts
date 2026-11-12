@@ -6,28 +6,28 @@ import { TIMEOUTS } from '../config';
  * Page Object для страницы Parents.
  */
 export class ParentPage extends BasePage {
-  readonly heading: ReturnType<this['page']['getByRole']>;
-  readonly newParentButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
-  readonly saveButton: ReturnType<this['page']['getByRole']>;
+  readonly heading: Locator;
+  readonly newParentButton: Locator;
+  readonly searchInput: Locator;
+  readonly createButton: Locator;
+  readonly saveButton: Locator;
 
   // Form fields
-  readonly firstNameInput: ReturnType<this['page']['getByRole']>;
-  readonly lastNameInput: ReturnType<this['page']['getByRole']>;
-  readonly emailInput: ReturnType<this['page']['getByRole']>;
-  readonly passwordInput: ReturnType<this['page']['getByRole']>;
-  readonly confirmPasswordInput: ReturnType<this['page']['getByRole']>;
-  readonly relationshipSelect: ReturnType<this['page']['getByRole']>;
-  readonly athleteSelect: ReturnType<this['page']['getByRole']>;
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly confirmPasswordInput: Locator;
+  readonly relationshipSelect: Locator;
+  readonly athleteSelect: Locator;
 
   // Dialog elements
-  readonly newParentHeading: ReturnType<this['page']['getByRole']>;
-  readonly relationshipOptions: ReturnType<this['page']['getByRole']>;
-  readonly athleteOptions: ReturnType<this['page']['getByRole']>;
+  readonly newParentHeading: Locator;
+  readonly relationshipOptions: Locator;
+  readonly athleteOptions: Locator;
 
   // Table rows
-  readonly parentRows: ReturnType<this['page']['getByRole']>;
+  readonly parentRows: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -127,12 +127,12 @@ export class ParentPage extends BasePage {
 
   /** Проверка существования Parent по email */
   async isParentExists(email: string): Promise<boolean> {
-    return await this.parentRows.filter({ hasText: email, exact: false }).first().isVisible({ timeout: TIMEOUTS.short });
+    return await this.parentRows.filter({ hasText: email }).first().isVisible({ timeout: TIMEOUTS.short });
   }
 
   /** Получить локатор строки родителя в таблице */
   getParentRow(email: string): Locator {
-    return this.parentRows.filter({ hasText: email, exact: false }).first();
+    return this.parentRows.filter({ hasText: email }).first();
   }
 
   /** Открыть edit parent через More actions (search уже применён тестом, identifier — имя) */

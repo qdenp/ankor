@@ -8,21 +8,21 @@ import { TIMEOUTS } from '../config';
  * Поддерживает: Create, Read, Update (make inactive).
  */
 export class ScorecardTemplatePage extends BasePage {
-  readonly newScorecardButton: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
-  readonly saveButton: ReturnType<this['page']['getByRole']>;
-  readonly cancelButton: ReturnType<this['page']['getByRole']>;
-  readonly addCategoryButton: ReturnType<this['page']['getByRole']>;
+  readonly newScorecardButton: Locator;
+  readonly createButton: Locator;
+  readonly saveButton: Locator;
+  readonly cancelButton: Locator;
+  readonly addCategoryButton: Locator;
 
   // Sidebar link
-  readonly sidebarLink: ReturnType<this['page']['getByRole']>;
+  readonly sidebarLink: Locator;
 
   // Scorecard form fields
-  readonly scorecardNameInput: ReturnType<this['page']['getByRole']>;
-  readonly activeScorecardToggle: ReturnType<this['page']['getByRole']>;
+  readonly scorecardNameInput: Locator;
+  readonly activeScorecardToggle: Locator;
 
   // Table rows
-  readonly tableRows: ReturnType<this['page']['getByRole']>;
+  readonly tableRows: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -191,7 +191,7 @@ export class ScorecardTemplatePage extends BasePage {
       )
     );
     await actionMenu.click();
-    await this.page.getByRole('menuitem', { name: /Edit|Редактировать/i }).click();
+    await this.page.getByRole('menuitem', { name: 'Edit' }).click();
     await expect(this.scorecardNameInput).toBeVisible({ timeout: TIMEOUTS.medium });
   }
 

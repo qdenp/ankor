@@ -51,7 +51,7 @@ test.describe('Coach Plan Tests', () => {
     // [step 10.2] План создан
     await planPage.search(planName);
     await expect(planPage.searchInput).toHaveValue(planName);
-    await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.long });
     // Проверяем что duration виден на карточке плана
     await expect(page.getByText('15 min')).toBeVisible({ timeout: TIMEOUTS.medium });
   });

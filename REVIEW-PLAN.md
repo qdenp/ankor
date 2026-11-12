@@ -86,11 +86,16 @@
     - Добавить скрипт `"typecheck": "tsc --noEmit"`.
   - **Готово, когда:** `npm run typecheck` проходит без ошибок.
 
-- [ ] **1.7 Исправить ошибки, которые найдёт `tsc`.** Первый запуск `npm run typecheck` (2026-11-11): 244 ошибки.
+- [x] **1.7 Исправить ошибки, которые найдёт `tsc`.** Сделано (2026-11-12): 244 → 0 ошибок. Первый запуск `npm run typecheck` (2026-11-11): 244 ошибки.
   - TS2322 ×203 — тип `ReturnType<this['page']['getByRole']>` не сводится к `Locator`; заменить на `Locator`.
   - TS2339/TS2551/TS2564 ×32 — необъявленные / неприсвоенные поля (ниже).
   - TS2353 ×8 — `filter({ hasText, exact: false })`: у `filter` нет опции `exact`, Playwright её молча игнорирует (athlete, coach ×3, parent ×2, team, `getAthleteRow`/`isAthleteExists`). Убрать.
   - TS7006 ×1 — параметр без типа в `isTokenValid` (`fixtures.ts`).
+  - **Сразу после того, как `typecheck` станет зелёным — включить регулярный запуск:**
+    - npm-скрипты `pretest:<роль>` и `pretest:all` → `npm run typecheck` (3–6 с) перед каждым прогоном;
+    - строка «`npm run typecheck` — без ошибок» в скилле 03 (шаг 4) и в чек-листе скилла 04;
+    - по желанию — git-хук `pre-commit`.
+    - Включать только после зелёного `typecheck`, иначе хуки заблокируют все прогоны.
 
   Известные заранее:
   - **Присваиваются без объявления:**
@@ -149,13 +154,13 @@
   - **Где больше всего:** 12-evaluations (44, 103–111, 198–217), 06-coaches (105, 132–136), 13-plans, 10-drills, 07-parents:59, coach/90-permissions:80.
   - **Что сделать:** использовать уже существующие `openEditCoach()`, `getRatingInput()`, `getRatingCell()` и добавить недостающие методы.
   - **Готово, когда:** `grep -rnE "page\.(getByRole|locator|getByText|keyboard)" tests/specs` пуст.
-- [ ] **3.2 Удалить `HomePage.logout()`.** Он перекрывает `BasePage.logout()`, а его локатор `/logout/` не находит «Log Out». Удалить вместе с `userProfile`/`logoutButton`.
-- [ ] **3.3 Разделить кнопки в PlanPage.** `createButton` сейчас ищет `'Save'`. Объявить отдельные `saveButton`/`createButton`. `getPlanCard` и `getPlanRow` одинаковы — оставить один метод.
+- [x] **3.2 Удалить `HomePage.logout()`.** Он перекрывает `BasePage.logout()`, а его локатор `/logout/` не находит «Log Out». Удалить вместе с `userProfile`/`logoutButton`.
+- [x] **3.3 Разделить кнопки в PlanPage.** Сделано: `createButton` → `saveButton` (в форме одна кнопка Save), `getPlanRow` удалён в пользу `getPlanCard`. `createButton` сейчас ищет `'Save'`. Объявить отдельные `saveButton`/`createButton`. `getPlanCard` и `getPlanRow` одинаковы — оставить один метод.
 - [x] **3.4 SignUpPage.** Сделано: PO не соответствовал реальной форме (выдуманные шаги Next/Back, поиск по плейсхолдерам-примерам `Jose`/`••••••••`). Локаторы переписаны по подписям полей (каждый находит ровно 1 элемент); удалены `registerAthlete` (выдуманный сценарий) и `gotoWithCode` (`?code=` не заполняет Join code). Отправка формы не проверялась — она создаёт пользователя.
   - `passwordInput` (`/password/`) найдёт и «Confirm password» → strict mode violation.
   - `gotoWithCode` переходит на страницу дважды.
-- [ ] **3.5 Убрать спекулятивные русские варианты из регулярок** (`Редактировать`, `Сохранить`, `Отмена`, `Далее`, `Назад`, `Вход`, `выйти`). UI английский.
-- [ ] **3.6 Удалить мёртвый код:**
+- [x] **3.5 Убрать спекулятивные русские варианты из регулярок** (`Редактировать`, `Сохранить`, `Отмена`, `Далее`, `Назад`, `Вход`, `выйти`). UI английский.
+- [x] **3.6 Удалить мёртвый код:** Сделано: обёртки BasePage, `get*Count` и `logout` в HomePage, неиспользуемые поля PlanPage/OrganizationPage, `BASE_URL` и `DATA_TEST` в config. Оставлены: `ROLES`, `EVALUATION` (константы предметной области), методы-заготовки PO, `isXExists` (нужны `00-create-users`).
   - **🔒** в `config.ts`: `DATA_TEST`, `ROLES`, `EVALUATION`, `BASE_URL`.
   - Неиспользуемые методы PO: `isAthleteExists`/`isCoachExists`/`isParentExists` (возвращают boolean — антипаттерн), `getText`, `getCount`, `waitForElement*`, `getUrl`, `getPathname`.
   - Тест `00-create-users` перевести на фикстуру `loginAs` или явно задокументировать как ручной.
@@ -249,7 +254,7 @@
   - 01–03 читать сразу.
   - Чек-листы reliability, antipatterns и pom-review читать только на шаге 04.
   - Для простых сценариев объединить утверждения 01 и 02 в одно.
-- [~] **4.8 Исправить опечатки и стиль:** (в скиллах, AGENTS.md и 06-coaches исправлено; `origen` в `fixtures.ts` 🔒 — в пакете на одобрение; единое написание и тон — вместе с 4.1)
+- [~] **4.8 Исправить опечатки и стиль:** (в скиллах, AGENTS.md и 06-coaches исправлено; `fixtures.ts` исправлен в пакете 1.7; единое написание и тон — вместе с 4.1)
   - **Опечатки:**
     - `origen` → origin ([fixtures.ts:38,44,52](tests/fixtures.ts#L38)) 🔒.
     - `воркерех` → воркерах; `ревокан`/`ревокал` → отозван.

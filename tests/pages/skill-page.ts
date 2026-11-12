@@ -6,20 +6,20 @@ import { TIMEOUTS } from '../config';
  * Page Object для страницы Skills.
  */
 export class SkillPage extends BasePage {
-  readonly heading: ReturnType<this['page']['getByRole']>;
-  readonly newSkillHeading: ReturnType<this['page']['getByRole']>;
-  readonly createSkillButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
+  readonly heading: Locator;
+  readonly newSkillHeading: Locator;
+  readonly createSkillButton: Locator;
+  readonly searchInput: Locator;
 
   // Form fields
-  readonly nameInput: ReturnType<this['page']['getByRole']>;
-  readonly categorySelect: ReturnType<this['page']['getByRole']>;
-  readonly levelSelect: ReturnType<this['page']['getByRole']>;
-  readonly descriptionInput: ReturnType<this['page']['getByRole']>;
-  readonly videoUrlInput: ReturnType<this['page']['getByRole']>;
+  readonly nameInput: Locator;
+  readonly categorySelect: Locator;
+  readonly levelSelect: Locator;
+  readonly descriptionInput: Locator;
+  readonly videoUrlInput: Locator;
 
   // Dialog
-  readonly createButton: ReturnType<this['page']['getByRole']>;
+  readonly createButton: Locator;
 
   constructor(page: Page) {
     super(page);

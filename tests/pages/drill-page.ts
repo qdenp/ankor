@@ -9,20 +9,32 @@ import { TIMEOUTS } from '../config';
  */
 export class DrillPage extends BasePage {
   readonly heading: Locator;
-  readonly newDrillButton: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
+  readonly newDrillButton: Locator;
+  readonly createButton: Locator;
 
   // Form fields
-  readonly nameInput: ReturnType<this['page']['getByRole']>;
-  readonly descriptionInput: ReturnType<this['page']['getByRole']>;
-  readonly segmentSelect: ReturnType<this['page']['getByRole']>;
-  readonly durationInput: ReturnType<this['page']['getByRole']>;
-  readonly minPlayersInput: ReturnType<this['page']['getByRole']>;
-  readonly maxPlayersInput: ReturnType<this['page']['getByRole']>;
-  readonly minAgeInput: ReturnType<this['page']['getByRole']>;
-  readonly maxAgeInput: ReturnType<this['page']['getByRole']>;
-  readonly youtubeUrlInput: ReturnType<this['page']['getByRole']>;
-  readonly visibilitySelect: ReturnType<this['page']['getByRole']>;
+  readonly nameInput: Locator;
+  readonly descriptionInput: Locator;
+  readonly segmentSelect: Locator;
+  readonly durationInput: Locator;
+  readonly minPlayersInput: Locator;
+  readonly maxPlayersInput: Locator;
+  readonly minAgeInput: Locator;
+  readonly maxAgeInput: Locator;
+  readonly youtubeUrlInput: Locator;
+  readonly visibilitySelect: Locator;
+
+  // Skill mapping
+  readonly addSkillMappingButton: Locator;
+  readonly skillMappingPopup: Locator;
+  readonly skillMappingPopupTitle: Locator;
+  readonly doneButton: Locator;
+
+  // Table
+  readonly tableRows: Locator;
+
+  /** YouTube iframe на detail странице дрила */
+  readonly youtubeIframe: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -161,9 +173,6 @@ export class DrillPage extends BasePage {
     const byText = this.page.getByText(drillName, { exact: false }).first();
     return byRole.or(byCell).or(byText).first();
   }
-
-  /** YouTube iframe на detail странице дрила */
-  readonly youtubeIframe: Locator;
 
   /** Вернуться в список дриллов */
   async goToDrillsList(): Promise<void> {

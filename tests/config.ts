@@ -7,8 +7,7 @@ import dotenv from 'dotenv';
 // Загружаем переменные окружения из файла, названного по серверу
 dotenv.config({ path: '.env.d333afta2q6llv' });
 
-/* ======================== Base URL ======================== */
-export const BASE_URL = process.env.ANKOR_BASE_URL || 'https://d333afta2q6llv.cloudfront.net';
+/* Base URL задаётся в playwright.config.ts (use.baseURL, переменная ANKOR_BASE_URL) */
 
 /* ======================== Credentials ======================== */
 /**
@@ -99,36 +98,3 @@ export const EVALUATION = {
   maxScore: 5,
   maxCategoriesBelowThree: 5,
 } as const;
-
-/* ======================== UI Selectors ======================== */
-export const DATA_TEST = {
-  // Auth
-  signInButton: 'sign-in-btn',
-  signUpButton: 'sign-up-btn',
-  nextButton: 'next-btn',
-  submitButton: 'submit-btn',
-  cancelButton: 'cancel-btn',
-
-  // Navigation
-  sidebar: 'sidebar',
-  navItem: 'nav-item',
-  userProfile: 'user-profile',
-
-  // Tables
-  dataTable: 'data-table',
-  addNewButton: 'add-new-btn',
-  editButton: 'edit-btn',
-  deleteButton: 'delete-btn',
-  actionMenu: 'action-menu',
-
-  // Forms
-  textField: 'text-field',
-  selectField: 'select-field',
-  checkbox: 'checkbox',
-  dropdown: 'dropdown',
-
-  // Alerts
-  toast: 'toast',
-  dialog: 'dialog',
-  modal: 'modal',
-};

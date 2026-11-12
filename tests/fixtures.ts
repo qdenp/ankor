@@ -19,14 +19,19 @@ export interface AuthFixture {
 
 /**
  * Проверить что JWT токен в storageState ещё валиден.
+ * Supabase хранит в localStorage JSON-объект сессии ({"access_token":"<JWT>", ...});
+ * на случай другого формата поддерживается и «голый» JWT.
+ * Битый или нечитаемый кэш — не ошибка теста, а повод для UI-логина, поэтому здесь catch → false.
  */
 function isTokenValid(storagePath: string): boolean {
   if (!fs.existsSync(storagePath)) return false;
   try {
     const state = JSON.parse(fs.readFileSync(storagePath, 'utf-8'));
-    const token = state.origins?.[0]?.localStorage?.find(e => e.name.includes('auth-token'));
+    const entries: Array<{ name: string; value: string }> = state.origins?.[0]?.localStorage ?? [];
+    const token = entries.find((e) => e.name.includes('auth-token'));
     if (!token) return false;
-    const payload = JSON.parse(atob(token.value.split('.')[1]));
+    const jwt = token.value.trim().startsWith('{') ? JSON.parse(token.value).access_token : token.value;
+    const payload = JSON.parse(atob(jwt.split('.')[1]));
     return payload.exp * 1000 > Date.now();
   } catch {
     return false;
@@ -35,13 +40,13 @@ function isTokenValid(storagePath: string): boolean {
 
 /**
  * Восстановить сессию из storageState в уже существующий контекст страницы.
- * Навигирует на origen приложения, восстанавливает cookies и localStorage,
- * затем перезагружает страницу чтобы приложение подхватило авторизацию.
+ * Открывает origin приложения, восстанавливает cookies и localStorage,
+ * затем заново открывает / чтобы приложение подхватило авторизацию.
  */
 async function restoreAuthFromCache(page: Page, storagePath: string): Promise<void> {
   const state = JSON.parse(fs.readFileSync(storagePath, 'utf-8'));
 
-  // Навигируем на origen приложения, чтобы cookies/localStorage применялись к правильному домену
+  // Открываем origin приложения, чтобы cookies/localStorage применялись к правильному домену
   await page.goto('/');
 
   // Восстанавливаем cookies
@@ -49,7 +54,7 @@ async function restoreAuthFromCache(page: Page, storagePath: string): Promise<vo
     await page.context().addCookies(state.cookies);
   }
 
-  // Восстанавливаем localStorage только для текущего origen
+  // Восстанавливаем localStorage только для текущего origin
   const currentOrigin = new URL(page.url()).origin;
   for (const origin of state.origins || []) {
     if (origin.origin !== currentOrigin) continue;
@@ -74,7 +79,7 @@ async function restoreAuthFromCache(page: Page, storagePath: string): Promise<vo
  * - Кэш: tests/.auth/{role}.json (owner, sysadmin, coach, parent, athlete)
  * - Каждый role имеет свой кэш-файл
  * - Если кэш валиден — восстанавливает сессию из storageState в текущий контекст
- * - Если кэш невалиден (logout ревокал или токен истёк) — UI-логин + обновление кэша
+ * - Если кэш невалиден (logout отозвал сессию или токен истёк) — UI-логин + обновление кэша
  *
  * Тесты sign-in/sign-up используют test.use({ storageState: undefined })
  * для сброса кэша и чистого браузера.
@@ -140,8 +145,8 @@ export const test = base.extend<AuthFixture, { browser: Browser }>({
       await basePage.logout();
 
       // Инвалидируем кэш только той роли, которая была залогинена.
-      // Токен ревокан на сервере, кэш этой роли больше не валиден.
-      // Кэши других ролей не трогаем — они живут на своих воркерех.
+      // Сессия отозвана на сервере, кэш этой роли больше не валиден.
+      // Кэши других ролей не трогаем — они живут на своих воркерах.
       if (currentRole) {
         const storagePath = path.resolve('tests/.auth', `${currentRole}.json`);
         if (fs.existsSync(storagePath)) {

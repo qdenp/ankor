@@ -8,24 +8,24 @@ import { TIMEOUTS } from '../config';
  * Поддерживает: Create, Read.
  */
 export class TeamPage extends BasePage {
-  readonly heading: ReturnType<this['page']['getByRole']>;
-  readonly newTeamButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
+  readonly heading: Locator;
+  readonly newTeamButton: Locator;
+  readonly searchInput: Locator;
 
   // Form fields
-  readonly nameInput: ReturnType<this['page']['getByRole']>;
-  readonly sportSelect: ReturnType<this['page']['getByRole']>;
-  readonly activeToggle: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
+  readonly nameInput: Locator;
+  readonly sportSelect: Locator;
+  readonly activeToggle: Locator;
+  readonly createButton: Locator;
 
   // Sidebar link
-  readonly sidebarLink: ReturnType<this['page']['getByRole']>;
+  readonly sidebarLink: Locator;
 
   // Dialog elements
-  readonly newTeamHeading: ReturnType<this['page']['getByRole']>;
+  readonly newTeamHeading: Locator;
 
   // Table rows
-  readonly teamRows: ReturnType<this['page']['getByRole']>;
+  readonly teamRows: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -100,6 +100,6 @@ export class TeamPage extends BasePage {
 
   /** Получить локатор строки команды в таблице */
   getTeamRow(name: string): Locator {
-    return this.teamRows.filter({ hasText: name, exact: false }).first();
+    return this.teamRows.filter({ hasText: name }).first();
   }
 }

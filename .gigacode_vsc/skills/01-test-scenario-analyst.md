@@ -26,7 +26,7 @@ grep -r "createAthlete" tests/specs/
 grep -r "createCoach" tests/specs/
 grep -r "createParent" tests/specs/
 grep -r "createPlan" tests/specs/
-grep -r "getAthleteRow\|getCoachRow\|getParentRow\|getPlanRow" tests/specs/
+grep -r "getAthleteRow\|getCoachRow\|getParentRow\|getPlanCard" tests/specs/
 
 # Список существующих тестов по ролям:
 ls tests/specs/owner/
@@ -64,7 +64,7 @@ ls tests/specs/athlete/
 
 ### Ассерты (web-first, ТОЛЬКО через PO)
 - await expect(athletePage.getAthleteRow(email)).toBeVisible({ timeout: TIMEOUTS.long })
-- await expect(planPage.getPlanRow(planName)).toBeVisible({ timeout: TIMEOUTS.long })
+- await expect(planPage.getPlanCard(planName)).toBeVisible({ timeout: TIMEOUTS.long })
 - await expect(page).toHaveURL(/expected-route/)
 - await expect(po.heading).toBeVisible()
 - await expect(po.searchInput).toHaveValue(searchTerm)

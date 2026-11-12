@@ -8,57 +8,57 @@ import { TIMEOUTS } from '../config';
  * Поддерживает: Create, View, Duplicate, Invite.
  */
 export class PlanPage extends BasePage {
-  readonly sidebarLink: ReturnType<this['page']['getByRole']>;
-  readonly newPlanButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
+  readonly sidebarLink: Locator;
+  readonly newPlanButton: Locator;
+  readonly searchInput: Locator;
 
   // Tabs
-  readonly myPlansTab: ReturnType<this['page']['getByRole']>;
-  readonly invitedTab: ReturnType<this['page']['getByRole']>;
-  readonly prebuiltTab: ReturnType<this['page']['getByRole']>;
-  readonly orgPlansTab: ReturnType<this['page']['getByRole']>;
+  readonly myPlansTab: Locator;
+  readonly invitedTab: Locator;
+  readonly prebuiltTab: Locator;
+  readonly orgPlansTab: Locator;
 
   // Form fields
-  readonly nameInput: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
-  readonly cancelButton: ReturnType<this['page']['getByRole']>;
+  readonly nameInput: Locator;
+  // В форме плана одна кнопка Save — и при создании, и при редактировании
+  readonly saveButton: Locator;
+  readonly cancelButton: Locator;
 
   // Drill mapping
-  readonly addDrillButton: ReturnType<this['page']['getByRole']>;
-  readonly drillDurationInput: ReturnType<this['page']['getByRole']>;
-  readonly drillNotesInput: ReturnType<this['page']['getByRole']>;
-  readonly drillMenuButton: ReturnType<this['page']['getByRole']>;
-  readonly editDrillOption: ReturnType<this['page']['getByRole']>;
-  readonly removeDrillOption: ReturnType<this['page']['getByRole']>;
+  readonly addDrillButton: Locator;
+  readonly drillDurationInput: Locator;
+  readonly drillNotesInput: Locator;
+  readonly drillMenuButton: Locator;
+  readonly editDrillOption: Locator;
+  readonly removeDrillOption: Locator;
 
   // Dialog elements
-  readonly addDrillConfirmButton: ReturnType<this['page']['getByRole']>;
-  readonly doneButton: ReturnType<this['page']['getByRole']>;
+  readonly addDrillConfirmButton: Locator;
+  readonly doneButton: Locator;
 
   // Drill edit dialog
-  readonly drillSaveButton: ReturnType<this['page']['getByRole']>;
-  readonly drillEditSaveButton: ReturnType<this['page']['getByRole']>;
+  readonly drillSaveButton: Locator;
+  readonly drillEditSaveButton: Locator;
 
-  // Actions
-  readonly inviteButton: ReturnType<this['page']['getByRole']>;
-  readonly duplicateButton: ReturnType<this['page']['getByRole']>;
-  readonly viewButton: ReturnType<this['page']['getByRole']>;
-  readonly editButton: ReturnType<this['page']['getByRole']>;
-  readonly deleteButton: ReturnType<this['page']['getByRole']>;
+  // Plan card actions (My Plans list)
+  readonly planCardViewButton: Locator;
+  readonly planCardDuplicateButton: Locator;
+  readonly planCardEditLink: Locator;
+
+  // Plan detail actions (after View)
+  readonly inviteUsersButton: Locator;
+  readonly planDetailEditLink: Locator;
 
   // Toast / success notification
-  readonly toast: ReturnType<this['page']['getByRole']>;
+  readonly toast: Locator;
 
   // Prebuilt checkbox (sysadmin only)
-  readonly prebuiltCheckbox: ReturnType<this['page']['getByRole']>;
-
-  // Table rows
-  readonly planRows: ReturnType<this['page']['getByRole']>;
+  readonly prebuiltCheckbox: Locator;
 
   // Dialog elements
-  readonly newPlanHeading: ReturnType<this['page']['getByRole']>;
-  readonly addDrillsHeading: ReturnType<this['page']['getByRole']>;
-  readonly segmentsHeading: ReturnType<this['page']['getByRole']>;
+  readonly newPlanHeading: Locator;
+  readonly addDrillsHeading: Locator;
+  readonly segmentsHeading: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -75,7 +75,7 @@ export class PlanPage extends BasePage {
 
     // Form fields
     this.nameInput = page.getByRole('textbox', { name: 'Plan name' });
-    this.createButton = page.getByRole('button', { name: 'Save' });
+    this.saveButton = page.getByRole('button', { name: 'Save' });
     this.cancelButton = page.getByRole('button', { name: 'Cancel' });
 
     // Drill mapping
@@ -83,8 +83,8 @@ export class PlanPage extends BasePage {
     this.drillDurationInput = page.getByRole('spinbutton', { name: /duration/i });
     this.drillNotesInput = page.getByRole('textbox', { name: /notes/i });
     this.drillMenuButton = page.getByRole('button', { name: 'Segment actions' }).first();
-    this.editDrillOption = page.getByRole('menuitem', { name: /edit|Редактировать/i }).first();
-    this.removeDrillOption = page.getByRole('menuitem', { name: /remove|Удалить/i }).first();
+    this.editDrillOption = page.getByRole('menuitem', { name: 'Edit' }).first();
+    this.removeDrillOption = page.getByRole('menuitem', { name: 'Remove' }).first();
 
     // Plan card actions (visible in My Plans list)
     this.planCardViewButton = page.getByRole('button', { name: 'View' }).first();
@@ -104,9 +104,6 @@ export class PlanPage extends BasePage {
 
     // Prebuilt checkbox (sysadmin only)
     this.prebuiltCheckbox = page.getByRole('checkbox', { name: /Prebuilt/i });
-
-    // Plan list items (cards/articles)
-    this.planCards = page.locator('article, [role="article"]');
 
     // Dialog elements
     this.newPlanHeading = page.getByRole('heading', { name: /New Plan/i });
@@ -138,7 +135,7 @@ export class PlanPage extends BasePage {
   async createPlan(params: { name: string }): Promise<void> {
     await this.clickNewPlan();
     await this.fillPlanForm(params);
-    await this.createButton.click();
+    await this.saveButton.click();
     await expect(this.newPlanHeading).toBeHidden({ timeout: TIMEOUTS.medium });
   }
 
@@ -240,7 +237,7 @@ export class PlanPage extends BasePage {
 
   /** Сохранить план и вернуться на My Plans */
   async savePlanAndReturnToMyPlans(): Promise<void> {
-    await this.createButton.click();
+    await this.saveButton.click();
     await expect(this.newPlanHeading).toBeHidden({ timeout: TIMEOUTS.long });
     await this.goToMyPlans();
     await expect(this.myPlansTab).toBeVisible();
@@ -250,11 +247,5 @@ export class PlanPage extends BasePage {
   async search(text: string): Promise<void> {
     await this.searchInput.click();
     await this.searchInput.fill(text);
-  }
-
-  /** Получить локатор карточки плана в My Plans — robust selection by role */
-  getPlanRow(name: string): Locator {
-    // Use getByRole for stable selection by accessible name
-    return this.page.getByRole('article', { name }).first();
   }
 }

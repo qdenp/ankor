@@ -9,39 +9,40 @@ import { TIMEOUTS } from '../config';
  */
 export class EvaluationPage extends BasePage {
   readonly heading: Locator;
-  readonly newEvaluationButton: ReturnType<this['page']['getByRole']>;
-  readonly submitButton: ReturnType<this['page']['getByRole']>;
-  readonly saveAsDraftButton: ReturnType<this['page']['getByRole']>;
-  readonly editButton: ReturnType<this['page']['getByRole']>;
+  readonly newEvaluationButton: Locator;
+  readonly submitButton: Locator;
+  readonly saveAsDraftButton: Locator;
+  readonly editButton: Locator;
 
   // Sidebar links
-  readonly sidebarLink: ReturnType<this['page']['getByRole']>;
-  readonly sidebarReportLink: ReturnType<this['page']['getByRole']>;
+  readonly sidebarLink: Locator;
+  readonly sidebarReportLink: Locator;
 
   // Form fields
-  readonly scorecardTemplateSelect: ReturnType<this['page']['getByRole']>;
-  readonly filterByTeamSelect: ReturnType<this['page']['getByRole']>;
-  readonly filterByPositionSelect: ReturnType<this['page']['getByRole']>;
+  readonly scorecardTemplateSelect: Locator;
+  readonly filterByTeamSelect: Locator;
+  readonly filterByPositionSelect: Locator;
   readonly athletesToEvaluateChip: Locator;
-  readonly addSkillButton: ReturnType<this['page']['getByRole']>;
+  readonly addSkillButton: Locator;
 
   // Subskills popup
   readonly subskillsPopup: Locator;
   readonly subskillsPopupTitle: Locator;
-  readonly doneButton: ReturnType<this['page']['getByRole']>;
-  readonly saveSubskillsButton: ReturnType<this['page']['getByRole']>;
+  readonly doneButton: Locator;
+  readonly saveSubskillsButton: Locator;
   readonly subskillCheckboxes: Locator;
-  readonly subskillRatingButtons: ReturnType<this['page']['getByRole']>;
+  readonly subskillRatingButtons: Locator;
 
   // Category rating fields (динамические)
   readonly categoryRatingInputs: Locator;
   readonly categoryRatingCells: Locator;
+  readonly ratingInput: Locator;
 
   // Table
-  readonly tableRows: ReturnType<this['page']['getByRole']>;
+  readonly tableRows: Locator;
 
   // Create button (visible/hidden check)
-  readonly createButton: ReturnType<this['page']['getByRole']>;
+  readonly createButton: Locator;
 
   constructor(page: Page) {
     super(page);

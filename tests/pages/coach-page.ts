@@ -6,24 +6,24 @@ import { TIMEOUTS } from '../config';
  * Page Object для страницы Coaches.
  */
 export class CoachPage extends BasePage {
-  readonly heading: ReturnType<this['page']['getByRole']>;
-  readonly newCoachButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
+  readonly heading: Locator;
+  readonly newCoachButton: Locator;
+  readonly searchInput: Locator;
+  readonly createButton: Locator;
 
   // Form fields
-  readonly firstNameInput: ReturnType<this['page']['getByRole']>;
-  readonly lastNameInput: ReturnType<this['page']['getByRole']>;
-  readonly emailInput: ReturnType<this['page']['getByRole']>;
-  readonly passwordInput: ReturnType<this['page']['getByRole']>;
-  readonly confirmPasswordInput: ReturnType<this['page']['getByRole']>;
-  readonly phoneInput: ReturnType<this['page']['getByRole']>;
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly confirmPasswordInput: Locator;
+  readonly phoneInput: Locator;
 
   // Dialog elements
-  readonly newCoachHeading: ReturnType<this['page']['getByRole']>;
+  readonly newCoachHeading: Locator;
 
   // Table rows
-  readonly coachRows: ReturnType<this['page']['getByRole']>;
+  readonly coachRows: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -101,7 +101,7 @@ export class CoachPage extends BasePage {
   /** Проверка существования Coach по email */
   async isCoachExists(email: string): Promise<boolean> {
     await this.search(email);
-    const rows = this.coachRows.filter({ hasText: email, exact: false });
+    const rows = this.coachRows.filter({ hasText: email });
     return await rows.count() > 0;
   }
 
@@ -113,12 +113,12 @@ export class CoachPage extends BasePage {
 
   /** Получить локатор строки коуча по email */
   getRowByEmail(email: string): Locator {
-    return this.coachRows.filter({ hasText: email, exact: false }).first();
+    return this.coachRows.filter({ hasText: email }).first();
   }
 
   /** Получить локатор строки коуча по имени (first + last) */
   getRowByName(name: string): Locator {
-    return this.coachRows.filter({ hasText: name, exact: false }).first();
+    return this.coachRows.filter({ hasText: name }).first();
   }
 
   /** Открыть edit coach через More actions (search уже применён) */

@@ -8,14 +8,14 @@ import { TIMEOUTS } from '../config';
  * Навигация через левое меню (Organization Profile / Organizations).
  */
 export class OrganizationPage extends BasePage {
-  readonly sidebarOrgLink: ReturnType<this['page']['getByRole']>;
-  readonly orgListLink: ReturnType<this['page']['getByRole']>;
-  readonly editButton: ReturnType<this['page']['getByRole']>;
-  readonly nameInput: ReturnType<this['page']['getByRole']>;
-  readonly saveButton: ReturnType<this['page']['getByRole']>;
-  readonly cancelButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
-  readonly orgRows: ReturnType<this['page']['getByRole']>;
+  readonly sidebarOrgLink: Locator;
+  readonly orgListLink: Locator;
+  readonly editButton: Locator;
+  readonly nameInput: Locator;
+  readonly saveButton: Locator;
+  readonly cancelButton: Locator;
+  readonly searchInput: Locator;
+  readonly orgRows: Locator;
   readonly firstDataRow: Locator;
 
   constructor(page: Page) {
@@ -26,20 +26,16 @@ export class OrganizationPage extends BasePage {
     this.orgListLink = page.getByRole('link', { name: 'Organizations' }).first();
 
     // Form elements - multiple fallback strategies
-    this.editButton = page.getByRole('button', { name: /Edit|Редактировать/i }).first();
+    this.editButton = page.getByRole('button', { name: 'Edit' }).first();
     this.nameInput = page.getByLabel('Organization name').or(page.getByRole('textbox', { name: 'Organization name' })).or(page.locator('input[name="name"]').first());
-    this.saveButton = page.getByRole('button', { name: /Save|Сохранить/i }).first();
-    this.cancelButton = page.getByRole('button', { name: /Cancel|Отмена/i }).first();
+    this.saveButton = page.getByRole('button', { name: 'Save' }).first();
+    this.cancelButton = page.getByRole('button', { name: 'Cancel' }).first();
 
-// Search & list
+    // Search & list
     this.searchInput = page.getByRole('textbox', { name: /search/i });
     // MUI DataGrid rows
     this.orgRows = page.getByRole('row');
     this.firstDataRow = page.locator('[role="row"][data-rowindex="0"]').first();
-    this.orgRowByName = (name: string) => page.getByRole('row', { name });
-    this.orgRowEditButton = (name: string) => page.getByRole('row', { name }).getByRole('button', { name: /Edit|Редактировать/i });
-    // DataGrid column headers - use data-field attribute for reliability
-    this.orgHeaderOrganization = page.locator('[role="columnheader"][data-field="name"]');
   }
 
   /** Переход на страницу Organization Profile через левое меню */
@@ -108,7 +104,7 @@ export class OrganizationPage extends BasePage {
   /** Получить имя организации из строки таблицы */
   async getOrgNameFromRow(row: Locator): Promise<string> {
     const nameCell = row.locator('[role="gridcell"][data-field="name"]');
-    return await nameCell.textContent();
+    return (await nameCell.textContent()) ?? '';
   }
 
   /** Кликнуть Edit на строке DataGrid (через More actions menu) */

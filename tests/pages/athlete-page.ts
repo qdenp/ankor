@@ -6,30 +6,30 @@ import { TIMEOUTS } from '../config';
  * Page Object для страницы Athletes.
  */
 export class AthletePage extends BasePage {
-  readonly heading: ReturnType<this['page']['getByRole']>;
-  readonly newAthleteButton: ReturnType<this['page']['getByRole']>;
-  readonly searchInput: ReturnType<this['page']['getByRole']>;
-  readonly createButton: ReturnType<this['page']['getByRole']>;
+  readonly heading: Locator;
+  readonly newAthleteButton: Locator;
+  readonly searchInput: Locator;
+  readonly createButton: Locator;
 
   // Form fields
-  readonly firstNameInput: ReturnType<this['page']['getByRole']>;
-  readonly lastNameInput: ReturnType<this['page']['getByRole']>;
-  readonly graduationYearInput: ReturnType<this['page']['getByRole']>;
-  readonly positionSelect: ReturnType<this['page']['getByRole']>;
-  readonly emailInput: ReturnType<this['page']['getByRole']>;
-  readonly teamSelect: ReturnType<this['page']['getByRole']>;
-  readonly genderSelect: ReturnType<this['page']['getByRole']>;
-  readonly passwordInput: ReturnType<this['page']['getByRole']>;
-  readonly confirmPasswordInput: ReturnType<this['page']['getByRole']>;
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly graduationYearInput: Locator;
+  readonly positionSelect: Locator;
+  readonly emailInput: Locator;
+  readonly teamSelect: Locator;
+  readonly genderSelect: Locator;
+  readonly passwordInput: Locator;
+  readonly confirmPasswordInput: Locator;
 
   // Dialog elements
-  readonly newAthleteHeading: ReturnType<this['page']['getByRole']>;
-  readonly positionOptions: ReturnType<this['page']['getByRole']>;
-  readonly teamOptions: ReturnType<this['page']['getByRole']>;
-  readonly genderOptions: ReturnType<this['page']['getByRole']>;
+  readonly newAthleteHeading: Locator;
+  readonly positionOptions: Locator;
+  readonly teamOptions: Locator;
+  readonly genderOptions: Locator;
 
   // Table rows
-  readonly athleteRows: ReturnType<this['page']['getByRole']>;
+  readonly athleteRows: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -125,11 +125,11 @@ export class AthletePage extends BasePage {
 
   /** Проверка существования Athlete по email */
   async isAthleteExists(email: string): Promise<boolean> {
-    return await this.athleteRows.filter({ hasText: email, exact: false }).first().isVisible({ timeout: TIMEOUTS.short });
+    return await this.athleteRows.filter({ hasText: email }).first().isVisible({ timeout: TIMEOUTS.short });
   }
 
   /** Получить локатор строки атлета в таблице */
   getAthleteRow(email: string): Locator {
-    return this.athleteRows.filter({ hasText: email, exact: false }).first();
+    return this.athleteRows.filter({ hasText: email }).first();
   }
 }
