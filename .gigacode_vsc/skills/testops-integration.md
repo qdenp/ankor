@@ -1,55 +1,21 @@
-# TestOps Integration — Allure TestOps
+# TestOps: кейсы через MCP
 
-## URL
-https://rallyup.testops.cloud
+Allure TestOps — https://rallyup.testops.cloud, **проект 366** (Ankor). Источник шагов и ожиданий кейсов.
 
-## Доступные проекты
-Список проектов доступен в TestOps. Уточни ID нужного проекта через веб-интерфейс.
+## MCP
+Сервер `https://rallyup.testops.cloud/api/mcp`, токен — из пользовательской переменной окружения `TESTOPS_AUTH_HEADER` (`api-token <TOKEN>`; в репозиторий не коммитить):
+- GigaCode — `.gigacode_vsc/gigacode.jsonc` (через `npx mcp-remote`);
+- Claude Code — `.mcp.json` в корне.
 
-## Как использовать
-
-### 1. Найти тест-кейсы
-Открой TestOps и введи в поиск:
-- URL: `https://rallyup.testops.cloud`
-- Раздел: **Test Cases**
-- Поиск по названию, ID или тегу
-
-### 2. Найти прогоны (раны)
-- Раздел: **Launches**
-- Фильтр по проекту, дате, статусу
-
-### 3. MCP-инструменты (для агентов)
-Сервер `https://rallyup.testops.cloud/api/mcp` подключён для обоих агентов, токен в обоих случаях из `TESTOPS_AUTH_HEADER`:
-- **GigaCode** — `.gigacode_vsc/gigacode.jsonc` (через `npx mcp-remote`);
-- **Claude Code** — `.mcp.json` в корне (HTTP напрямую). При первом запуске Claude Code спросит, одобрить ли сервер `allure-testops`.
-
-Инструменты только для чтения — использовать свободно:
-- `testops_find_testcases` — поиск тест-кейсов (по `test_case_id`, названию)
-- `testops_find_testresults` — поиск прогонов
-- `testops_find_sharedsteps`, `testops_get_project`, `testops_get_issue_details`
-
-Инструменты, которые **меняют данные TestOps** (общие для команды) — только по явной просьбе пользователя:
-`testops_create_testcase`, `testops_update_testcase`, `testops_delete_testcase`, `testops_restore_testcase`,
-`testops_create_sharedstep`, `testops_update_sharedstep`, `testops_create_mute`, `testops_delete_mute`.
-
-**Настройка токена (один раз на машине).** MCP-сервер настроен в `.gigacode_vsc/gigacode.jsonc` и берёт заголовок авторизации из пользовательской переменной окружения `TESTOPS_AUTH_HEADER`. Токен в репозиторий не коммитить.
+Настройка на новой машине (затем перезапустить VS Code):
 ```powershell
 [Environment]::SetEnvironmentVariable('TESTOPS_AUTH_HEADER', 'api-token <TOKEN>', 'User')
 ```
-После этого полностью перезапустить VS Code, чтобы он подхватил переменную.
 
-### 4. API (если нужен программный доступ)
-```
-Base URL: https://rallyup.testops.cloud/api
-Authorization: api-token <TOKEN>
-```
+**Читать — свободно:** `testops_find_testcases` (`projectId: 366`, `aql: "id = 72600"`, `expand: ["scenario"]` — шаги), `testops_find_testresults` (результаты запуска: `aql: "launch = <id>"`), `testops_get_project`, `testops_find_sharedsteps`.
+**Менять** (данные общие для команды) — только по явной просьбе пользователя: `create/update/delete/restore_testcase`, `*_sharedstep`, `*_mute`.
 
-## Маппинг TC из CSV → TestOps
-- `allure_id` из CSV (91XXX/93XXX) = ID тест-кейса в TestOps
-- `test_case_id` из CSV = внутренний ID тест-кейса
-- В тестах — `await allure.allureId('XXXXX')` первой строкой (test_case_id), НЕ allure_id. `@TC-…` в названии TestOps не распознаёт (AGENTS.md §6)
-
-## Примеры
-- TC 91859 (allure_id) → 72600 (test_case_id) → Create Plan as Administrator/Owner
-- TC 91830 (allure_id) → 72679 (test_case_id) → Home page (System Administrator)
-- TC 91866 (allure_id) → 71460 (test_case_id) → Create evaluation
+## Номер кейса в тесте
+- В тесте — `test_case_id` (например, 72600): `await allure.allureId('72600')` первой строкой (AGENTS §6).
+- Номера вида 91XXX — это allure_id из старой выгрузки CSV, в тестах не использовать.
+- Выгрузка результатов из CI не переписывает название и поля кейса только благодаря настройке проекта (Settings → Upload → Meta data update policies: `from_test_case` для Name и Custom Fields).
