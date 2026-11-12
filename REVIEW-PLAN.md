@@ -166,7 +166,7 @@
 
 Каждый пункт — тест, который может пройти, ничего не проверив.
 
-- [ ] **2.1** [parent/90-permissions.spec.ts:68](tests/specs/parent/90-permissions.spec.ts#L68): регулярка `/sign-in|dashboard|practice-plans/` совпадает с самим `/practice-plans/new`. Нужно проверять `not.toHaveURL(/practice-plans\/new/)` или отсутствие формы.
+- [x] **2.1** Сделано (2026-11-12): parent при прямом заходе на `/practice-plans/new` перенаправляется на список — проверяется `toHaveURL(/\/practice-plans\/?$/)` и отсутствие поля Plan name. [parent/90-permissions.spec.ts:68](tests/specs/parent/90-permissions.spec.ts#L68): регулярка `/sign-in|dashboard|practice-plans/` совпадает с самим `/practice-plans/new`. Нужно проверять `not.toHaveURL(/practice-plans\/new/)` или отсутствие формы.
 - [x] **2.2** ~~plan-tabs.factory.ts~~ — фабрика удалена (3.8): была пропущена у всех ролей, вкладки проверяют тесты с кейсами 71645, 72617, 72622.
   - Пропускать только athlete, через параметр фабрики.
   - Убрать дубли с явными тестами: owner `@TC-71645`, parent `@TC-71643`/`@TC-72622`, athlete `@TC-72622`.
@@ -180,7 +180,7 @@
   - **Строка 84:** `not.toContainText('6')` — сначала дождаться финального состояния ячейки (ожидаемое значение или сообщение-предупреждение).
   - **Draft:** проверять статус Draft в строке.
   - **`getRow(TEMPLATE_NAME)`:** находит старые строки. Нужен уникальный признак созданной оценки.
-- [ ] **2.7** [06-coaches.spec.ts](tests/specs/owner/06-coaches.spec.ts): имя `'View Coach'` не уникально. Использовать `Coach${Date.now()}` и искать строку по email.
+- [x] **2.7** Закрыт переписыванием 06-coaches (3.8): имена с `Date.now()`, строка ищется по email. [06-coaches.spec.ts](tests/specs/owner/06-coaches.spec.ts): имя `'View Coach'` не уникально. Использовать `Coach${Date.now()}` и искать строку по email.
 - [ ] **2.8** [10-drills.spec.ts](tests/specs/owner/10-drills.spec.ts):
   - Сейчас 3 теста создают 3 дрилла с одинаковым именем. Создавать один дрилл с уникальным именем в первом тесте, остальные тесты переиспользуют его (минимум новых сущностей, см. 3.11).
   - Тест «verify role permissions» переименовать или вынести проверку прав в спеки ролей.
@@ -190,10 +190,10 @@
   - Добавить проверки «только своя организация» (owner) и «все организации» (sysadmin).
   - Перед каждым `toBeHidden` ждать загрузки страницы, иначе негативная проверка проходит раньше рендера.
 - [x] **2.10** Сделано (2026-11-12): после деактивации строка шаблона содержит `Inactive` (колонка Status), в обоих тестах. [11-scorecard-templates.spec.ts:48,79](tests/specs/owner/11-scorecard-templates.spec.ts#L48): проверять статус Inactive в строке.
-- [ ] **2.11** [01-signin.spec.ts](tests/specs/owner/01-signin.spec.ts):
+- [x] **2.11** Закрыт в 3.8: неверный пароль проверяет текст ошибки `Invalid login credentials`; тест пустой формы и describe `Sign Up` удалены. [01-signin.spec.ts](tests/specs/owner/01-signin.spec.ts):
   - Для невалидных данных и пустой формы проверять сообщения об ошибке.
   - Удалить дублирующий describe `Sign Up`.
-- [ ] **2.12** [04-organization.spec.ts](tests/specs/owner/04-organization.spec.ts):
+- [x] **2.12** Закрыт: первый тест — `test.skip` с TODO(71116) (профиль не проверяется); откат имени — к константе `ORGANIZATIONS` (PR #2), поэтому упавший прогон чинится следующим, `finally` не нужен. [04-organization.spec.ts](tests/specs/owner/04-organization.spec.ts):
   - Первый тест проверяет только «не sign-in» — проверять профиль.
   - Откат имени перенести в `afterEach`/`finally`.
 - [ ] **2.13** `getRow = byRole.or(byCell).or(getByText(name))` (drill, evaluation, scorecard): ветка `getByText` находит имя в toast и заголовках. Убрать её. Строка таблицы — только `getByRole('row')` с фильтром.
