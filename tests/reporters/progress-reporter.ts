@@ -145,14 +145,18 @@ function renderSummary(states: RoleState[]): string {
   const now = Date.now();
   const roleWidth = Math.max(...states.map((s) => s.role.length));
   const lines = states.map((s) => {
-    const counts =
-      `${`${s.done}/${s.total}`.padStart(5)}  ok ${String(s.ok).padEnd(3)} x ${String(s.failed).padEnd(3)} - ${String(s.skipped).padEnd(3)}` +
-      (s.flaky ? ` flaky ${s.flaky}` : '');
+    const progress = `${s.done}/${s.total}`.padStart(5);
+    const counts = (
+      `${progress}  ok ${String(s.ok).padEnd(3)} x ${String(s.failed).padEnd(3)} - ${String(s.skipped).padEnd(3)}` +
+      (s.flaky ? ` flaky ${s.flaky}` : '')
+    ).trimEnd();
     const tail =
       s.status === 'running'
         ? `▶ running ${formatDuration(now - s.startedAt)}  ${s.current ?? ''}`
         : `${s.status === 'passed' ? '✓' : '✗'} ${s.status} in ${formatDuration((s.finishedAt ?? now) - s.startedAt)}`;
-    return `${s.role.padEnd(roleWidth)}  ${counts}  ${tail}`;
+    // Статус и текущий тест — второй строкой, ровно под "N/M": сводка читается в узком окне редактора
+    const indent = roleWidth + 2 + (progress.length - progress.trimStart().length);
+    return `${s.role.padEnd(roleWidth)}  ${counts}\n${' '.repeat(indent)}${tail}`;
   });
 
   const failures = states.flatMap((s) => s.failures.map((f) => `  ${s.role.padEnd(roleWidth)}  x ${f.title} (attempt ${f.attempt})\n${' '.repeat(roleWidth + 6)}${f.error}`));
