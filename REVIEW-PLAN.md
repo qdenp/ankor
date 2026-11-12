@@ -175,7 +175,7 @@
 - [x] **2.5** Сделано (2026-11-12): после remove — `toHaveText(/Segments \(0\)/)`; `15 min` уже ищется в карточке плана (`getPlanCard`). [coach/13-plans.spec.ts:35,56](tests/specs/coach/13-plans.spec.ts#L35):
   - После remove проверять `Segments (0)`.
   - Длительность `15 min` искать внутри карточки `getPlanRow(planName)`, а не по всей странице.
-- [ ] **2.6** [12-evaluations.spec.ts](tests/specs/owner/12-evaluations.spec.ts):
+- [x] **2.6** Сделано (2026-11-12): рейтинг 6 — проверяется предупреждение «…from 1 to 5» и что ячейка Category1 осталась `—` (`getCategoryRatingCell` вместо «первой ячейки с —», которая перескакивала). Остальное закрыто раньше (1.5): тест отчёта переименован (71562, workout 71563 — отдельно), черновики — по статусу `In Progress` и удаляются в afterEach. [12-evaluations.spec.ts](tests/specs/owner/12-evaluations.spec.ts):
   - **Строка 235:** название обещает report и workout — добавить их проверки или переименовать тест.
   - **Строка 84:** `not.toContainText('6')` — сначала дождаться финального состояния ячейки (ожидаемое значение или сообщение-предупреждение).
   - **Draft:** проверять статус Draft в строке.
