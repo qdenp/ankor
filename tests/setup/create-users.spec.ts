@@ -3,7 +3,9 @@ import { SignInPage } from '../pages/sign-in-page';
 import { AthletePage } from '../pages/athlete-page';
 import { CoachPage } from '../pages/coach-page';
 import { ParentPage } from '../pages/parent-page';
-import { CREDENTIALS, TIMEOUTS } from '../config';
+import { OrgSignUpPage } from '../pages/org-signup-page';
+import { OrganizationPage } from '../pages/organization-page';
+import { CREDENTIALS, ORGANIZATIONS, TIMEOUTS } from '../config';
 
 /**
  * Тест для создания пользователей через интерфейс сайта.
@@ -17,7 +19,8 @@ import { CREDENTIALS, TIMEOUTS } from '../config';
  * Запуск: npm run test:setup
  */
 test.describe('Create Test Users', () => {
-  test.describe.configure({ mode: 'serial' });
+  // Без ретраев: повтор регистрации организации с тем же email упал бы на дубликате и скрыл настоящую причину
+  test.describe.configure({ mode: 'serial', retries: 0 });
 
   test('should create coach, parent, athlete via their respective pages', async ({ page }) => {
     const signInPage = new SignInPage(page);
@@ -85,5 +88,47 @@ test.describe('Create Test Users', () => {
 
     // Проверяем parent через PO метод
     await expect(parentPage.getParentRow(CREDENTIALS.parent.email)).toBeVisible();
+  });
+
+  /**
+   * Отдельная организация для sysadmin/04-organization (редактирование имени): с организацией owner
+   * тесты owner и sysadmin правили одно имя параллельно и сбивали друг друга.
+   * Запускать один раз: повторная регистрация с тем же email не пройдёт, удалить организацию нельзя.
+   *   npm run test:setup -- --grep "organization for sysadmin"
+   */
+  test('should create organization for sysadmin edit test', async ({ page, browser, baseURL }) => {
+    const org = ORGANIZATIONS.sysadminEdit;
+    const password = process.env.ANKOR_SYSEDIT_ORG_PASSWORD;
+    if (!password) throw new Error('ANKOR_SYSEDIT_ORG_PASSWORD is required. Set it in .env file.');
+
+    // Регистрация — в чистом контексте, без чьей-либо сессии
+    const signUpContext = await browser.newContext({ baseURL });
+    const signUpPage = await signUpContext.newPage();
+    const orgSignUpPage = new OrgSignUpPage(signUpPage);
+    await orgSignUpPage.goto();
+    await orgSignUpPage.createOrganization({
+      adminFirstName: 'Sysadmin',
+      adminLastName: 'Edit Test',
+      adminEmail: org.adminEmail,
+      adminPhone: '5555550102',
+      password,
+      organizationName: org.name,
+      sport: 'Lacrosse',
+      gender: 'Coed',
+      teamName: `${org.name} Team`,
+    });
+    await expect(signUpPage).not.toHaveURL(/org-signup/, { timeout: TIMEOUTS.long });
+    await signUpContext.close();
+
+    // Проверка: sysadmin находит новую организацию по email админа
+    const signInPage = new SignInPage(page);
+    const orgPage = new OrganizationPage(page);
+    await signInPage.goto();
+    await signInPage.login(CREDENTIALS.sysadmin.email, CREDENTIALS.sysadmin.password);
+    await expect(page).not.toHaveURL(/sign-in/);
+    await orgPage.gotoOrganizationsList();
+    await orgPage.waitForDataGridLoaded();
+    await orgPage.search(org.adminEmail);
+    await expect(orgPage.getOrgRowByEmail(org.adminEmail)).toBeVisible({ timeout: TIMEOUTS.long });
   });
 });

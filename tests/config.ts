@@ -53,6 +53,21 @@ export const CREDENTIALS = {
   },
 };
 
+/* ======================== Organizations ======================== */
+/**
+ * Организации, имена которых меняют тесты редактирования. Тест возвращает имя к константе,
+ * а не к прочитанному в начале значению — иначе один упавший прогон портит имя навсегда.
+ */
+export const ORGANIZATIONS = {
+  /** Организация owner (ANKOR_OWNER_EMAIL) — её правит owner/04-organization */
+  owner: { name: 'aiorg01' },
+  /**
+   * Отдельная организация для sysadmin/04-organization, чтобы не пересекаться с owner (роли идут параллельно).
+   * Создаётся tests/setup/create-users.spec.ts; пароль админа — ANKOR_SYSEDIT_ORG_PASSWORD (нужен только setup).
+   */
+  sysadminEdit: { name: 'aiorg01sysedit', adminEmail: 'dtimokhin+aiorg01sysedit@aexsoft.com' },
+} as const;
+
 /* ======================== Roles ======================== */
 export const ROLES = {
   SYSTEM_ADMIN: 'System Administrator',

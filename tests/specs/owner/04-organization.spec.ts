@@ -1,7 +1,7 @@
 import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { OrganizationPage } from '../../pages/organization-page';
-import { TIMEOUTS } from '../../config';
+import { ORGANIZATIONS } from '../../config';
 
 /**
  * 04 — Organization (пункт меню Organizations).
@@ -35,11 +35,12 @@ test.describe('Owner Organization Tests', () => {
     await allure.allureId('71924');
     const orgPage = new OrganizationPage(page);
 
-    await orgPage.goto();
+    // Возврат — к константе, а не к прочитанному имени: прогон, упавший до возврата, иначе оставлял
+    // временное "Test Org …" как «исходное» для всех следующих прогонов
+    const originalName = ORGANIZATIONS.owner.name;
 
-    // Click Edit to enter edit mode and get original name from input
+    await orgPage.goto();
     await orgPage.clickEdit();
-    const originalName = await orgPage.nameInput.inputValue();
 
     // Edit organization
     const newName = `Test Org ${Date.now()}`;
