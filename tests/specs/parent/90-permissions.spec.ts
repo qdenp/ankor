@@ -65,8 +65,10 @@ test.describe('Parent Permission Tests', () => {
     // Org Plans tab — NOT visible (TC-72622)
     await expect(planPage.orgPlansTab, 'Org Plans tab should be hidden for parent').toBeHidden();
 
-    // Direct access to /practice-plans/new — blocked
+    // Direct access to /practice-plans/new — blocked: parent is redirected to the plans list.
+    // Раньше регулярка /sign-in|dashboard|practice-plans/ совпадала и с самим /practice-plans/new — проверка проходила всегда
     await page.goto('/practice-plans/new');
-    await expect(page, 'Direct access to new plan should be blocked').toHaveURL(/sign-in|dashboard|practice-plans/);
+    await expect(page, 'Direct access to new plan should redirect to the plans list').toHaveURL(/\/practice-plans\/?$/);
+    await expect(planPage.nameInput, 'Plan form should not be shown to parent').toBeHidden();
   });
 });
