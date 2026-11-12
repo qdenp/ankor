@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SignInPage } from '../pages/sign-in-page';
 import { ManageUsersPage } from '../pages/manage-users-page';
-import { CREDENTIALS, TIMEOUTS } from '../config';
+import { CREDENTIALS, EVALUATED_ATHLETE, TIMEOUTS } from '../config';
 
 /**
  * Служебный тест (не проверка): разово деактивировать пользователей, накопленных тестами создания.
@@ -10,17 +10,34 @@ import { CREDENTIALS, TIMEOUTS } from '../config';
  *
  * Безопасность:
  * - только под owner: owner видит пользователей своей организации, чужие организации не затрагиваются;
- * - только email по шаблонам тестов создания (поиск на сервере по email). Основные пользователи ролей
- *   из .env (dtimokhin+parent@…, dtimokhin+coach@…) под шаблоны не подходят;
+ * - только email по шаблонам тестов создания (поиск на сервере по email): после "+…" у них отметка времени
+ *   Date.now(), у постоянных пользователей её нет;
+ * - PROTECTED_USERS — постоянные пользователи, на которых держатся тесты. Тест падает ДО деактивации, если
+ *   кто-то из них подходит под шаблон, и проверяет ПОСЛЕ, что все они активны;
  * - уже деактивированные пропускаются — тест можно перезапускать.
  *
+ * ⚠️ Добавляете шаблон (например, тест создания атлетов) или нового постоянного пользователя —
+ *    сначала обновите TEST_USER_EMAIL_PATTERNS и PROTECTED_USERS.
+ *
  * Запуск: npm run test:setup -- --grep "deactivate users created by tests"
- * Новые пользователи после этого не копятся: 06-coaches и 07-parents деактивируют своих в afterAll.
+ * Новые пользователи после этого не копятся: тесты создания деактивируют своих в afterAll.
  */
 const TEST_USER_EMAIL_PATTERNS = [
   'dtimokhin+parent1', // 71252 Create parent: dtimokhin+parent<Date.now()>@aexsoft.com
   'testcoach+', // 71990 Add coach (и старые версии теста): testcoach+<Date.now()>@aexsoft.com
 ];
+
+/** Постоянные пользователи организации owner: никогда не деактивировать */
+const PROTECTED_USERS: { email: string; why: string }[] = [
+  { email: CREDENTIALS.owner.email, why: 'owner из .env' },
+  { email: CREDENTIALS.coach.email, why: 'coach из .env' },
+  { email: CREDENTIALS.parent.email, why: 'parent из .env' },
+  { email: CREDENTIALS.athlete.email, why: 'athlete из .env (Athlete User)' },
+  { email: EVALUATED_ATHLETE.email, why: 'Athlete Last — его оценивают тесты 12-evaluations' },
+  { email: 'athlete-031126-01@m.re', why: 'создан вручную (Athlete031126-01 Last)' },
+  { email: 'dtimokhin+ankorathlete03@aexsoft.com', why: 'создан вручную (Athlete03Multy, несколько организаций)' },
+];
+
 /** Защита от бесконечного цикла, если деактивация перестанет срабатывать */
 const MAX_DEACTIVATIONS_PER_PATTERN = 1000;
 
@@ -30,9 +47,19 @@ test.describe('Deactivate users created by tests', () => {
   test('should deactivate users created by tests', async ({ page }) => {
     // ~600 пользователей по 2–3 с — дольше обычного таймаута теста
     test.setTimeout(TIMEOUTS.long * 120);
+
+    // До деактивации: ни один постоянный пользователь не подходит под шаблон (поиск — подстрока email без учёта регистра)
+    for (const user of PROTECTED_USERS) {
+      for (const pattern of TEST_USER_EMAIL_PATTERNS) {
+        expect(
+          user.email.toLowerCase().includes(pattern.toLowerCase()),
+          `Protected user ${user.email} (${user.why}) matches cleanup pattern "${pattern}" — fix the pattern`,
+        ).toBe(false);
+      }
+    }
+
     const signInPage = new SignInPage(page);
     const usersPage = new ManageUsersPage(page);
-
     await signInPage.goto();
     await signInPage.login(CREDENTIALS.owner.email, CREDENTIALS.owner.password);
     await expect(usersPage.navHome).toBeVisible({ timeout: TIMEOUTS.long });
@@ -54,6 +81,14 @@ test.describe('Deactivate users created by tests', () => {
       }
       test.info().annotations.push({ type: 'deactivated', description: `${pattern}: ${deactivated}` });
       console.log(`Deactivated ${deactivated} users matching "${pattern}"`);
+    }
+
+    // После: все постоянные пользователи активны
+    for (const user of PROTECTED_USERS) {
+      await usersPage.search(user.email);
+      await expect(usersPage.activeUserRows, `Protected user ${user.email} (${user.why}) should stay active`).toHaveCount(1, {
+        timeout: TIMEOUTS.long,
+      });
     }
   });
 });
