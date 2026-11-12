@@ -44,12 +44,14 @@
 - [ ] Правильный импорт фикстур
 - [ ] Serial mode настроен, если тесты изменяют состояние
 - [ ] Методы PO возвращают Promise<void>, а не boolean
+- [ ] `npm run typecheck` — без ошибок (новые поля PO объявлены в классе, опции методов Playwright существуют)
 
 ### Шаг 4: Запуск тестов
 ```bash
+npm run typecheck
 npx playwright test tests/specs/{role}/{file}.spec.ts --list
 ```
-Убедиться, что тесты обнаружены и нет ошибок компиляции.
+Убедиться, что ошибок типов нет и тесты обнаружены. `npm run test:{role}` и так запускает `typecheck` перед тестами (хук `pretest:{role}`) и при ошибке типов тесты не стартуют.
 
 ```bash
 npm run test:{role}   # owner, sysadmin, coach, parent, athlete, или all
