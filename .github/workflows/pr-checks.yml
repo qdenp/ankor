@@ -48,20 +48,6 @@ jobs:
         # --reporter=list: без allure-playwright, иначе --list пишет «skipped» на каждый тест (AGENTS.md §16)
         run: npx playwright test --list --reporter=list > /dev/null
 
-      - name: No locators in specs (only Page Object methods)
-        run: |
-          if grep -rnE "page\.(getByRole|getByText|locator|keyboard)" tests/specs; then
-            echo "::error::Локаторы в спеках запрещены — вынести в Page Object (AGENTS.md §4)"; exit 1
-          fi
-
-      - name: No hardcoded waits
-        run: |
-          if grep -rn "waitForTimeout(" tests/; then
-            echo "::error::waitForTimeout запрещён — ждать условие через expect/waitFor (AGENTS.md §3)"; exit 1
-          fi
-
-      - name: No swallowed errors
-        run: |
-          if grep -rn "\.catch(() =>" tests/; then
-            echo "::error::.catch(() => …) глушит ошибки — пусть тест падает с понятной ошибкой (AGENTS.md §3)"; exit 1
-          fi
+      - name: Forbidden patterns (locators in specs, waitForTimeout, .catch(() =>))
+        # Тот же скрипт, что и локально: npm run lint (scripts/lint-tests.mjs)
+        run: npm run lint
