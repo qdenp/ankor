@@ -38,9 +38,11 @@ interface RoleState {
 
 const stripAnsi = (s: string): string => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
+/** "55s", "1m 14s" — формат "0:55" читался как "passed 0" */
 const formatDuration = (ms: number): string => {
   const sec = Math.round(ms / 1000);
-  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+  const min = Math.floor(sec / 60);
+  return min ? `${min}m ${sec % 60}s` : `${sec}s`;
 };
 
 /** Название без корня и проекта: "07-parents.spec.ts › Owner Parents Tests › should edit parent" */
@@ -148,8 +150,8 @@ function renderSummary(states: RoleState[]): string {
       (s.flaky ? ` flaky ${s.flaky}` : '');
     const tail =
       s.status === 'running'
-        ? `▶ ${formatDuration(now - s.startedAt)}  ${s.current ?? ''}`
-        : `${s.status === 'passed' ? '✓' : '✗'} ${s.status} ${formatDuration((s.finishedAt ?? now) - s.startedAt)}`;
+        ? `▶ running ${formatDuration(now - s.startedAt)}  ${s.current ?? ''}`
+        : `${s.status === 'passed' ? '✓' : '✗'} ${s.status} in ${formatDuration((s.finishedAt ?? now) - s.startedAt)}`;
     return `${s.role.padEnd(roleWidth)}  ${counts}  ${tail}`;
   });
 
