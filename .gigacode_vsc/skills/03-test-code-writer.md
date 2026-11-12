@@ -14,7 +14,7 @@
 
 | Step | UI / PO method | Why | PO method (existing / new) |
 |------|----------------|-----|----------------------------|
-| Login | UI | One login per test | signInPage.login() — existing |
+| Login | fixture | One login per test | `loginAs(role)` (AGENTS.md §8) |
 | Create athlete | PO method | Precondition | athletePage.createAthlete() — **new** |
 | Verify count | UI assertion | Outcome | expect(athletePage.athleteRows).toHaveCount(N) — existing |
 
