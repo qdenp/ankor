@@ -8,6 +8,7 @@
 #   ANKOR_ATHLETE_EMAIL, ANKOR_ATHLETE_PASSWORD — тестовые пользователи (как в .env.d333afta2q6llv);
 #   ALLURE_TOKEN — API-токен Allure TestOps. Без него тесты запускаются, но в TestOps ничего не уходит.
 name: E2E tests
+run-name: "E2E: ${{ inputs.roles }}"
 
 on:
   workflow_dispatch:
