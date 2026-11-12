@@ -1,7 +1,7 @@
 import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { OrganizationPage } from '../../pages/organization-page';
-import { TIMEOUTS } from '../../config';
+import { ORGANIZATIONS, TIMEOUTS } from '../../config';
 
 /**
  * 04 — Organization (пункт меню Organizations).
@@ -30,10 +30,14 @@ test.describe('SysAdmin Organization Tests', () => {
   });
 
   // 71957: Edit organization as SysAdmin
+  // Своя организация (aiorg01sysedit), не организация owner: роли идут параллельно, и с общей организацией
+  // owner/04-organization и этот тест переименовывали её одновременно и сбивали друг друга.
   test('sysadmin can edit organization name and revert', async ({ page }) => {
     await allure.allureId('71957');
     const orgPage = new OrganizationPage(page);
-    const targetEmail = 'dtimokhin+aiorg01@aexsoft.com';
+    const targetEmail = ORGANIZATIONS.sysadminEdit.adminEmail;
+    // Возврат — к константе, а не к прочитанному имени (см. owner/04-organization)
+    const originalName = ORGANIZATIONS.sysadminEdit.name;
 
     await orgPage.gotoOrganizationsList();
     await orgPage.waitForDataGridLoaded();
@@ -47,15 +51,12 @@ test.describe('SysAdmin Organization Tests', () => {
     const targetOrgRow = orgPage.getOrgRowByEmail(targetEmail);
     await expect(targetOrgRow, `Organization row with email "${targetEmail}" should be visible`).toBeVisible({ timeout: TIMEOUTS.long });
 
-    // Get current name from the row
-    const originalName = await orgPage.getOrgNameFromRow(targetOrgRow);
-
     // Click Edit on the target organization row
+    const rowName = await orgPage.getOrgNameFromRow(targetOrgRow);
     await orgPage.clickEditOnRow(targetOrgRow);
     await expect(orgPage.nameInput, 'Name input should be editable').toBeEditable();
-
-    // Verify the input shows the current name
-    await expect(orgPage.nameInput).toHaveValue(originalName);
+    // Форма открылась на той организации, что в найденной строке (а не на соседней)
+    await expect(orgPage.nameInput).toHaveValue(rowName);
 
     // Edit organization
     const newName = `Test Org ${Date.now()}`;

@@ -431,6 +431,11 @@ test.describe('Owner Auth Tests', () => {
   - Coach: First name, Last name, Email, Password, Confirm password
   - Parent: First name, Last name, Email, Password, Confirm password, Relationship, Athlete
 
+### Организации, которые меняют тесты (`ORGANIZATIONS` в `config.ts`)
+- `aiorg01` — организация owner, имя меняет `owner/04-organization`; `aiorg01sysedit` — отдельная, для `sysadmin/04-organization` (создана `tests/setup`, пароль админа — `ANKOR_SYSEDIT_ORG_PASSWORD` в `.env`)
+- Тесты разных ролей не должны менять одну и ту же запись: роли идут параллельно и сбивают друг друга
+- После правки тест возвращает имя к **константе**, а не к прочитанному в начале значению: упавший до возврата прогон иначе оставляет временное имя «исходным» для всех следующих
+
 ## 11. Роли и права доступа
 
 5 ролей с разными правами:
