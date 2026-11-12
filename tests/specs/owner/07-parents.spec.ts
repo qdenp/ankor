@@ -40,7 +40,7 @@ test.describe('Owner Parent Tests', () => {
     const timestamp = Date.now();
     const parent = {
       firstName: `TestParent${timestamp}`,
-      email: `dtimokhin+temp-parent-${timestamp}@aexsoft.com`, // +temp- — маркер для чистки (AGENTS.md §10)
+      email: `dtimokhin+temp-parent-${timestamp}@aexsoft.com`, // +temp- — маркер для чистки (AGENTS.md §9)
       // Общий пароль тестовых аккаунтов — из .env, не из кода
       password: CREDENTIALS.parent.password,
     };

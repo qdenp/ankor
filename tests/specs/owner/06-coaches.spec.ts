@@ -41,7 +41,7 @@ test.describe('Owner Coach Tests', () => {
     await allure.allureId('71990');
     const coachPage = new CoachPage(page);
     const stamp = Date.now();
-    const coach = { firstName: `Coach${stamp}`, fullName: `Coach${stamp} Auto`, email: `dtimokhin+temp-coach-${stamp}@aexsoft.com` }; // +temp- — маркер для чистки (AGENTS.md §10)
+    const coach = { firstName: `Coach${stamp}`, fullName: `Coach${stamp} Auto`, email: `dtimokhin+temp-coach-${stamp}@aexsoft.com` }; // +temp- — маркер для чистки (AGENTS.md §9)
 
     // [step 1]
     await coachPage.goto();
