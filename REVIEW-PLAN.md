@@ -98,6 +98,20 @@
     | `organization-page.ts` | `gotoOrganizationsList` |
 
     Уже ждут: `goto` у athlete/coach/parent/skill/home/organization, `create*`/`edit*` у athlete/coach/parent/team/skill.
+  - **Возврат после создания / редактирования / удаления (от пользователя):** после сохранения записи или пользователя приложение возвращает на страницу с данными, и она снова грузится со спиннером — здесь тоже нужен `waitForLoading()`.
+
+    | Где | Сохранение без ожидания загрузки после возврата |
+    |---|---|
+    | `plan-page.ts` | `createPlan`, `savePlanAndReturnToMyPlans` |
+    | `scorecard-template-page.ts` | `createScorecard`, `toggleActive` |
+    | `evaluation-page.ts` | `createEvaluation`, `deleteEvaluation`, `deleteAllByTemplate` |
+    | `drill-page.ts` | `clickCreate` (после создания — детальная страница дрилла) |
+    | `owner/07-parents.spec.ts` | `clickCreateInDialog()` → сразу поиск по списку |
+    | `owner/09-skills.spec.ts` | `createButton.click()` → только ожидание заголовка |
+    | `owner/12-evaluations.spec.ts` | `saveAsDraftButton.click()`, 5× `submitButton.click()` → сразу поиск строки |
+
+    Уже ждут: `createAthlete`, `createCoach`, `editCoach`, `createParent`, `editParent`, `createTeam`, `createSkill`, `OrganizationPage.save`, сохранение в `06-coaches`. Не относятся: сохранение во всплывающем окне (`saveSubskillRatings`), открытие формы (`clickCreateSkill`), вход и регистрация (нет спиннеров).
+  - **Как чинить спеки:** сохранение из теста перенести в метод PO (`createParent`, `createSkill`, `saveEvaluationAsDraft`, `submitEvaluation`), который сам ждёт загрузки — заодно уходят прямые клики по кнопкам (3.1).
   - **В спеках напрямую:** `homePage.goToSkills/Drills/EasyJoin()` во всех `90-permissions`; `page.getByRole('link', { name: 'Back' }).click()` в `12-evaluations`; `page.goto('/practice-plans/new')` в `parent/90-permissions`.
   - **Тонкость:** `waitForLoading()` проверяет «спиннеров 0». Если вызвать его сразу после клика, когда спиннер ещё не появился, проверка пройдёт мгновенно. Надёжный порядок: дождаться признака страницы (заголовок/кнопка), затем `waitForLoading()` — так работает `goto()` у athlete/coach (на Evaluations этот порядок проверен 3/3).
   - **Что сделать** (🔒 PO): добавить `waitForLoading()` во все методы из таблицы; `goTo*` в `BasePage` — тоже; правило — в AGENTS.md §4 и чек-лист скилла 04.
