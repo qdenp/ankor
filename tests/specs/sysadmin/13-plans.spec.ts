@@ -13,8 +13,8 @@ test.describe('Sysadmin Plan Tests', () => {
     await loginAs('sysadmin');
   });
 
-  // 72679: Home page (System Administrator) - verify all tabs visible for Plans
-  test('@TC-72679 sysadmin sees all plan tabs', async ({ page }) => {
+  // 72617: Prebuilt Plans and Org Plans tabs visible to Administrator / Owner / System Administrator
+  test('@TC-72617 sysadmin sees all plan tabs', async ({ page }) => {
     const planPage = new PlanPage(page);
 
     await planPage.goto();
