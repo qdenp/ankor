@@ -1,7 +1,7 @@
 import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { CoachPage } from '../../pages/coach-page';
-import { TIMEOUTS } from '../../config';
+import { CREDENTIALS, TIMEOUTS } from '../../config';
 import { forgetEntity, recallEntity, rememberEntity } from '../../helpers/test-data-store';
 import { deactivateCreatedUser } from '../../helpers/deactivate-user';
 
@@ -62,8 +62,9 @@ test.describe('Owner Coach Tests', () => {
       firstName: coach.firstName,
       lastName: 'Auto',
       email: coach.email,
-      password: 'Test123456',
-      confirmPassword: 'Test123456',
+      // Общий пароль тестовых аккаунтов — из .env, не из кода (AGENTS.md §5)
+      password: CREDENTIALS.coach.password,
+      confirmPassword: CREDENTIALS.coach.password,
     });
     await coachPage.phoneInput.fill('+1234567890');
 

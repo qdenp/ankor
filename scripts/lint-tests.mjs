@@ -16,6 +16,16 @@ const RULES = [
     message: 'waitForTimeout запрещён — ждать условие через expect / waitFor (AGENTS.md §3)',
   },
   {
+    dir: 'tests/specs',
+    pattern: /password: *['"`]/i,
+    message: 'Пароль строкой в спеке — брать из .env через CREDENTIALS (AGENTS.md §5)',
+  },
+  {
+    dir: 'tests/pages',
+    pattern: /password: *['"`]/i,
+    message: 'Пароль строкой в Page Object — брать из .env через CREDENTIALS (AGENTS.md §5)',
+  },
+  {
     dir: 'tests',
     pattern: /expect\(await /,
     message: 'expect(await …) — одноразовое чтение без ретрая; web-first матчер: toHaveText / toHaveCount / toBeVisible (AGENTS.md §3)',
