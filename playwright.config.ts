@@ -41,7 +41,7 @@ export default defineConfig({
 
   // Локально line + list вместе намеренно: line при старте теста пишет [N/M] (прогресс),
   // list по завершении — ok/x/- N (результат). В файл лог пишет перенаправление
-  // `> test-output.log` из команды запуска: outputFile у line не поддерживается.
+  // `> reports\test-output.log` из команды запуска: outputFile у line не поддерживается.
   reporter: process.env.CI
     ? [['html', { outputFolder: `reports/html/${role}` }]]
     : [

@@ -38,5 +38,5 @@ allure-results/
 allure-report/
 allure-results.zip
 
-# Логи прогонов (npm run test:* > test-output.log и т.п.)
+# Логи прогонов (npm run test:* > reports\test-output.log и т.п.)
 *.log

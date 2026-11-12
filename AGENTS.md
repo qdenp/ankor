@@ -11,11 +11,12 @@ Bash tool убивает процессы через 120 секунд по ум�
 ```powershell
 # Запуск с таймаутом 30 минут (1800000 мс):
 Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force reports | Out-Null   # перенаправление `>` само папку не создаёт
+Remove-Item "reports\test-output.log" -ErrorAction SilentlyContinue
 # Оболочка агента задаёт NO_COLOR=1, Playwright даёт воркерам FORCE_COLOR — Node на каждый воркер
 # пишет в лог предупреждение о конфликте. Цветов в файле нет в любом случае.
 Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue
-npm run test:all 2>&1 > test-output.log
+npm run test:all 2>&1 > reports\test-output.log
 # timeout: 1800000
 ```
 
@@ -33,12 +34,12 @@ npm run test:all 2>&1 > test-output.log
 # Первая строка RUNNING / FINISHED — идёт ли ещё прогон
 
 # Подробности — полный лог через Read tool:
-# Read tool → test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
+# Read tool → reports/test-output.log → offset=1, limit=200 → offset=201, limit=200 ...
 # Формат: [N/M] — тест N из M стартовал (line), ok N / x N / - N — прошёл / упал / пропущен (list)
 # test:all: перед каждой строкой имя роли — [owner], [coach] …; одна роль в логе — поиск по [coach]
 
 # Проверка завершены ли:
-# Read tool → test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
+# Read tool → reports/test-output.log → если последняя строка "npm run test:* exited with code 0" → завершены
 # (test:all — такая строка для каждой из 5 ролей)
 ```
 
@@ -51,7 +52,8 @@ npm run test:all 2>&1 > test-output.log
 Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
 Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
 Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue
-npm run test:owner 2>&1 > test-output.log
+New-Item -ItemType Directory -Force reports | Out-Null
+npm run test:owner 2>&1 > reports\test-output.log
 
 # После генерации отчёта:
 npx allure generate --clean -o allure-report
@@ -76,9 +78,10 @@ Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
 
 ```powershell
 Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force reports | Out-Null   # перенаправление `>` само папку не создаёт
+Remove-Item "reports\test-output.log" -ErrorAction SilentlyContinue
 Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue   # дочерний процесс наследует окружение
-$proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > test-output.log" -WindowStyle Hidden -PassThru
+$proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > reports\test-output.log" -WindowStyle Hidden -PassThru
 Write-Output "Started PID: $($proc.Id)"
 ```
 
