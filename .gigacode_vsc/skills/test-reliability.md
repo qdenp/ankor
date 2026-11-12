@@ -46,9 +46,9 @@ await expect(label).toHaveText('Updated');  // Auto-retries
 - `page.getByText('exact static text')` — если текст стабилен
 - `page.locator('[data-testid="value"]')` — тестовый атрибут
 
-**Не флажить:**
+**Не считать нарушением:**
 - `.first()` / `.last()` когда действительно один элемент или порядок гарантирован
-- Локаторы в PO (флажить определение в PO, не использование в спеке)
+- Локаторы в PO (отмечать определение в PO, не использование в спеке)
 
 ---
 
@@ -105,7 +105,7 @@ await page.locator('input[type="number"]').first().fill('2');
 
 **FIX:** Перенести в соответствующий PO как публичный locator property.
 
-**Не флажить:**
+**Не считать нарушением:**
 - One-off селекторы уникальные для этого теста
 - `page.getByRole()` / `page.getByText()` для простых стабильных элементов
 
@@ -121,7 +121,7 @@ await page.locator('input[type="number"]').first().fill('2');
 - User IDs / entity IDs как raw числа
 - Даты, которые устареют (например, ожидаемая дата последней оценки)
 
-**Не флажить:**
+**Не считать нарушением:**
 - Assertion expected values статичные ("Active", "Completed")
 - Test data намеренно уникальная для одного теста
 
@@ -152,14 +152,14 @@ await page.locator('input[type="number"]').first().fill('2');
 - Тест предполагает состояние приложения, оставленное предыдущим тестом
 - Комментарии "must run after X" или "depends on Y running first"
 
-**Не флажить:**
+**Не считать нарушением:**
 - Переиспользование сущности из теста создания, если тест явно проверяет её наличие и падает с понятным сообщением, а в перспективе берёт её из хранилища прошлого прогона (REVIEW-PLAN 3.12)
 
 ---
 
 ## 9. Missing Error Messages on Assertions (SEVERITY: LOW)
 
-**Что искать:** неочевидный `expect()` без сообщения. Сообщение — рекомендация, не требование: не флажить ассерты, понятные по локатору (`expect(planPage.heading).toBeVisible()`).
+**Что искать:** неочевидный `expect()` без сообщения. Сообщение — рекомендация, не требование: не считать нарушением ассерты, понятные по локатору (`expect(planPage.heading).toBeVisible()`).
 
 **BAD:**
 ```ts
@@ -222,7 +222,7 @@ await expect(label).toHaveText('New Value');
 - Тест 3+ минуты
 - Фейл в step 2 делает steps 3-8 бессмысленными но они всё равно падают
 
-**Не флажить:**
+**Не считать нарушением:**
 - Multi-step тесты для одного flow end-to-end (create → modify → verify → cleanup)
 - Тесты намеренно покрывающие user journey
 
@@ -286,7 +286,7 @@ await expect.soft(element, "Element should be visible for this test path").toBeV
 await expect.soft(element, "Element should have expected text").toHaveText('Expected');
 ```
 
-**Не флажить:**
+**Не считать нарушением:**
 - Conditionals проверяющие ДРУГОЕ условие для выбора какого ассерта запустить (branching logic, не skipping)
 - `if (process.env.FEATURE_FLAG)` type guards намеренно пропускающие тесты в некоторых env
 
@@ -326,7 +326,7 @@ await expect.soft(el).toHaveAttribute('aria-checked', 'true');
 
 **BAD:**
 ```ts
-await element.isVisible();  // Не ассертит ничего
+await element.isVisible();  // Не проверяет ничего
 await element.textContent();
 await elements.count();
 ```
@@ -340,7 +340,7 @@ await expect(elements).toHaveCount(expectedCount);
 
 **Различие с #13:** Нет `expect()` вообще, просто standalone call → **#16**. Есть `expect()` но нет `await` → **#13**.
 
-**Не флажить:**
+**Не считать нарушением:**
 - Return values assigned: `const text = await el.textContent();` — intentional
 - Методы для side effects (`await page.goto()` — navigation is the point)
 
