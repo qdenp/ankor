@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "allure-testops": {
+      "type": "http",
+      "url": "https://rallyup.testops.cloud/api/mcp",
+      "headers": {
+        "Authorization": "${TESTOPS_AUTH_HEADER}"
+      }
+    }
+  }
+}
