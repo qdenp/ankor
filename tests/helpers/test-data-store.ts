@@ -27,6 +27,11 @@ export function rememberEntity<T>(role: string, entity: string, data: T): void {
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
+/** Забыть сущность (её деактивировали/удалили): зависимый тест потом скажет «запустите тест создания» */
+export function forgetEntity(role: string, entity: string): void {
+  fs.rmSync(entityFile(role, entity), { force: true });
+}
+
 /**
  * Сущность из этого или прошлого прогона. Нет файла — понятная ошибка с названием теста создания.
  * Существует ли сущность на стенде, проверяет сам тест (поиск в списке): её могли деактивировать.

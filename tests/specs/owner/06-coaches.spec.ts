@@ -2,7 +2,8 @@ import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { CoachPage } from '../../pages/coach-page';
 import { TIMEOUTS } from '../../config';
-import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
+import { forgetEntity, recallEntity, rememberEntity } from '../../helpers/test-data-store';
+import { deactivateCreatedUser } from '../../helpers/deactivate-user';
 
 /**
  * 06 — Coaches для Owner.
@@ -16,6 +17,14 @@ test.describe('Owner Coach Tests', () => {
   // Коуча создаёт только 71990; view/edit берут его из хранилища — и из прошлого прогона (REVIEW-PLAN 3.12)
   type Coach = { firstName: string; fullName: string; email: string };
   const CREATE_COACH_TEST = 'should create a coach and show it in the table';
+  // Коуч, созданный ЭТИМ прогоном: после view/edit деактивируется, чтобы тестовые коучи не копились (3.11)
+  let createdThisRunEmail: string | undefined;
+
+  test.afterAll(async ({ browser }, testInfo) => {
+    if (!createdThisRunEmail) return;
+    await deactivateCreatedUser(browser, testInfo.project.use.baseURL, createdThisRunEmail);
+    forgetEntity('owner', 'coach');
+  });
 
   test.beforeEach(async ({ loginAs }) => {
     await loginAs('owner');
@@ -66,6 +75,7 @@ test.describe('Owner Coach Tests', () => {
     await coachPage.search(coach.firstName);
     await expect(coachPage.getRowByName(coach.fullName)).toBeVisible({ timeout: TIMEOUTS.long });
     rememberEntity('owner', 'coach', coach);
+    createdThisRunEmail = coach.email;
   });
 
   /**
