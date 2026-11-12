@@ -78,7 +78,8 @@ test.describe('Deactivate users created by tests', () => {
           deactivated++;
           continue;
         }
-        if (await usersPage.nextPageButton.isDisabled()) break;
+        // Одна страница результатов — пагинации нет совсем; иначе последняя страница — кнопка выключена
+        if ((await usersPage.nextPageButton.count()) === 0 || (await usersPage.nextPageButton.isDisabled())) break;
         await usersPage.nextPageButton.click();
         await usersPage.waitForLoading();
       }
