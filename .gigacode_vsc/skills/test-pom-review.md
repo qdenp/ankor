@@ -6,7 +6,6 @@
 
 **Scope:** Весь PO файл. Прямые импорты только если это другие PO или shared utilities вызванные методами этого файла.
 
-**Cap:** 15 аннотаций за запуск. Overflow → в отчёт.
 
 ---
 
@@ -31,20 +30,13 @@ async waitForElement(locator: Locator, timeout?: number): Promise<void> {
 **GOOD:** Убрать методы. Callers должны использовать Playwright built-in assertions со своими таймаутами:
 ```ts
 // GOOD — callers используют auto-retrying expect с явными таймаутами
-await expect(locator).toBeVisible({ timeout: 5000 });
-await expect(locator).not.toBeVisible({ timeout: 5000 });
+await expect(locator).toBeVisible({ timeout: TIMEOUTS.short });
+await expect(locator).not.toBeVisible({ timeout: TIMEOUTS.short });
 ```
 
 **Не флажить:**
 - Явные таймауты на `waitFor()` / `waitForResponse()` намеренно tuned для конкретных медленных операций (file upload)
 - `waitForLoadState()` вызовы — это event-based, не time-based
-
-**Аннотация:**
-```ts
-// HIGH: Hidden wait with configurable timeout — multiplied across every caller
-// FIX: Remove method; callers should use await expect(locator).toBeVisible({ timeout: X })
-async waitForElement(locator: Locator, timeout?: number): Promise<void> {
-```
 
 ---
 
@@ -70,13 +62,6 @@ async closeDialog() {
 ```
 
 **В проекте:** Проверить все методы в `base-page.ts` и конкретных PO. Особенно обёртки `selectOption`, `click` и методы с несколькими действиями подряд (`createScorecard`, `deleteDraftsCreatedSince`, `fillAthleteForm`).
-
-**Аннотация:**
-```ts
-// CRITICAL: Missing await on click() — fires without waiting for completion
-// FIX: Add await before this.closeButton.click()
-this.closeButton.click();
-```
 
 ---
 
@@ -112,13 +97,6 @@ this.profileButton = page
 - Селекторы с `data-testid` или `data-test` атрибутами
 - `.first()` / `.last()` когда порядок гарантирован приложением
 
-**Аннотация:**
-```ts
-// HIGH: :has(svg) fallback with .first() matches any icon button — breaks if DOM structure changes
-// FIX: Use getByRole with the user's name, getByTestId, or data-attribute selector
-.or(page.locator('[role="button"]:has(svg)'))
-```
-
 ---
 
 ## 4. Methods That Swallow Errors (SEVERITY: HIGH)
@@ -137,7 +115,7 @@ async isAthleteExists(email: string): Promise<boolean> {
 ```ts
 async isElementPresent(locator: Locator): Promise<boolean> {
     try {
-        await locator.waitFor({ state: 'visible', timeout: 5000 });
+        await locator.waitFor({ state: 'visible', timeout: TIMEOUTS.short });
         return true;
     } catch (error) {
         return false;  // Swallowed: could be timeout, could be real bug
@@ -158,13 +136,6 @@ await expect(locator).not.toBeVisible();
 **Не флажить:**
 - try/catch логирующий ошибку и re-throwing
 - try/catch вокруг cleanup кода в `afterEach`-style методах где фейл ожидаем
-
-**Аннотация:**
-```ts
-// HIGH: Method returns boolean instead of asserting — hides real failures from callers
-// FIX: Remove method; callers should use await expect(locator).toBeVisible() / not.toBeVisible()
-async isAthleteExists(email: string): Promise<boolean> {
-```
 
 ---
 
@@ -190,19 +161,12 @@ async isElementPresent(locator: Locator): Promise<boolean> {
 **FIX:** Убрать метод. Использовать Playwright assertions напрямую:
 ```ts
 // Expect visible:
-await expect(locator).toBeVisible({ timeout: 5000 });
+await expect(locator).toBeVisible({ timeout: TIMEOUTS.short });
 // Expect not visible:
-await expect(locator).not.toBeVisible({ timeout: 5000 });
+await expect(locator).not.toBeVisible({ timeout: TIMEOUTS.short });
 ```
 
 **Различие от #1:** Если метод primary purpose — checking visibility И имеет hidden wait → **#5**. Если метод делает что-то другое (click, fill, navigate) и имеет wait → **#1**.
-
-**Аннотация:**
-```ts
-// HIGH: waitForElement hides configurable wait — callers may not expect delay
-// FIX: Remove method; use await expect(locator).toBeVisible({ timeout: X })
-async waitForElement(locator: Locator, timeout?: number): Promise<void> {
-```
 
 ---
 
@@ -242,13 +206,6 @@ if (optionCount > 0) {
 - Методы выполняющие single multi-step UI interaction (заполнение формы с 5 полями)
 - Методы genuinely one logical operation несмотря на длину
 
-**Аннотация:**
-```ts
-// MEDIUM: Method fills category + skill + video with branching duplicated in addAndFillCategory
-// FIX: Split into smaller methods; remove the unreachable branch and the duplication
-async fillFirstCategory(params: {
-```
-
 ---
 
 ## Tie-Break Rules
@@ -257,21 +214,17 @@ async fillFirstCategory(params: {
 - **#3 vs #6:** Если один локатор селектор хрупкий → **#3**. Если метод делает слишком много независимо от селекторов → **#6**.
 - **#2 vs #4:** Если missing `await` внутри try/catch swallowing error → **#4** (error swallowing вреднее missing await alone).
 
-**Никогда не double-annotate одну строку. Выбирай самый специфичный.**
+**Одно нарушение — одна категория: выбирай самую специфичную.**
 
 ---
 
 ## Execution Rules
 
-1. **Read first.** Прочитать целевой PO файл полностью перед аннотированием.
-2. **Annotate source file.** Использовать Edit tool для вставки severity annotations прямо в код.
-3. **Don't modify logic.** Только комментарии — никогда не менять, не двигать, не удалять код.
-4. **One pair per problem.** Каждое finding → ровно один severity comment + один fix comment.
-5. **Skip clean code.** Если секция чистая — не добавлять похвалы.
-6. **Trace base classes.** Если PO extends BasePage, прочитать BasePage проверить не оттуда ли проблемы.
-7. **Idempotency.** Если файл уже имеет severity annotations от предыдущего запуска, НЕ добавлять дубликаты для той же проблемы на той же строке.
-8. **Line numbers.** Точные line numbers когда возможно. Если файл сдвинулся во время аннотации — использовать "near `methodName()`" как fallback.
-9. **After annotating,** вывести summary report в chat.
+1. **Сначала прочитать** целевой PO целиком; если он наследует BasePage — проверить, не оттуда ли проблема.
+2. Результаты ревью — **только в чат**, файлы на этом шаге не правятся (комментарии `// SEVERITY` в код не вставлять). Каждое нарушение — строка отчёта: severity, `файл:строка`, категория, что исправить.
+3. **Не трогать код** на шаге ревью — исправления потом, с согласия пользователя (общие PO — AGENTS.md).
+4. **Чистые секции** не упоминать.
+5. **Номер строки** — точный; если не определить — «около `methodName()`».
 
 ---
 
@@ -279,8 +232,6 @@ async fillFirstCategory(params: {
 
 ```
 ## PO Review: [filename]
-
-### Annotations Added: X total
 
 ### Critical
 - Line X: [one-line description]
@@ -297,7 +248,7 @@ async fillFirstCategory(params: {
 ### Summary
 - X critical, X high, X medium, X low
 - Impact: [reliability / maintainability / performance]
-- Files annotated: [list]
+- Files reviewed: [list]
 ```
 
 ---

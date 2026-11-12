@@ -28,13 +28,6 @@ await button.click();
 await expect(label).toHaveText('Updated');  // Auto-retries
 ```
 
-**Аннотация:**
-```ts
-// CRITICAL: expect(await ...) не авто-ретраит — race condition
-// FIX: await expect(locator).toHaveText('value')
-expect(await label.textContent()).toBe('Updated');
-```
-
 ---
 
 ## 2. Fragile Selectors (SEVERITY: HIGH)
@@ -57,13 +50,6 @@ expect(await label.textContent()).toBe('Updated');
 - `.first()` / `.last()` когда действительно один элемент или порядок гарантирован
 - Локаторы в PO (флажить определение в PO, не использование в спеке)
 
-**Аннотация:**
-```ts
-// HIGH: .nth(2) selector — breaks if row order changes
-// FIX: Use getByRole, getByTestId, or data-attribute selector
-await page.locator('tr').nth(2).click();
-```
-
 ---
 
 ## 3. Weak or Missing Assertions (SEVERITY: HIGH)
@@ -76,7 +62,7 @@ await page.locator('tr').nth(2).click();
 - Проверяют наличие (`toBeVisible`), но не контент (`toHaveText`)
 - Только happy path, нет промежуточных проверок
 
-**Также:** Ассерты без кастомных сообщений. В проекте **каждый `expect()` должен иметь описательный второй аргумент**.
+**Также:** для неочевидных ассертов (что именно и почему проверяется) рекомендуется сообщение вторым аргументом `expect()` — см. #9.
 
 **BAD:**
 ```ts
@@ -97,13 +83,6 @@ await test.step('Fill form and submit', async () => {
 });
 ```
 
-**Аннотация:**
-```ts
-// HIGH: test.step has 4 actions but no assertions — doesn't verify anything
-// FIX: Add expect() to verify the outcome of these actions
-await test.step('Fill form and submit', async () => {
-```
-
 ---
 
 ## 4. Assertion-Title Mismatch (SEVERITY: MEDIUM)
@@ -111,13 +90,6 @@ await test.step('Fill form and submit', async () => {
 **Что искать:** Title говорит "verify X", ассерты проверяют Y. X остается непротестированным.
 
 **Пример из проекта:** тест `should generate report and workout after submit` (12-evaluations) проверяет только появление оценки в таблице — ни report, ни workout не проверяются.
-
-**Аннотация:**
-```ts
-// MEDIUM: Title says "generate report and workout" but assertions only check the evaluation row
-// FIX: Add assertions for the report and workout named in the test title
-test('should generate report and workout after submit', async ({ page }) => {
-```
 
 ---
 
@@ -137,13 +109,6 @@ await page.locator('input[type="number"]').first().fill('2');
 - One-off селекторы уникальные для этого теста
 - `page.getByRole()` / `page.getByText()` для простых стабильных элементов
 
-**Аннотация:**
-```ts
-// MEDIUM: Inline selector — should be in a page object for reuse and maintenance
-// FIX: Move to the appropriate page object as a public Locator property
-await page.locator('.MuiDialog-root .MuiDialogActions-root button').click();
-```
-
 ---
 
 ## 6. Hardcoded Magic Values (SEVERITY: MEDIUM)
@@ -160,13 +125,6 @@ await page.locator('.MuiDialog-root .MuiDialogActions-root button').click();
 - Assertion expected values статичные ("Active", "Completed")
 - Test data намеренно уникальная для одного теста
 
-**Аннотация:**
-```ts
-// MEDIUM: Hardcoded email — should come from config.ts CREDENTIALS
-// FIX: Use CREDENTIALS.owner.email or test data constant
-await loginPage.emailInput.fill('owner@test.com');
-```
-
 ---
 
 ## 7. Missing Cleanup / Dirty State (SEVERITY: HIGH)
@@ -181,14 +139,7 @@ await loginPage.emailInput.fill('owner@test.com');
 
 **Ограничение стенда:** удалять можно Teams (у оценок есть Delete — не проверено). Пользователей любых ролей удалить нельзя — только деактивировать через Manage Users. Для них «cleanup» = не создавать лишних: новых создаёт только тест создания, остальные переиспользуют (REVIEW-PLAN 3.12).
 
-**Best practice в проекте:** Cleanup в `beforeEach` (не `afterEach`) — тест начинает чисто даже если предыдущий упал. Но создание БЕЗ ЛЮБОГО cleanup path — проблема.
-
-**Аннотация:**
-```ts
-// HIGH: Creates team via UI but never deletes it — pollutes the stand
-// FIX: Delete the created team at the end of the test (afterEach / finally)
-await teamPage.createTeam({ name: teamName, active: true });
-```
+**В проекте:** cleanup — в `afterEach` / `finally` (или `afterAll` для серии), удалять только созданное этим тестом. Пользователей — деактивировать в `afterAll` (`tests/helpers/deactivate-user.ts`). Что удаляется на стенде — AGENTS.md §10.
 
 ---
 
@@ -204,18 +155,11 @@ await teamPage.createTeam({ name: teamName, active: true });
 **Не флажить:**
 - Переиспользование сущности из теста создания, если тест явно проверяет её наличие и падает с понятным сообщением, а в перспективе берёт её из хранилища прошлого прогона (REVIEW-PLAN 3.12)
 
-**Аннотация:**
-```ts
-// CRITICAL: DRILL_NAME is set only by another test — undefined when this test runs alone
-// FIX: Assert the dependency with a clear message, or load the entity saved by the create test
-await drillPage.fillName(DRILL_NAME);
-```
-
 ---
 
 ## 9. Missing Error Messages on Assertions (SEVERITY: LOW)
 
-**Что искать:** `expect()` без кастомного failure message. Проект требует descriptive messages.
+**Что искать:** неочевидный `expect()` без сообщения. Сообщение — рекомендация, не требование: не флажить ассерты, понятные по локатору (`expect(planPage.heading).toBeVisible()`).
 
 **BAD:**
 ```ts
@@ -227,13 +171,6 @@ await expect(element).toBeVisible();
 ```ts
 expect(response.status(), "Expected plan creation to return 200").toBe(200);
 await expect(element, "Expected success banner after form submit").toBeVisible();
-```
-
-**Аннотация:**
-```ts
-// LOW: Missing custom failure message on expect()
-// FIX: Add descriptive string as second arg: expect(value, "Expected X").toBe(Y)
-expect(response.status()).toBe(200);
 ```
 
 ---
@@ -257,13 +194,6 @@ await expect(label).toHaveText('New Value');
 
 **Также:** Переменные, захватывающие состояние элемента рано в тесте, используемые в ассертах много строк позже после взаимодействий.
 
-**Аннотация:**
-```ts
-// HIGH: Text captured before action — will be stale after button click on next line
-// FIX: Move assertion after the click and use await expect(label).toHaveText()
-const text = await label.textContent();
-```
-
 ---
 
 ## 11. Non-Retrying Assertions (SEVERITY: HIGH)
@@ -280,13 +210,6 @@ const text = await label.textContent();
 
 **Exception:** `expect.soft()` с `await` допустим когда намеренно нужен single-check soft assert.
 
-**Аннотация:**
-```ts
-// HIGH: Non-retrying assertion — evaluates once, will flake if UI still updating
-// FIX: Use await expect(locator).toHaveText('value') for auto-retry
-expect(await element.textContent()).toBe('Expected');
-```
-
 ---
 
 ## 12. Overly Broad Test Scope (SEVERITY: LOW)
@@ -302,13 +225,6 @@ expect(await element.textContent()).toBe('Expected');
 **Не флажить:**
 - Multi-step тесты для одного flow end-to-end (create → modify → verify → cleanup)
 - Тесты намеренно покрывающие user journey
-
-**Аннотация:**
-```ts
-// LOW: Test covers 3 unrelated features — hard to pinpoint failure
-// FIX: Split into separate tests for each feature, sharing setup via beforeEach
-test('should create, view and edit a coach', async ({ page }) => {
-```
 
 ---
 
@@ -337,13 +253,6 @@ await expect.soft(element).toHaveText('Saved');
 - #13: `expect(locator).toBeVisible()` — нет `await` на самом ассерте
 - antipatterns #8: `page.reload()` — нет `await` на вызове Playwright API
 - reliability #1 / #11: `expect(await locator.textContent()).toBe()` — `await` есть, но паттерн неверный (single-shot)
-
-**Аннотация:**
-```ts
-// CRITICAL: Missing await on expect() — assertion is a no-op (Promise is truthy)
-// FIX: Add await: await expect(element).toBeVisible()
-expect(element).toBeVisible();
-```
 
 ---
 
@@ -381,13 +290,6 @@ await expect.soft(element, "Element should have expected text").toHaveText('Expe
 - Conditionals проверяющие ДРУГОЕ условие для выбора какого ассерта запустить (branching logic, не skipping)
 - `if (process.env.FEATURE_FLAG)` type guards намеренно пропускающие тесты в некоторых env
 
-**Аннотация:**
-```ts
-// HIGH: Assertion inside if-block — silently skips if condition is false
-// FIX: Assert unconditionally, or use expect.soft() to report when skipped
-if (isVisible) {
-```
-
 ---
 
 ## 15. Type Coercion in Assertions (SEVERITY: CRITICAL)
@@ -416,13 +318,6 @@ await expect.soft(el).toHaveAttribute('aria-checked', 'true');
 
 **Где случается:** Любой ассерт на результате `getAttribute()`, `textContent()`, `inputValue()`, `evaluate()` возвращающих string.
 
-**Аннотация:**
-```ts
-// CRITICAL: Type coercion — getAttribute returns "true" (string), .toBe(true) expects boolean
-// FIX: Use .toBe("true") or await expect(el).toHaveAttribute('aria-checked', 'true')
-expect.soft(await el.getAttribute('aria-checked')).toBe(true);
-```
-
 ---
 
 ## 16. Discarded Return Values (SEVERITY: HIGH)
@@ -448,13 +343,6 @@ await expect(elements).toHaveCount(expectedCount);
 **Не флажить:**
 - Return values assigned: `const text = await el.textContent();` — intentional
 - Методы для side effects (`await page.goto()` — navigation is the point)
-
-**Аннотация:**
-```ts
-// HIGH: await el.isVisible() — result discarded, this doesn't assert anything
-// FIX: Use await expect(el).toBeVisible() to actually verify visibility
-await element.isVisible();
-```
 
 ---
 
@@ -485,8 +373,8 @@ await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();  // FAIL: фил
 await coachPage.goto();
 await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.medium });
 // Если нужно проверить конкретную запись — ищем через поиск
-await coachPage.searchInput.fill(COACH_EMAIL);
-await expect(coachPage.page.getByRole('row', { name: COACH_EMAIL, exact: false })).toBeVisible({ timeout: TIMEOUTS.long });
+await coachPage.search(COACH_EMAIL);
+await expect(coachPage.getRowByEmail(COACH_EMAIL)).toBeVisible({ timeout: TIMEOUTS.long });
 
 // Создание → возврат на список → ждём обновления
 await createButton.click();
@@ -494,22 +382,15 @@ await expect(successMessage).toBeVisible();
 await listButton.click();
 await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.medium });
 // Проверяем запись через поиск
-await coachPage.searchInput.fill(COACH_EMAIL);
-await expect(coachPage.page.getByRole('row', { name: COACH_EMAIL, exact: false })).toBeVisible({ timeout: TIMEOUTS.long });
+await coachPage.search(COACH_EMAIL);
+await expect(coachPage.getRowByEmail(COACH_EMAIL)).toBeVisible({ timeout: TIMEOUTS.long });
 ```
 
 **Правила:**
 1. **После `goto()`** — всегда ждать `heading` или `newButton` (признак загрузки данных)
-2. **После `fill(searchInput)`** — искать запись через `getByRole('row', { name: email })`, не через `getCoachRow(email)` (который ищет по `hasText` в row)
+2. **После поиска** — запись методом PO (`getRowByEmail(email)` → `getByRole('row', { name: email })`), не локатором в спеке
 3. **После create/update/delete** — ждать подтверждения действия, затем возвращаться на список и ждать `heading`
 4. **Длинные email** — могут обрезаться в grid, использовать поиск для точного совпадения
-
-**Аннотация:**
-```ts
-// CRITICAL: Searching for row in table immediately after navigation — data may not be loaded
-// FIX: Wait for heading first, then use search input to find the record
-await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();
-```
 
 ---
 
@@ -525,7 +406,7 @@ await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();
 
 **Master rule:** Нет `await` на любом ассерте с Playwright matcher → **CRITICAL**, перекрывает все категории. Это самый влиятельный баг: ассерт буквально не выполняется.
 
-**Никогда не double-annotate одну строку. Выбирай самый специфичный.**
+**Одно нарушение — одна категория: выбирай самую специфичную.**
 
 ---
 
@@ -533,7 +414,4 @@ await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();
 
 1. Открыть тест + используемые PO
 2. Пройти по пунктам 1-17
-3. Каждое нарушение → inline annotation `// SEVERITY: ...` + `// FIX: ...`
-4. Обновить summary block в начале файла
-5. Cap: 20 аннотаций за запуск. Overflow → в chat report
-6. Idempotent: не дублировать существующие аннотации на тех же строках
+3. Результаты ревью — **только в чат**, файлы на этом шаге не правятся (комментарии `// SEVERITY` в код не вставлять). Каждое нарушение — строка отчёта: severity, `файл:строка`, категория, что исправить.

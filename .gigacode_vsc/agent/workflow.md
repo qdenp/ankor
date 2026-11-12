@@ -96,5 +96,5 @@ await expect(coachPage.getCoachRow(COACH_EMAIL)).toBeVisible();  // FAIL: дан
 await coachPage.goto();
 await expect(coachPage.heading).toBeVisible({ timeout: TIMEOUTS.medium });  // Данные загрузились
 await coachPage.searchInput.fill(COACH_EMAIL);
-await expect(coachPage.page.getByRole('row', { name: COACH_EMAIL, exact: false })).toBeVisible({ timeout: TIMEOUTS.long });
+await expect(coachPage.getRowByEmail(COACH_EMAIL)).toBeVisible({ timeout: TIMEOUTS.long });
 ```

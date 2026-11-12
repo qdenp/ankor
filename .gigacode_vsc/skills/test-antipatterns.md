@@ -38,13 +38,6 @@ await expect(page.getByRole('option').first()).toBeVisible({ timeout: TIMEOUTS.m
 await page.waitForTimeout(5000);
 ```
 
-**Аннотация:**
-```ts
-// HIGH: Hard-coded 2s wait — flaky and slow
-// FIX: await expect(statusElement).toBeVisible() or await page.waitForResponse(...)
-await page.waitForTimeout(2000);
-```
-
 ---
 
 ## 2. Double-Wait Chains (SEVERITY: MEDIUM)
@@ -69,13 +62,6 @@ await moreActions.click(); // click сам ждёт visible + enabled
 ```
 
 **Где проверять:** Методы PO (`openEditCoach`, `openEditParent`, `deleteDraftsCreatedSince` и т.п.), методы `base-page.ts`.
-
-**Аннотация:**
-```ts
-// MEDIUM: Double-wait — click() already waits for visibility
-// FIX: Remove the expect(...).toBeVisible() line before click()
-await expect(moreActions).toBeVisible({ timeout: TIMEOUTS.medium });
-```
 
 ---
 
@@ -103,13 +89,6 @@ await page.goto(result);
 
 Также проверять `waitForTimeout` внутри `Promise.all` — hard timeout рядом с event listener убивает смысл listener'а.
 
-**Аннотация:**
-```ts
-// CRITICAL: Promise.all not awaited — serves no purpose, remove the wrapper
-// FIX: await the evaluate directly and remove the Promise.all
-Promise.all([
-```
-
 ---
 
 ## 4. Unnecessary Wrapper Method Usage (SEVERITY: LOW)
@@ -125,13 +104,6 @@ Promise.all([
 - `basePage.getCount(locator)` → `await expect(locator).toHaveCount(N)`
 - `basePage.waitForElement(locator)` → `await expect(locator).toBeVisible()`
 - `basePage.waitForElementGone(locator)` → `await expect(locator).toBeHidden()`
-
-**Аннотация:**
-```ts
-// LOW: click wrapper — await locator.click() does the same thing
-// FIX: Replace with direct locator.click()
-await basePage.click(someLocator);
-```
 
 ---
 
@@ -149,13 +121,6 @@ test('should create team', async ({ loginAs, page }) => {
 });
 ```
 
-**Аннотация:**
-```ts
-// MEDIUM: Same role already logged in by beforeEach
-// FIX: Remove the repeated loginAs('owner') call
-await loginAs('owner');
-```
-
 ---
 
 ## 6. Redundant Setup / Cleanup Calls (SEVERITY: LOW)
@@ -165,13 +130,6 @@ await loginAs('owner');
 **В проекте:** `12-evaluations.spec.ts` — `afterEach` после каждого теста открывает Evaluations и ищет свои черновики, включая тест, который ничего не сохраняет (`should block rating above 5`).
 
 **Только флажить если:** Вызов явно лишний для конкретных тестов. Не флажить, если тесты действительно нуждаются в чистом состоянии.
-
-**Аннотация:**
-```ts
-// LOW: Cleanup runs after every test — not all tests create an evaluation
-// FIX: Clean up only in tests that save an evaluation
-await evaluationPage.deleteDraftsCreatedSince(testStartedAt);
-```
 
 ---
 
@@ -187,14 +145,6 @@ const [response] = await Promise.all([
     page.waitForResponse(res => res.url().includes('/api/plans') && res.status() === 200),
     button.click(),
 ]);
-```
-
-**Аннотация:**
-```ts
-// MEDIUM: Hard wait after API-triggering click — use waitForResponse instead
-// FIX: await Promise.all([page.waitForResponse(res => res.url().includes('/api/...')), button.click()])
-await button.click();
-await page.waitForTimeout(5000);
 ```
 
 ---
@@ -232,13 +182,6 @@ await page.goto(url);
 - Намеренно fire-and-forget (крайне редко — если сомневаешься, флажь)
 - Внутри `Promise.all()` — они awaited wrapper'ом
 
-**Аннотация:**
-```ts
-// CRITICAL: page.reload() without await — fires without waiting for completion
-// FIX: Add await: await page.reload()
-page.reload();
-```
-
 ---
 
 ## 9. Asserting on Locator/Promise Object (SEVERITY: CRITICAL)
@@ -266,13 +209,6 @@ await expect.soft(planPage.searchInput).toBeVisible();
 ```
 
 **Различие от reliability #3 (Weak assertions):** `expect(locator).toBeTruthy()` — не слабый ассерт, а **no-op**. Не тестирует ничего. Классифицировать как #9, не reliability #3.
-
-**Аннотация:**
-```ts
-// CRITICAL: expect(locator).toBeTruthy() — Locator is always truthy, this is a no-op
-// FIX: Use await expect(locator).toBeVisible() to check actual DOM presence
-expect(athletePage.newAthleteButton).toBeTruthy();
-```
 
 ---
 
@@ -302,13 +238,6 @@ test.afterEach(async () => {
 **Не флажить:**
 - Wait в хуке с комментарием, почему он нужен (rate limiting)
 - Ожидания, действительно нужные для очистки состояния (но предложить event-based альтернативы)
-
-**Аннотация:**
-```ts
-// HIGH: 5s wait in afterEach — 5s × N tests = Ns dead time per run
-// FIX: Remove wait; if needed, wait for specific page/API state
-await page.waitForTimeout(5000);
-```
 
 ---
 
@@ -352,13 +281,6 @@ test("Test A", async ({ browser, baseURL }) => {
 - Переменные на describe scope, записываемые только в `beforeAll` (не per-test) — intended pattern для shared setup
 - Данные сущности, созданной тестом создания и переиспользуемой следующими тестами serial-серии (например, `createdParent` в `07-parents.spec.ts`) — это намеренный паттерн, см. REVIEW-PLAN 3.12
 
-**Аннотация:**
-```ts
-// HIGH: Shared mutable page variable — if test fails, afterEach closes stale page
-// FIX: Scope page inside each test or use try/finally for cleanup
-let extraPage: Page;
-```
-
 ---
 
 ## Tie-Break Rules
@@ -371,10 +293,10 @@ let extraPage: Page;
 
 **Master rule:** Нет `await` на любом ассерте с Playwright matcher → CRITICAL, перекрывает всё. Это самый влиятельный баг: ассерт буквально не выполняется.
 
-**Никогда не double-annotate одну строку за overlapping категории. Выбирай самый специфичный.**
+**Одно нарушение — одна категория: выбирай самую специфичную.**
 
 ---
 
 ## Использование в 04-test-review-and-fixes.md
 
-То же, что и для reliability: проходить по 1-11, ставить inline annotations, обновлять summary block, cap 20, idempotent.
+Пройти по пунктам 1-11. Результаты ревью — **только в чат**, файлы на этом шаге не правятся (комментарии `// SEVERITY` в код не вставлять). Каждое нарушение — строка отчёта: severity, `файл:строка`, категория, что исправить.
