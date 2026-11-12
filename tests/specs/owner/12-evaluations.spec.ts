@@ -114,7 +114,7 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.addSkill('Skill2');
 
     // Click on rating cell "—" → becomes number input
-    const categoryCell = evaluationPage.getRatingCell();
+    const categoryCell = evaluationPage.getCategoryRatingCell('Category1');
     await expect(categoryCell).toBeVisible();
     await categoryCell.click();
 
@@ -123,11 +123,13 @@ test.describe('Owner Evaluation Tests', () => {
     await expect(ratingInput, 'Expected rating input to appear').toBeVisible();
     await evaluationPage.typeRatingAndConfirm('6');
 
-    // Value should be blocked or reset — wait for input to disappear (validation)
+    // Шаг кейса: предупреждение (в приложении текст "Values should be whole numbers from 1 to 5.")
+    await expect(evaluationPage.ratingRangeAlert, 'Expected the 1–5 range warning').toBeVisible();
     await expect(ratingInput, 'Expected rating input to be hidden after validation').toBeHidden();
 
-    // Verify the cell no longer shows '6' (blocked)
-    await expect(categoryCell, 'Expected rating cell to not contain 6').not.toContainText('6', { timeout: TIMEOUTS.short });
+    // Значение не принято: ячейка осталась пустой. Раньше было not.toContainText('6') по «первой ячейке с —»:
+    // проходило до обновления ячейки, а локатор после ввода значения перескакивал на другую ячейку
+    await expect(categoryCell, 'Rating 6 should not be accepted').toHaveText('—');
   });
 
   /**

@@ -1,6 +1,7 @@
 import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { PlanPage } from '../../pages/plan-page';
+import { PLANS, TIMEOUTS } from '../../config';
 
 /**
  * 13 — Practice Plans for Athlete role.
@@ -22,9 +23,11 @@ test.describe('Athlete Plan Tests', () => {
     await planPage.goto();
     await planPage.goToInvited();
 
-    // [step 2] Открыть план, на который атлет только приглашён (не владелец)
-    // Проверяем что на карточке плана нет кнопки Edit
-    await expect(planPage.planCardEditLink, 'Edit link should not be visible on invited plan card').not.toBeVisible();
+    // [step 2] План, на который атлет только приглашён (не владелец), есть на вкладке и без Edit.
+    // Сначала — что карточка есть: на пустой вкладке проверка «нет Edit» проходила впустую (REVIEW-PLAN 2.4)
+    const invitedPlan = planPage.getPlanCard(PLANS.athleteInvited.name);
+    await expect(invitedPlan, 'Invited plan card should be visible (created by tests/setup)').toBeVisible({ timeout: TIMEOUTS.long });
+    await expect(planPage.getPlanCardEditLink(PLANS.athleteInvited.name), 'Edit link should not be visible on invited plan card').toBeHidden();
   });
 
   // 72622: Athlete does not see Org Plans tab

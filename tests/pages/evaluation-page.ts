@@ -37,6 +37,8 @@ export class EvaluationPage extends BasePage {
   readonly categoryRatingInputs: Locator;
   readonly categoryRatingCells: Locator;
   readonly ratingInput: Locator;
+  /** Предупреждение о недопустимом рейтинге: "Values should be whole numbers from 1 to 5." */
+  readonly ratingRangeAlert: Locator;
 
   // Report: блок "Recommended drills" — персонализированный workout (дриллы с Play / View)
   readonly recommendedDrillsHeading: Locator;
@@ -117,6 +119,7 @@ export class EvaluationPage extends BasePage {
     this.categoryRatingInputs = page.getByRole('textbox', { name: /^(1|2|3|4|5)$/ }).first();
     this.categoryRatingCells = page.getByRole('gridcell').filter({ hasText: '—' });
     this.ratingInput = page.locator('input[type="number"]').first();
+    this.ratingRangeAlert = page.getByRole('alert').filter({ hasText: /from 1 to 5/ });
 
     // Table
     this.tableRows = page.getByRole('row');
@@ -249,6 +252,14 @@ export class EvaluationPage extends BasePage {
   }
 
   /** Rating ячейка с "—" для ввода оценки */
+  /**
+   * Ячейка рейтинга категории (первый атлет). В отличие от getRatingCell (первая ячейка с "—"),
+   * не перескакивает на другую ячейку, когда в этой появится значение
+   */
+  getCategoryRatingCell(category: string): Locator {
+    return this.page.getByRole('row').filter({ hasText: category }).getByRole('gridcell').nth(1);
+  }
+
   getRatingCell(): Locator {
     return this.page.getByRole('gridcell').filter({ hasText: '—' }).first();
   }
