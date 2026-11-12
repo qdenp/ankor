@@ -5,7 +5,8 @@
 import dotenv from 'dotenv';
 
 // Загружаем переменные окружения из файла, названного по серверу
-dotenv.config({ path: '.env.d333afta2q6llv' });
+// quiet: без строки "injected env … from .env" — её печатал каждый процесс и каждый воркер в лог прогона
+dotenv.config({ path: '.env.d333afta2q6llv', quiet: true });
 
 /* Base URL задаётся в playwright.config.ts (use.baseURL, переменная ANKOR_BASE_URL) */
 

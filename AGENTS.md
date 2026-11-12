@@ -12,6 +12,9 @@ Bash tool убивает процессы через 120 секунд по ум�
 # Запуск с таймаутом 30 минут (1800000 мс):
 Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
 Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+# Оболочка агента задаёт NO_COLOR=1, Playwright даёт воркерам FORCE_COLOR — Node на каждый воркер
+# пишет в лог предупреждение о конфликте. Цветов в файле нет в любом случае.
+Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue
 npm run test:all 2>&1 > test-output.log
 # timeout: 1800000
 ```
@@ -47,6 +50,7 @@ npm run test:all 2>&1 > test-output.log
 # Перед запуском тестов:
 Remove-Item allure-results\* -Recurse -ErrorAction SilentlyContinue
 Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
+Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue
 npm run test:owner 2>&1 > test-output.log
 
 # После генерации отчёта:
@@ -73,6 +77,7 @@ Remove-Item test-results\* -Recurse -ErrorAction SilentlyContinue
 ```powershell
 Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
 Remove-Item "test-output.log" -ErrorAction SilentlyContinue
+Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue   # дочерний процесс наследует окружение
 $proc = Start-Process powershell -ArgumentList "-NoProfile", "-Command", "Set-Location 'C:\projects\aexsoft\ankor'; npm run test:all 2>&1 > test-output.log" -WindowStyle Hidden -PassThru
 Write-Output "Started PID: $($proc.Id)"
 ```
