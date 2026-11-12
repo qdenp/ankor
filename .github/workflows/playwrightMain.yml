@@ -5,7 +5,7 @@
 # Нужные секреты (Settings → Secrets and variables → Actions):
 #   ANKOR_OWNER_EMAIL, ANKOR_OWNER_PASSWORD, ANKOR_SYSADMIN_EMAIL, ANKOR_SYSADMIN_PASSWORD,
 #   ANKOR_COACH_EMAIL, ANKOR_COACH_PASSWORD, ANKOR_PARENT_EMAIL, ANKOR_PARENT_PASSWORD,
-#   ANKOR_ATHLETE_EMAIL, ANKOR_ATHLETE_PASSWORD — тестовые пользователи (как в .env.d333afta2q6llv);
+#   ANKOR_ATHLETE_EMAIL, ANKOR_ATHLETE_PASSWORD, ANKOR_EVAL_ATHLETE_EMAIL, ANKOR_EVAL_ATHLETE_PASSWORD — тестовые пользователи (как в .env.d333afta2q6llv);
 #   ALLURE_TOKEN — API-токен Allure TestOps. Без него тесты запускаются, но в TestOps ничего не уходит.
 name: E2E tests
 run-name: "E2E: ${{ inputs.roles }}"
@@ -40,6 +40,8 @@ env:
   ANKOR_PARENT_PASSWORD: ${{ secrets.ANKOR_PARENT_PASSWORD }}
   ANKOR_ATHLETE_EMAIL: ${{ secrets.ANKOR_ATHLETE_EMAIL }}
   ANKOR_ATHLETE_PASSWORD: ${{ secrets.ANKOR_ATHLETE_PASSWORD }}
+  ANKOR_EVAL_ATHLETE_EMAIL: ${{ secrets.ANKOR_EVAL_ATHLETE_EMAIL }}
+  ANKOR_EVAL_ATHLETE_PASSWORD: ${{ secrets.ANKOR_EVAL_ATHLETE_PASSWORD }}
   # Allure TestOps
   ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
   ALLURE_ENDPOINT: https://rallyup.testops.cloud

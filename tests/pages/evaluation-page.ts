@@ -38,6 +38,11 @@ export class EvaluationPage extends BasePage {
   readonly categoryRatingCells: Locator;
   readonly ratingInput: Locator;
 
+  // Report: блок "Recommended drills" — персонализированный workout (дриллы с Play / View)
+  readonly recommendedDrillsHeading: Locator;
+  readonly recommendedDrillViewButtons: Locator;
+  readonly noRecommendedDrillsText: Locator;
+
   // Table
   readonly tableRows: Locator;
 
@@ -143,6 +148,10 @@ export class EvaluationPage extends BasePage {
     this.viewReportButtons = page.getByRole('button', { name: 'View Report' });
     // Детали отчёта: шаблон, атлет, дата, категории и подскиллы с оценками ("Skill1 4.0")
     this.reportContent = page.getByRole('main');
+    // В отчёте кнопки View есть только у рекомендованных дриллов; без дриллов — текст-заглушка
+    this.recommendedDrillsHeading = page.getByRole('heading', { name: 'Recommended drills' });
+    this.recommendedDrillViewButtons = this.reportContent.getByRole('button', { name: 'View', exact: true });
+    this.noRecommendedDrillsText = page.getByText('No recommended drills for the selected focus skills.');
   }
 
   /** Переход на страницу Evaluations через левое меню */

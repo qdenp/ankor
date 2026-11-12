@@ -1,7 +1,9 @@
 import * as allure from 'allure-js-commons';
+import type { Page } from '@playwright/test';
 import { test, expect } from '../../fixtures';
 import { EvaluationPage } from '../../pages/evaluation-page';
-import { TIMEOUTS } from '../../config';
+import { SignInPage } from '../../pages/sign-in-page';
+import { EVALUATED_ATHLETE, TIMEOUTS } from '../../config';
 
 const TEMPLATE_NAME = '!Default Template for Evaluation';
 const TEAM_NAME = 'Team01';
@@ -15,6 +17,24 @@ async function createDraft(evaluationPage: EvaluationPage, skillName: string, ra
   await evaluationPage.addSkill(skillName);
   await evaluationPage.rateCategory(rating);
   await evaluationPage.saveAsDraft();
+}
+
+/**
+ * Новый отчёт после Submit. Список показывает только последние 20 (счётчик всегда «(20)»), поэтому
+ * запоминаем адрес самого нового отчёта до Submit, а после ждём, пока самый новый сменится.
+ */
+async function newestReportUrl(evaluationPage: EvaluationPage, page: Page): Promise<string> {
+  await evaluationPage.gotoReports();
+  await evaluationPage.openNewestReport();
+  return page.url();
+}
+
+async function openNewReportAfter(evaluationPage: EvaluationPage, page: Page, previousUrl: string): Promise<void> {
+  await expect(async () => {
+    await evaluationPage.gotoReports();
+    await evaluationPage.openNewestReport();
+    await expect(page).not.toHaveURL(previousUrl);
+  }).toPass({ timeout: TIMEOUTS.long });
 }
 
 test.describe('Owner Evaluation Tests', () => {
@@ -201,20 +221,15 @@ test.describe('Owner Evaluation Tests', () => {
 
   /**
    * TC-71562 После submit генерируется evaluation report
-   * ЕДИНСТВЕННЫЙ тест с Submit: отчёт в интерфейсе удалить нельзя (1 отчёт за прогон — это и есть проверка создания).
-   * Оценка категории 4 (выше 3) — её отчёт проверяет следующий тест (TC-71528).
-   * TC-71563 (workout) отложен: нужна оценка ниже 3, а в Team01 один атлет и у шаблона одна категория (REVIEW-PLAN 1.5).
+   * Один из двух тестов с Submit (второй — workout, TC-71563): отчёт в интерфейсе удалить нельзя,
+   * 1 отчёт за прогон — это и есть проверка создания. Оценка категории 4 (выше 3) — её отчёт проверяет TC-71528.
    */
   test('should generate an evaluation report after submit', async ({ page }) => {
     await allure.allureId('71562');
     const evaluationPage = new EvaluationPage(page);
     const today = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 
-    // Список отчётов показывает только последние 20 (счётчик всегда «(20)»), поэтому новый отчёт
-    // определяем так: адрес самого нового отчёта до Submit ≠ адрес самого нового после
-    await evaluationPage.gotoReports();
-    await evaluationPage.openNewestReport();
-    const newestReportBefore = page.url();
+    const newestReportBefore = await newestReportUrl(evaluationPage, page);
 
     await evaluationPage.goto();
     await evaluationPage.clickNewEvaluation();
@@ -226,12 +241,7 @@ test.describe('Owner Evaluation Tests', () => {
 
     await evaluationPage.submit();
 
-    // Новый отчёт — первый в списке
-    await expect(async () => {
-      await evaluationPage.gotoReports();
-      await evaluationPage.openNewestReport();
-      await expect(page).not.toHaveURL(newestReportBefore);
-    }).toPass({ timeout: TIMEOUTS.long });
+    await openNewReportAfter(evaluationPage, page, newestReportBefore);
     await expect(evaluationPage.reportContent).toContainText(TEMPLATE_NAME);
     await expect(evaluationPage.reportContent).toContainText(today);
     submittedReportUrl = page.url();
@@ -250,6 +260,79 @@ test.describe('Owner Evaluation Tests', () => {
     await evaluationPage.openReport(submittedReportUrl!);
     for (const subskill of ['Skill1', 'Skill2', 'Skill3', 'Skill4']) {
       await expect(evaluationPage.reportContent, `${subskill} should have the category rating 4.0`).toContainText(new RegExp(`${subskill}\\s*4\\.0`));
+    }
+  });
+
+});
+
+/**
+ * TC-71563 — отдельная группа без ретраев: в serial-группе ретрай перезапускает ВСЮ группу, включая Submit,
+ * и каждый повтор оставлял бы ещё неудаляемые отчёты. Здесь не больше одного Submit за прогон.
+ */
+test.describe('Owner Evaluation Workout', () => {
+  test.describe.configure({ retries: 0 });
+
+  test.beforeEach(async ({ loginAs }) => {
+    await loginAs('owner');
+  });
+
+  /**
+   * TC-71563 После submit генерируется персонализированный workout
+   * Отдельная оценка ниже 3 и второй Submit: +1 неудаляемый отчёт за прогон (выбрано пользователем).
+   * Workout в приложении — блок отчёта "Recommended drills" (дриллы с Play / View), отдельной вкладки нет;
+   * в отчёте с оценкой 4.0 (TC-71562) там "No recommended drills for the selected focus skills."
+   * [step 1] Submit оценки с рейтингом ниже 3 → [step 3] в отчёте есть рекомендованные дриллы
+   * [step 4] Зайти атлетом → в его отчёте тоже есть рекомендованные дриллы
+   */
+  test('should generate a personalized workout after submit with a rating below 3', async ({ page, browser, baseURL }) => {
+    await allure.allureId('71563');
+    const evaluationPage = new EvaluationPage(page);
+    const skillName = 'Skill3';
+    // Данные атлета — до Submit: без ANKOR_EVAL_ATHLETE_* тест падает раньше, чем создаст неудаляемый отчёт
+    const athlete = { email: EVALUATED_ATHLETE.email, password: EVALUATED_ATHLETE.password };
+
+    const newestReportBefore = await newestReportUrl(evaluationPage, page);
+
+    // [step 1] Оценка категории 2: раскрываются подскиллы, их тоже нужно оценить
+    await evaluationPage.goto();
+    await evaluationPage.clickNewEvaluation();
+    await evaluationPage.selectScorecardTemplate(TEMPLATE_NAME);
+    await evaluationPage.selectTeam(TEAM_NAME);
+    await evaluationPage.addSkill(skillName);
+    await evaluationPage.rateCategory(2);
+    await expect(evaluationPage.subskillsPopupTitle).toBeVisible({ timeout: TIMEOUTS.long });
+    await evaluationPage.setSubskillRating(skillName, 2);
+    await evaluationPage.saveSubskillRatings();
+    await evaluationPage.waitForSubmitEnabled();
+    await evaluationPage.submit();
+
+    await openNewReportAfter(evaluationPage, page, newestReportBefore);
+    const reportUrl = page.url();
+
+    // [step 3] Owner: в отчёте атлета есть рекомендованные дриллы
+    await expect(evaluationPage.reportContent).toContainText(EVALUATED_ATHLETE.name);
+    await expect(evaluationPage.recommendedDrillsHeading).toBeVisible();
+    await expect(evaluationPage.recommendedDrillViewButtons.first(), 'Workout drills should be recommended').toBeVisible();
+    // После появления дриллов — заглушки нет (сама по себе toBeHidden прошла бы и до рендера блока)
+    await expect(evaluationPage.noRecommendedDrillsText).toBeHidden();
+
+    // [step 4] Атлет видит тот же workout. Отдельный контекст: сессия owner не трогается
+    const athleteContext = await browser.newContext({ baseURL });
+    try {
+      const athleteTab = await athleteContext.newPage();
+      const signInPage = new SignInPage(athleteTab);
+      const athleteReport = new EvaluationPage(athleteTab);
+
+      await signInPage.goto();
+      await signInPage.login(athlete.email, athlete.password);
+      await expect(athleteReport.navHome, 'Evaluated athlete should be logged in').toBeVisible({ timeout: TIMEOUTS.long });
+
+      await athleteReport.openReport(reportUrl);
+      await expect(athleteReport.recommendedDrillsHeading).toBeVisible({ timeout: TIMEOUTS.long });
+      await expect(athleteReport.recommendedDrillViewButtons.first(), 'Athlete should see the workout drills').toBeVisible();
+      await expect(athleteReport.noRecommendedDrillsText).toBeHidden();
+    } finally {
+      await athleteContext.close();
     }
   });
 });

@@ -28,6 +28,8 @@ jobs:
       ANKOR_PARENT_PASSWORD: ci
       ANKOR_ATHLETE_EMAIL: ci@example.com
       ANKOR_ATHLETE_PASSWORD: ci
+      ANKOR_EVAL_ATHLETE_EMAIL: ci@example.com
+      ANKOR_EVAL_ATHLETE_PASSWORD: ci
     steps:
       - uses: actions/checkout@v7
 
