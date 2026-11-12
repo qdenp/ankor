@@ -438,8 +438,8 @@ tests/
 │   ├── athlete-page.ts
 │   └── ...
 └── specs/              # Тесты по папкам ролей
-    ├── owner/          # 00-create-users, 01-signin, 04-organization, 06-coaches … 13-plans
-    ├── sysadmin/       # 01-permissions, 04-organization, 13-plans
+    ├── owner/          # 00-create-users … 13-plans, 90-permissions, 99-auth
+    ├── sysadmin/       # 04-organization, 13-plans, 90-permissions
     ├── coach/
     ├── parent/
     └── athlete/
