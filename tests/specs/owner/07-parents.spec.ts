@@ -3,7 +3,7 @@ import { test, expect } from '../../fixtures';
 import { ParentPage } from '../../pages/parent-page';
 import { SignInPage } from '../../pages/sign-in-page';
 import { HomePage } from '../../pages/home-page';
-import { TIMEOUTS } from '../../config';
+import { CREDENTIALS, TIMEOUTS } from '../../config';
 import { recallEntity, rememberEntity } from '../../helpers/test-data-store';
 
 /**
@@ -32,7 +32,8 @@ test.describe('Owner Parent Tests', () => {
     const parent = {
       firstName: `TestParent${timestamp}`,
       email: `dtimokhin+parent${timestamp}@aexsoft.com`,
-      password: '7952Qaz!',
+      // Общий пароль тестовых аккаунтов — из .env, не из кода
+      password: CREDENTIALS.parent.password,
     };
 
     // --- Шаг 1-3: пустая форма → валидация ---
