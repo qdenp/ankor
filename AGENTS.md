@@ -94,7 +94,8 @@ test('should create plan and see in My Plans', async ({ page }) => {
 });
 ```
 
-- Один тест — один кейс. `@TC-…` в названии TestOps не распознаёт. Тест без номера при выгрузке создаёт в TestOps новый кейс — тестов без кейса не держать.
+- Один тест — один кейс: тест на несколько кейсов — разделить. Обратное допустимо: кейс на несколько ролей (72622 — атлет и родитель) — по тесту в папке каждой роли с тем же `allureId`; TestOps различает результаты по параметру `Project`.
+- `@TC-…` в названии TestOps не распознаёт. Тест без номера при выгрузке создаёт в TestOps новый кейс — тестов без кейса не держать.
 
 **Нумерация файлов = пункты меню** (одинаковая у всех ролей; роль содержит только доступные ей файлы):
 01 signin · 02 homepage · 03 signup (join-код) · 04 organization · 05 athletes · 06 coaches · 07 parents · 08 teams · 09 skills · 10 drills · 11 scorecard-templates · 12 evaluations · 13 plans · 14 easy-join · 15 manage-users · 16 notifications · 90 permissions (права роли) · 99 auth (logout, только owner, всегда последний).
