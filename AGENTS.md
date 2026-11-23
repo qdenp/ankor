@@ -97,7 +97,7 @@ test('should create plan and see in My Plans', async ({ page }) => {
 - `@TC-…` в названии TestOps не распознаёт. Тест без номера при выгрузке создаёт в TestOps новый кейс — тестов без кейса не держать.
 
 **Нумерация файлов = пункты меню** (одинаковая у всех ролей; роль содержит только доступные ей файлы):
-01 signin · 02 homepage · 03 signup (join-код) · 04 organization · 05 athletes · 06 coaches · 07 parents · 08 teams · 09 skills · 10 drills · 11 scorecard-templates · 12 evaluations · 13 plans · 14 easy-join · 15 manage-users · 16 notifications · 90 permissions (права роли) · 99 auth (logout, только owner, всегда последний).
+01 signin · 02 homepage · 03 signup (join-код) · 04 organization · 05 athletes · 06 coaches · 07 parents · 08 teams · 09 skills · 10 drills · 11 scorecard-templates · 12 evaluations · 13 plans · 14 easy-join · 15 manage-users · 16 notifications · 17 evaluation-reports · 90 permissions (права роли) · 99 auth (logout, только owner, всегда последний).
 Разные сущности — в разных файлах.
 
 ## 7. Роли и параллельность
@@ -119,7 +119,7 @@ test('should create plan and see in My Plans', async ({ page }) => {
 - Запись создаёт **только тест, который проверяет само создание**; view/edit/права/валидация берут её из хранилища `tests/helpers/test-data-store.ts` (`rememberEntity` / `recallEntity` / `forgetEntity`, файлы `tests/.data/<роль>/<сущность>.json`). Edit сохраняет новое имя.
 - Что можно удалить (команды, черновики) — тест удаляет сам (`finally` / `afterEach`).
 - Email создаваемых пользователей — `dtimokhin+temp-<роль>-${Date.now()}@aexsoft.com`; созданного тест деактивирует в `afterAll` (`tests/helpers/deactivate-user.ts`). Накопленных — служебный `tests/setup/deactivate-test-users.spec.ts` (список постоянных пользователей `PROTECTED_USERS` там же).
-- Отчёт оценки неудаляем: Submit — только где нужен отчёт (сейчас 71562 и 71563); новые Submit — с согласия пользователя.
+- Отчёт оценки неудаляем: Submit — только где нужен отчёт (сейчас 71562 и 71563 и разово — setup для 71604, отчёт Athlete Second); новые Submit — с согласия пользователя.
 - Основные пользователи ролей (`.env`) и «Athlete Last» (`EVALUATED_ATHLETE` — его оценивают тесты 12-evaluations) не менять. Организации: `aiorg01` (owner) правит только `owner/04`, `aiorg01sysedit` — только `sysadmin/04`; имя возвращать к константе `ORGANIZATIONS`, а не к прочитанному в начале.
 - Тесты разных ролей не меняют одну запись. Правки инфраструктуры проверять на спеках, которые ничего не создают (`*-homepage`, `*-permissions`).
 
