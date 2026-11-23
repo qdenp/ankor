@@ -25,6 +25,8 @@ export class SignInPage extends BasePage {
   readonly createOrgLink: Locator;
   readonly showPasswordToggle: Locator;
   readonly errorAlert: Locator;
+  /** Запросы входа в Supabase (/auth/v1/token) с момента создания PO — 70940: форма не должна отправиться */
+  private authRequests = 0;
 
   constructor(page: Page) {
     super(page);
@@ -38,6 +40,15 @@ export class SignInPage extends BasePage {
     this.createOrgLink = page.getByRole('link', { name: 'Create an organization profile' });
     this.showPasswordToggle = page.getByRole('button', { name: 'Show password' });
     this.errorAlert = page.getByRole('alert');
+
+    page.on('request', (request) => {
+      if (request.url().includes('/auth/v1/token')) this.authRequests++;
+    });
+  }
+
+  /** Сколько запросов входа ушло; запрос уходит сразу по клику, до ответа и до alert */
+  get authRequestCount(): number {
+    return this.authRequests;
   }
 
   /** Переход на страницу входа */

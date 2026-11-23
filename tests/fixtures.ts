@@ -72,8 +72,8 @@ async function getSession(role: Role): Promise<SupabaseSession> {
  * до первой загрузки приложения — оно сразу стартует авторизованным, без формы входа.
  * Форму входа проверяют только 01-signin и вход другого пользователя в отдельном контексте.
  *
- * Тесты sign-in/sign-up не вызывают loginAs: браузер каждого теста и так чистый
- * (новый контекст на тест, storageState в конфиге не задан).
+ * Тесты sign-in/sign-up начинают с чистого браузера (новый контекст на тест, storageState в конфиге
+ * не задан); loginAs там — только если предусловие кейса — активная сессия (70937).
  */
 export const test = base.extend<AuthFixture, { browser: Browser }>({
   browser: async ({ browser }, use) => {
