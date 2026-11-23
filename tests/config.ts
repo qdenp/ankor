@@ -69,6 +69,19 @@ export const EVALUATED_ATHLETE = {
   },
 };
 
+/* ======================== Supabase ======================== */
+/**
+ * Бэкенд авторизации стенда — для входа по API в loginAs (tests/fixtures.ts).
+ * anonKey публичный, не секрет: он же лежит во фронтенд-бандле и уходит в каждом запросе браузера.
+ * Сменится стенд — взять оба значения из его бандла (адрес *.supabase.co и JWT с "role":"anon").
+ */
+export const SUPABASE = {
+  url: 'https://xunwylqmyafdfzgepvls.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1bnd5bHFteWFmZGZ6Z2VwdmxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxMjQ4OTEsImV4cCI6MjEwMDcwMDg5MX0.RmwPsMvwLvqaRKFSwla26EpOKlgW2LK37qpoc2DAu-I',
+  /** Ключ localStorage, где приложение (supabase-js) хранит сессию */
+  storageKey: 'sb-xunwylqmyafdfzgepvls-auth-token',
+};
+
 /* ======================== Organizations ======================== */
 /**
  * Организации, имена которых меняют тесты редактирования. Тест возвращает имя к константе,
