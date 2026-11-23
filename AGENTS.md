@@ -111,7 +111,7 @@ test('should create plan and see in My Plans', async ({ page }) => {
 - `loginAs(role)` и `logout()` из `tests/fixtures.ts`. `loginAs` входит по API Supabase (`SUPABASE` в `config.ts`), одна сессия на роль в памяти воркера; после `logout()` следующий `loginAs` входит заново.
 - Вход через форму (`signInPage.login`) — в `01-signin`, `tests/setup` и для **другого пользователя в отдельном контексте** `browser.newContext({ baseURL })` (образец — `owner/07-parents.spec.ts`), а не через logout текущей роли.
 - Logout отзывает сессию на сервере — тест logout всегда последний в роли.
-- Тесты входа (`01-signin`) не вызывают `loginAs`: их браузер чистый.
+- Тесты входа (`01-signin`) начинают с чистого браузера; `loginAs` — только если предусловие кейса — активная сессия (70937).
 
 ## 9. Тестовые данные на стенде
 
