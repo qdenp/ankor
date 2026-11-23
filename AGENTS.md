@@ -103,13 +103,13 @@ test('should create plan and see in My Plans', async ({ page }) => {
 
 ## 7. Роли и параллельность
 
-- `tests/specs/<роль>/` — owner, sysadmin, coach, parent, athlete; проект Playwright = папка. Тест лежит в папке той роли, под которой логинится (иначе два проекта пишут в один `tests/.auth/<роль>.json`).
+- `tests/specs/<роль>/` — owner, sysadmin, coach, parent, athlete; проект Playwright = папка. Тест лежит в папке той роли, под которой логинится (logout роли отзывает все её сессии, в том числе в чужом проекте).
 - Роли идут параллельно, внутри роли — последовательно: `test.describe.configure({ mode: 'serial' })`.
 - `retries: 2` в конфиге; свои ретраи не добавлять. Группа с неудаляемыми действиями (Submit оценки) — `retries: 0`: ретрай serial-группы повторяет её целиком.
 
 ## 8. Авторизация
 
-- `loginAs(role)` и `logout()` из `tests/fixtures.ts`. Кэш сессии — `tests/.auth/<роль>.json`; отозванную сессию `loginAs` замечает и входит через форму заново.
+- `loginAs(role)` и `logout()` из `tests/fixtures.ts`. `loginAs` входит по API Supabase (`SUPABASE` в `config.ts`), одна сессия на роль в памяти воркера; после `logout()` следующий `loginAs` входит заново.
 - Вход через форму (`signInPage.login`) — в `01-signin`, `tests/setup` и для **другого пользователя в отдельном контексте** `browser.newContext({ baseURL })` (образец — `owner/07-parents.spec.ts`), а не через logout текущей роли.
 - Logout отзывает сессию на сервере — тест logout всегда последний в роли.
 - Тесты входа (`01-signin`) не вызывают `loginAs`: их браузер чистый.

@@ -1,9 +1,9 @@
-import { test as base, expect, Browser, Page } from '@playwright/test';
-import { CREDENTIALS, TIMEOUTS } from './config';
+import { test as base, expect, Browser } from '@playwright/test';
+import { CREDENTIALS, SUPABASE, TIMEOUTS } from './config';
 import { SignInPage } from './pages/sign-in-page';
 import { BasePage } from './pages/base-page';
-import * as fs from 'fs';
-import * as path from 'path';
+
+type Role = keyof typeof CREDENTIALS;
 
 /**
  * Расширенная фикстура для авторизованной сессии.
@@ -12,82 +12,69 @@ export interface AuthFixture {
   /** Страница входа */
   signInPage: SignInPage;
   /** Метод авторизации под определённой ролью */
-  loginAs: (role: keyof typeof CREDENTIALS) => Promise<void>;
+  loginAs: (role: Role) => Promise<void>;
   /** Метод выхода */
   logout: () => Promise<void>;
 }
 
-/**
- * Проверить что JWT токен в storageState ещё валиден.
- * Supabase хранит в localStorage JSON-объект сессии ({"access_token":"<JWT>", ...});
- * на случай другого формата поддерживается и «голый» JWT.
- * Битый или нечитаемый кэш — не ошибка теста, а повод для UI-логина, поэтому здесь catch → false.
- */
-function isTokenValid(storagePath: string): boolean {
-  if (!fs.existsSync(storagePath)) return false;
-  try {
-    const state = JSON.parse(fs.readFileSync(storagePath, 'utf-8'));
-    const entries: Array<{ name: string; value: string }> = state.origins?.[0]?.localStorage ?? [];
-    const token = entries.find((e) => e.name.includes('auth-token'));
-    if (!token) return false;
-    const jwt = token.value.trim().startsWith('{') ? JSON.parse(token.value).access_token : token.value;
-    const payload = JSON.parse(atob(jwt.split('.')[1]));
-    return payload.exp * 1000 > Date.now();
-  } catch {
-    return false;
-  }
+/** Сессия Supabase — ответ /auth/v1/token; приложение хранит её в localStorage как есть */
+interface SupabaseSession {
+  /** Срок действия access-токена, секунды Unix */
+  expires_at: number;
 }
 
 /**
- * Восстановить сессию из storageState в уже существующий контекст страницы.
- * Открывает origin приложения, восстанавливает cookies и localStorage,
- * затем заново открывает / чтобы приложение подхватило авторизацию.
+ * Сессии ролей в памяти воркера: один вход по API на роль, дальше тесты роли берут готовую.
+ * Вход на каждый тест упёрся бы в лимит Supabase на /auth/v1/token (150 за 5 мин с IP, всплеск 30),
+ * когда все роли идут параллельно с короткими тестами. В памяти, а не на диске: отозванная
+ * или чужая сессия не переживает прогон.
  */
-async function restoreAuthFromCache(page: Page, storagePath: string): Promise<void> {
-  const state = JSON.parse(fs.readFileSync(storagePath, 'utf-8'));
+const sessions = new Map<Role, SupabaseSession>();
 
-  // Открываем origin приложения, чтобы cookies/localStorage применялись к правильному домену
-  await page.goto('/');
+/**
+ * Сессию, которой осталось жить меньше, заменяем новой: тест не должен застать истечение токена.
+ * Порог должен быть больше запаса автообновления supabase-js (~90 с): приложение обновляет токен
+ * и меняет refresh token только у почти истёкшей сессии — такую фикстура уже не раздаёт, иначе
+ * Supabase принял бы старый refresh token за повторное использование и отозвал бы сессию.
+ */
+const MIN_SESSION_LIFETIME_MS = 5 * 60_000;
 
-  // Восстанавливаем cookies
-  if (state.cookies) {
-    await page.context().addCookies(state.cookies);
+/** Роль, которая сейчас залогинена: logout выбрасывает её сессию */
+let currentRole: Role | null = null;
+
+/**
+ * Вход по API — тот же запрос, что делает форма входа (supabase-js signInWithPassword).
+ * Node fetch, а не page.request: тело запроса с паролем не попадает в трейс теста.
+ */
+async function getSession(role: Role): Promise<SupabaseSession> {
+  const cached = sessions.get(role);
+  if (cached && cached.expires_at * 1000 - Date.now() > MIN_SESSION_LIFETIME_MS) return cached;
+
+  const { email, password } = CREDENTIALS[role];
+  const response = await fetch(`${SUPABASE.url}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE.anonKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) {
+    // В сообщении только ответ Supabase (код и текст ошибки), без учётных данных
+    throw new Error(`API login as ${role} failed: HTTP ${response.status} ${await response.text()}`);
   }
-
-  // Восстанавливаем localStorage только для текущего origin
-  const currentOrigin = new URL(page.url()).origin;
-  for (const origin of state.origins || []) {
-    if (origin.origin !== currentOrigin) continue;
-    for (const item of origin.localStorage || []) {
-      await page.evaluate(({ name, value }) => {
-        localStorage.setItem(name, value);
-      }, item);
-    }
-  }
-
-  // Перезагружаем чтобы приложение подхватило состояние авторизации.
-  // Именно goto('/'), а не reload(): к этому моменту приложение уже увело пустой браузер
-  // на /sign-in, и reload рендерит страницу входа, которая мелькает перед переходом на /
-  // и сбивает проверку в loginAs.
-  await page.goto('/');
+  const session = (await response.json()) as SupabaseSession;
+  sessions.set(role, session);
+  return session;
 }
 
 /**
  * Базовая фикстура для всех тестов Ankor.
  *
- * loginAs использует per-role storageState:
- * - Кэш: tests/.auth/{role}.json (owner, sysadmin, coach, parent, athlete)
- * - Каждый role имеет свой кэш-файл
- * - Если кэш валиден — восстанавливает сессию из storageState в текущий контекст
- * - Если кэш невалиден (logout отозвал сессию или токен истёк) — UI-логин + обновление кэша
+ * loginAs(role): сессия роли из памяти воркера (или вход по API) кладётся в localStorage
+ * до первой загрузки приложения — оно сразу стартует авторизованным, без формы входа.
+ * Форму входа проверяют только 01-signin и вход другого пользователя в отдельном контексте.
  *
  * Тесты sign-in/sign-up не вызывают loginAs: браузер каждого теста и так чистый
  * (новый контекст на тест, storageState в конфиге не задан).
  */
-
-// Роль, которая в данный момент залогинена (нужно для корректной инвалидации кэша при logout)
-let currentRole: keyof typeof CREDENTIALS | null = null;
-
 export const test = base.extend<AuthFixture, { browser: Browser }>({
   browser: async ({ browser }, use) => {
     await use(browser);
@@ -98,62 +85,33 @@ export const test = base.extend<AuthFixture, { browser: Browser }>({
     await use(signInPage);
   },
 
-  loginAs: async ({ page, signInPage }, use) => {
-    await use(async (role: keyof typeof CREDENTIALS) => {
+  loginAs: async ({ page }, use) => {
+    await use(async (role: Role) => {
       currentRole = role;
-      const credentials = CREDENTIALS[role];
-      const storagePath = path.resolve('tests/.auth', `${role}.json`);
+      const session = await getSession(role);
 
-      // Если кэш валиден — восстанавливаем сессию из storageState
-      if (isTokenValid(storagePath)) {
-        await restoreAuthFromCache(page, storagePath);
-        // Приложению нужно ~3–4 с, чтобы решить судьбу сессии: показать меню
-        // или (если токен отозван на сервере) уйти на /sign-in. Проверка URL
-        // сразу после reload срабатывает раньше и принимает отозванную сессию за рабочую.
-        const homeLink = new BasePage(page).navHome;
-        await expect(homeLink.or(signInPage.welcomeHeading)).toBeVisible({ timeout: TIMEOUTS.long });
-        if (await homeLink.isVisible()) {
-          return; // Сессия восстановлена
-        }
-        // Токен отозван — кэш недействителен, делаем UI-логин.
-      }
+      // Только при первой загрузке во вкладке (метка в sessionStorage): дальше сессией владеет
+      // приложение — обновляет токен, а после logout удаляет его, и скрипт не должен вернуть
+      // отозванную сессию при следующем переходе.
+      await page.addInitScript(({ key, value }) => {
+        if (sessionStorage.getItem('e2e-session-seeded')) return;
+        sessionStorage.setItem('e2e-session-seeded', '1');
+        localStorage.setItem(key, value);
+      }, { key: SUPABASE.storageKey, value: JSON.stringify(session) });
 
-      // UI-логин: гарантируем, что мы на странице входа.
-      // После logout старый токен может остаться в localStorage — тогда
-      // signInPage.goto() редиректит на dashboard и поле email не найдётся.
-      await signInPage.goto();
-      if (!page.url().includes('/sign-in')) {
-        // Редирект на dashboard — очищаем localStorage и куки, пробуем снова
-        await page.evaluate(() => localStorage.clear());
-        await page.context().clearCookies();
-        await signInPage.goto();
-      }
-      await signInPage.login(credentials.email, credentials.password);
-      await expect(page).not.toHaveURL(/sign-in/, { timeout: TIMEOUTS.long });
+      await page.goto('/');
       await expect(new BasePage(page).navHome).toBeVisible({ timeout: TIMEOUTS.long });
-
-      // Обновляем кэш свежим состоянием
-      const state = await page.context().storageState();
-      fs.mkdirSync(path.dirname(storagePath), { recursive: true });
-      fs.writeFileSync(storagePath, JSON.stringify(state));
     });
   },
 
   logout: async ({ page }, use) => {
     await use(async () => {
-      const basePage = new BasePage(page);
-      await basePage.logout();
+      await new BasePage(page).logout();
 
-      // Инвалидируем кэш только той роли, которая была залогинена.
-      // Сессия отозвана на сервере, кэш этой роли больше не валиден.
-      // Кэши других ролей не трогаем — они живут на своих воркерах.
-      if (currentRole) {
-        const storagePath = path.resolve('tests/.auth', `${currentRole}.json`);
-        if (fs.existsSync(storagePath)) {
-          fs.unlinkSync(storagePath);
-        }
-        currentRole = null;
-      }
+      // Logout отзывает на сервере все сессии пользователя, в том числе ту, что в памяти:
+      // следующий loginAs этой роли войдёт по API заново.
+      if (currentRole) sessions.delete(currentRole);
+      currentRole = null;
     });
   },
 });

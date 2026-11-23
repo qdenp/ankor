@@ -54,7 +54,7 @@ Actions → «E2E tests» → Run workflow (можно выбрать роли).
 ```
 tests/
 ├── config.ts        # роли, таймауты, адреса страниц; читает .env.d333afta2q6llv
-├── fixtures.ts      # loginAs(role), logout(), кэш сессий в tests/.auth/
+├── fixtures.ts      # loginAs(role) — вход по API Supabase, logout()
 ├── pages/           # Page Objects — все локаторы и действия
 ├── setup/           # подготовка данных для нового стенда: npm run test:setup (не входит в test:all и CI)
 └── specs/<роль>/    # тесты; папка = Playwright-проект = роль
