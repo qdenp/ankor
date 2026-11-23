@@ -69,6 +69,32 @@ export const EVALUATED_ATHLETE = {
   },
 };
 
+/** Атлет роли athlete (CREDENTIALS.athlete), ребёнок родителя роли parent — его отчёты видят 71601, 71602 */
+export const ROLE_ATHLETE_NAME = 'Athlete User';
+
+/**
+ * Данные для 71604 «родитель нескольких атлетов из разных команд» — создаёт tests/setup/create-users.spec.ts
+ * один раз: команда Team02, атлет в ней с одним отчётом (один Submit) и родитель двух детей —
+ * EVALUATED_ATHLETE (Team01) и этого атлета. Пароль — общий для тестовых аккаунтов (AGENTS §5).
+ * Team02 не удалять и не менять её состав: на ней держится предусловие 71604 «дети из разных команд».
+ */
+export const SECOND_TEAM_ATHLETE = {
+  team: 'Team02',
+  firstName: 'Athlete',
+  lastName: 'Second',
+  name: 'Athlete Second',
+  email: 'dtimokhin+athlete-second@aexsoft.com',
+  /** Шаблон его единственной оценки (Submit в setup) */
+  evaluationTemplate: '!Default Template for Evaluation',
+} as const;
+
+export const MULTI_CHILD_PARENT = {
+  firstName: 'Parent',
+  lastName: 'Multi',
+  email: 'dtimokhin+parent-multi@aexsoft.com',
+  children: [EVALUATED_ATHLETE.name, SECOND_TEAM_ATHLETE.name],
+} as const;
+
 /* ======================== Supabase ======================== */
 /**
  * Бэкенд авторизации стенда — для входа по API в loginAs (tests/fixtures.ts).

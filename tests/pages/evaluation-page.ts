@@ -71,6 +71,12 @@ export class EvaluationPage extends BasePage {
   readonly reportsHeading: Locator;
   readonly viewReportButtons: Locator;
   readonly reportContent: Locator;
+  /** Карточки отчётов на текущей странице списка ("Athlete: <имя>" в каждой) */
+  readonly reportCards: Locator;
+  /** Кнопки номеров страниц пагинации: текущая — "page N", остальные — "Go to page N" */
+  readonly reportPageButtons: Locator;
+  readonly reportNextPageButton: Locator;
+  private readonly reportsPagination: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -145,10 +151,15 @@ export class EvaluationPage extends BasePage {
     this.editEvaluationButton = page.getByRole('button', { name: 'Edit Evaluation' });
     this.editMenuItem = page.getByRole('menuitem', { name: 'Edit' });
 
-    // Evaluation Reports: последние 20 отчётов карточками с кнопкой "View Report", новые — первыми.
-    // Счётчик «(N)» не больше 20 и реальное число отчётов не отражает.
+    // Evaluation Reports: карточки по 12 на страницу с кнопкой "View Report", новые — первыми; счётчик «(N)» —
+    // всего отчётов, доступных роли. Поиска и фильтров нет. У coach свой адрес (/reports/coach-evaluation-reports) —
+    // переходить через меню.
     this.reportsHeading = page.getByRole('heading', { name: 'Evaluation Reports', level: 3 });
     this.viewReportButtons = page.getByRole('button', { name: 'View Report' });
+    this.reportCards = page.getByRole('article');
+    this.reportsPagination = page.getByRole('navigation', { name: 'pagination navigation' });
+    this.reportPageButtons = this.reportsPagination.getByRole('button', { name: /^(Go to )?page \d+$/ });
+    this.reportNextPageButton = this.reportsPagination.getByRole('button', { name: 'Go to next page' });
     // Детали отчёта: шаблон, атлет, дата, категории и подскиллы с оценками ("Skill1 4.0")
     this.reportContent = page.getByRole('main');
     // В отчёте кнопки View есть только у рекомендованных дриллов; без дриллов — текст-заглушка
@@ -279,6 +290,55 @@ export class EvaluationPage extends BasePage {
   async gotoReports(): Promise<void> {
     await this.sidebarReportLink.click();
     await expect(this.reportsHeading).toBeVisible();
+    await this.waitForLoading();
+  }
+
+  /** Карточки отчётов этого атлета на текущей странице */
+  getReportCardsOfAthlete(athleteName: string): Locator {
+    return this.reportCards.filter({ hasText: `Athlete: ${athleteName}` });
+  }
+
+  /** Карточки отчётов НЕ этих атлетов на текущей странице (для проверки «чужих нет») */
+  getReportCardsNotOfAthletes(athleteNames: readonly string[]): Locator {
+    return athleteNames.reduce((cards, name) => cards.filter({ hasNotText: `Athlete: ${name}` }), this.reportCards);
+  }
+
+  /** Имя атлета на странице отчёта (точно — строка карточки списка «Athlete: <имя>» под него не подходит) */
+  getReportDetailAthlete(athleteName: string): Locator {
+    return this.reportContent.getByText(athleteName, { exact: true });
+  }
+
+  /** Перейти на последнюю страницу списка отчётов (самые старые) */
+  async goToLastReportsPage(): Promise<void> {
+    const last = this.reportPageButtons.last();
+    const lastNumber = (await last.innerText()).trim();
+    await last.click();
+    await this.waitForReportsPage(lastNumber);
+  }
+
+  /**
+   * Открыть самый новый отчёт атлета: листает страницы, пока не найдёт его карточку.
+   * Нужен, когда отчёты атлета уезжают с первой страницы (у Athlete Second один отчёт, а Athlete Last
+   * получает два новых каждый прогон).
+   */
+  async openReportOfAthlete(athleteName: string): Promise<void> {
+    const cards = this.getReportCardsOfAthlete(athleteName);
+    for (let pageNumber = 1; ; pageNumber++) {
+      await expect(this.reportCards.first()).toBeVisible({ timeout: TIMEOUTS.long });
+      if (await cards.first().isVisible()) break;
+      await expect(this.reportNextPageButton, `No report of "${athleteName}" on any page`).toBeEnabled();
+      await this.reportNextPageButton.click();
+      await this.waitForReportsPage(String(pageNumber + 1));
+    }
+    await cards.first().getByRole('button', { name: 'View Report' }).click();
+    await expect(this.page).toHaveURL(/\/reports\/[a-z-]*evaluation-reports\/.+/, { timeout: TIMEOUTS.long });
+    await this.waitForLoading();
+  }
+
+  /** Дождаться, что открыта страница N списка отчётов (карточки соседних страниц бывают одинаковыми по тексту) */
+  private async waitForReportsPage(pageNumber: string): Promise<void> {
+    const current = this.reportsPagination.getByRole('button', { name: `page ${pageNumber}`, exact: true });
+    await expect(current).toHaveAttribute('aria-current', 'page', { timeout: TIMEOUTS.long });
     await this.waitForLoading();
   }
 
