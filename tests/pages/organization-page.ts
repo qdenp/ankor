@@ -17,6 +17,8 @@ export class OrganizationPage extends BasePage {
   readonly searchInput: Locator;
   readonly orgRows: Locator;
   readonly firstDataRow: Locator;
+  /** Строки данных таблицы организаций (без строки заголовков) */
+  readonly orgDataRows: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -36,6 +38,15 @@ export class OrganizationPage extends BasePage {
     // MUI DataGrid rows
     this.orgRows = page.getByRole('row');
     this.firstDataRow = page.locator('[role="row"][data-rowindex="0"]').first();
+    this.orgDataRows = page.getByRole('rowgroup').getByRole('row');
+  }
+
+  /** Ячейка колонки строки; CSS по data-field — у ячеек DataGrid имя по значению, а не по столбцу */
+  getOrgCell(
+    row: Locator,
+    field: 'name' | 'sport_name' | 'owner' | 'teams_count' | 'athletes_count' | 'coaches_count',
+  ): Locator {
+    return row.locator(`[role="gridcell"][data-field="${field}"]`);
   }
 
   /** Переход на страницу Organization Profile через левое меню */
