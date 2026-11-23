@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SignInPage } from '../pages/sign-in-page';
 import { ManageUsersPage } from '../pages/manage-users-page';
-import { CREDENTIALS, EVALUATED_ATHLETE, TIMEOUTS } from '../config';
+import { CREDENTIALS, EVALUATED_ATHLETE, MULTI_CHILD_PARENT, SECOND_TEAM_ATHLETE, TIMEOUTS } from '../config';
 
 /**
  * Служебный тест (не проверка): разово деактивировать пользователей, накопленных тестами создания.
@@ -39,6 +39,8 @@ const PROTECTED_USERS: { email: string; why: string }[] = [
   { email: EVALUATED_ATHLETE.email, why: 'Athlete Last — его оценивают тесты 12-evaluations' },
   { email: 'athlete-031126-01@m.re', why: 'создан вручную (Athlete031126-01 Last)' },
   { email: 'dtimokhin+ankorathlete03@aexsoft.com', why: 'создан вручную (Athlete03Multy, несколько организаций)' },
+  { email: SECOND_TEAM_ATHLETE.email, why: 'Athlete Second (Team02) — второй ребёнок Parent Multi, 71604' },
+  { email: MULTI_CHILD_PARENT.email, why: 'Parent Multi — родитель двух атлетов из разных команд, 71604' },
 ];
 
 /** Защита от бесконечного цикла, если деактивация перестанет срабатывать */
