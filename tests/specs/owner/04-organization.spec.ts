@@ -1,7 +1,7 @@
 import * as allure from 'allure-js-commons';
 import { test, expect } from '../../fixtures';
 import { OrganizationPage } from '../../pages/organization-page';
-import { ORGANIZATIONS } from '../../config';
+import { CREDENTIALS, ORGANIZATIONS } from '../../config';
 
 /**
  * 04 — Organization (пункт меню Organizations).
@@ -15,19 +15,32 @@ test.describe('Owner Organization Tests', () => {
   });
 
   /**
-   * 71116 owner / admin view own organization — пока проверяется только, что страница открылась без редиректа на вход.
-   * TODO(71116): не хватает шагов кейса — проверить данные своей организации в профиле
-   * (название, вид спорта и др. по шагам кейса) и что чужие организации не видны.
+   * 71116 owner / admin view own organization.
+   * Шаг 2 кейса (счётчики совпадают со списками) сверяется только по формату — целое число от 0:
+   * решение пользователя 2026-11-23, сверка со страницами списков сильно удлиняет тест.
+   * Teams в профиле считает только активные команды, а заголовок страницы Teams — все.
    */
-  test('should view organization profile', async ({ page }) => {
+  test('should show only own organization with sport, admin and counts', async ({ page }) => {
     await allure.allureId('71116');
-    test.skip(true, 'TODO(71116): checks only that the page opens; organization profile data is not verified yet');
     const orgPage = new OrganizationPage(page);
 
     await orgPage.goto();
 
-    // Проверяем, что видим профиль организации
-    await expect(page, 'Should be on organization profile page, not sign-in').not.toHaveURL(/sign-in/);
+    // [1.1] В профиле одна организация — своя
+    await expect(orgPage.orgDataRows, 'Owner should see only own organization').toHaveCount(1);
+    const row = orgPage.orgDataRows.first();
+    await expect(orgPage.getOrgCell(row, 'name')).toHaveText(ORGANIZATIONS.owner.name);
+
+    // [1.2] Sport, Admin (имя и email), счётчики Teams / Athletes / Coaches
+    await expect(orgPage.getOrgCell(row, 'sport_name')).toHaveText(ORGANIZATIONS.owner.sport);
+    await expect(orgPage.getOrgCell(row, 'owner')).toContainText(ORGANIZATIONS.owner.adminName);
+    await expect(orgPage.getOrgCell(row, 'owner')).toContainText(CREDENTIALS.owner.email);
+    for (const field of ['teams_count', 'athletes_count', 'coaches_count'] as const) {
+      await expect(orgPage.getOrgCell(row, field), `${field} should be a non-negative integer`).toHaveText(/^\d+$/);
+    }
+
+    // [1.3] Есть кнопка Edit
+    await expect(orgPage.editButton).toBeVisible();
   });
 
   // 71924: Edit own organization

@@ -89,7 +89,7 @@ export const SUPABASE = {
  */
 export const ORGANIZATIONS = {
   /** Организация owner (ANKOR_OWNER_EMAIL) — её правит owner/04-organization */
-  owner: { name: 'aiorg01' },
+  owner: { name: 'aiorg01', sport: 'Lacrosse', adminName: 'DenisT AI' },
   /**
    * Отдельная организация для sysadmin/04-organization, чтобы не пересекаться с owner (роли идут параллельно).
    * Создаётся tests/setup/create-users.spec.ts; пароль админа — ANKOR_SYSEDIT_ORG_PASSWORD (нужен только setup).

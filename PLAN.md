@@ -12,8 +12,7 @@
 
 | Кейс | Сейчас | Чего не хватает | Что нужно |
 |---|---|---|---|
-| 71116 owner / admin view own organization | ⏭️ `owner/04-organization` | проверить данные профиля своей организации и что чужие не видны | ничего — можно сразу |
-| 70943 Forgot password | ⏭️ `owner/01-signin` | ввести email, отправить запрос, проверить сообщение (письмо не проверяем — AGENTS §10) | ничего — можно сразу |
+| 70943 Forgot password | ⏭️ `owner/01-signin` | ввести email, отправить запрос, проверить сообщение | **решение пользователя:** сначала придумать, как получать письма-уведомления в тестах |
 | 72684 Create/edit drill: fields, role permissions, Visibility | ⏭️ `owner/10-drills` | шаги ролей: SysAdmin — выбор Visibility при создании и смена на Edit; Owner не правит Public-дрилл | шаги SysAdmin — тестом в `sysadmin/`; Public-дрилл на стенде |
 | 71716 Invite multiple user to plan by coach | ⏭️ `sysadmin/13-plans` | перенести в `coach/13-plans`: выбрать 5–10 пользователей, Send invites, сообщение «Invites saved. Emails sent: N» | **решение пользователя:** кому уходят реальные приглашения (письма) |
 | 70897 Успешная регистрация организации Lacrosse | ⏭️ `owner/01-signin` | полная регистрация через `/org-signup` (`OrgSignUpPage` уже есть) | каждая регистрация — неудаляемая организация и админ; согласовать частоту |
@@ -24,10 +23,10 @@
 
 | Feature | Кейсов | ✅ | ⏭️ | ❌ |
 |---|---|---|---|---|
-| Ankor - 1 version | 179 | 45 | 5 | 129 |
+| Ankor - 1 version | 179 | 46 | 4 | 129 |
 | 2 version | 52 | 0 | 0 | 52 |
 | (автоматический кейс) | 1 | 1 | 0 | 0 |
-| **Всего** | **232** | **46** | **5** | **181** |
+| **Всего** | **232** | **47** | **4** | **181** |
 
 ## Ankor - 1 version
 
@@ -161,11 +160,11 @@
 | 71830 | shared plan | ❌ |  |
 | 71831 | Forgot email | ❌ |  |
 
-### Organization Profile (3/4)
+### Organization Profile (4/4)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71116 | owner / admin view own organization | ⏭️ | owner/04-organization.spec.ts — пропущен: checks only that the page opens; organization profile data is not verified yet |
+| 71116 | owner / admin view own organization | ✅ | owner/04-organization.spec.ts |
 | 71922 | sys admin see all organization | ✅ | sysadmin/04-organization.spec.ts |
 | 71924 | Edit own organization | ✅ | owner/04-organization.spec.ts |
 | 71957 | Edit organization as sysadmin | ✅ | sysadmin/04-organization.spec.ts |
