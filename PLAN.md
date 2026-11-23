@@ -6,18 +6,29 @@
 
 Статусы: ✅ есть автотест · ⏭️ автотест есть, но пропущен (`test.skip` с TODO — покрывает кейс не полностью) · ❌ автотеста нет.
 
+**⭐ — основная регрессия:** набор кейсов из выгрузки `report (1).csv` (90 кейсов). Покрывать в первую очередь, остальные кейсы TestOps — после. Шаги и номера — всё равно из TestOps (скилл 01), не из CSV.
+
 ## Очередь
 
 С чего продолжать. Новый тест — по цепочке скиллов 01→04 (AGENTS §1); после него — поменять статус кейса ниже и убрать строку отсюда.
 
+**Сначала — ⭐ без блокеров** (не нужны письма, Submit и решения пользователя):
+- Plan: 72602, 72623, 72624, 72631, 72612, 71642, 71644, 72628 — часть уже в работе в ветке `test/plans-visibility`, сверить с ней;
+- Evaluation report: 71601, 71602, 71603, 71604 — отчёты на стенде есть (71562, 71563); для 71604 проверить, что у родителя атлеты из разных команд;
+- Manage user: 72062, 72065, 72064, 74184 — на временных пользователях `+temp-` (AGENTS §9);
+- Athlete: 71149 (coach создаёт атлета; деактивировать в `afterAll`);
+- Easy join: 71847; Roles: 72679 (Home у sysadmin).
+
+**⭐ с блокерами:** письма — 70943, 70944, 71564, 71565, 71606, Notification / email (8), Easy Join-регистрации 70977, 70979, 71047, 70980, 71182, 71426; Submit — 72667; второй owner — 73162; 71215 — существующий родитель; остальные — в таблице ниже.
+
 | Кейс | Сейчас | Чего не хватает | Что нужно |
 |---|---|---|---|
-| 70943 Forgot password | ⏭️ `owner/01-signin` | ввести email, отправить запрос, проверить сообщение | **решение пользователя:** сначала придумать, как получать письма-уведомления в тестах |
-| 70944 Forgot password несуществующий юзер | ❌ | тот же экран, что 70943 | отложен вместе с 70943 (решение пользователя) |
-| 72684 Create/edit drill: fields, role permissions, Visibility | ⏭️ `owner/10-drills` | шаги ролей: SysAdmin — выбор Visibility при создании и смена на Edit; Owner не правит Public-дрилл | шаги SysAdmin — тестом в `sysadmin/`; Public-дрилл на стенде |
-| 71716 Invite multiple user to plan by coach | ⏭️ `sysadmin/13-plans` | перенести в `coach/13-plans`: выбрать 5–10 пользователей, Send invites, сообщение «Invites saved. Emails sent: N» | **решение пользователя:** кому уходят реальные приглашения (письма) |
-| 70897 Успешная регистрация организации Lacrosse | ⏭️ `owner/01-signin` | полная регистрация через `/org-signup` (`OrgSignUpPage` уже есть) | каждая регистрация — неудаляемая организация и админ; согласовать частоту |
-| 71493 Не больше 5 категорий ниже 3 | ❌ | новый тест в `owner/12-evaluations` на черновике (Submit не нужен) | шаблон оценки с 6 категориями — создать один раз через `tests/setup` |
+| 70943 ⭐ Forgot password | ⏭️ `owner/01-signin` | ввести email, отправить запрос, проверить сообщение | **решение пользователя:** сначала придумать, как получать письма-уведомления в тестах |
+| 70944 ⭐ Forgot password несуществующий юзер | ❌ | тот же экран, что 70943 | отложен вместе с 70943 (решение пользователя) |
+| 72684 ⭐ Create/edit drill: fields, role permissions, Visibility | ⏭️ `owner/10-drills` | шаги ролей: SysAdmin — выбор Visibility при создании и смена на Edit; Owner не правит Public-дрилл | шаги SysAdmin — тестом в `sysadmin/`; Public-дрилл на стенде |
+| 71716 ⭐ Invite multiple user to plan by coach | ⏭️ `sysadmin/13-plans` | перенести в `coach/13-plans`: выбрать 5–10 пользователей, Send invites, сообщение «Invites saved. Emails sent: N» | **решение пользователя:** кому уходят реальные приглашения (письма) |
+| 70897 ⭐ Успешная регистрация организации Lacrosse | ⏭️ `owner/01-signin` | полная регистрация через `/org-signup` (`OrgSignUpPage` уже есть) | каждая регистрация — неудаляемая организация и админ; согласовать частоту |
+| 71493 ⭐ Не больше 5 категорий ниже 3 | ❌ | новый тест в `owner/12-evaluations` на черновике (Submit не нужен) | шаблон оценки с 6 категориями — создать один раз через `tests/setup` |
 
 
 ## Итого
@@ -28,6 +39,7 @@
 | 2 version | 52 | 0 | 0 | 52 |
 | (автоматический кейс) | 1 | 1 | 0 | 0 |
 | **Всего** | **232** | **52** | **4** | **176** |
+| ⭐ Основная регрессия | 90 | 44 | 4 | 42 |
 
 ## Ankor - 1 version
 
@@ -35,9 +47,9 @@
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71149 | Manually Add Athlete by coach | ❌ |  |
-| 71182 | Add athlete + parent | ❌ |  |
-| 71215 | Add athlete + parent  existing | ❌ |  |
+| 71149 | ⭐ Manually Add Athlete by coach | ❌ |  |
+| 71182 | ⭐ Add athlete + parent | ❌ |  |
+| 71215 | ⭐ Add athlete + parent  existing | ❌ |  |
 | 71216 | Add manual > check email | ❌ |  |
 | 71217 | Add manual > check email already registrated | ❌ |  |
 | 71218 | Пароль валидация | ❌ |  |
@@ -48,10 +60,10 @@
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71990 | Add coach manually | ✅ | owner/06-coaches.spec.ts |
-| 71991 | Edit coach | ✅ | owner/06-coaches.spec.ts |
+| 71990 | ⭐ Add coach manually | ✅ | owner/06-coaches.spec.ts |
+| 71991 | ⭐ Edit coach | ✅ | owner/06-coaches.spec.ts |
 | 72024 | Delete coach | ❌ |  |
-| 72057 | View coach | ✅ | owner/06-coaches.spec.ts |
+| 72057 | ⭐ View coach | ✅ | owner/06-coaches.spec.ts |
 | 72058 | Add manual > check email | ❌ |  |
 | 72059 | Add manual > check email already registrated | ❌ |  |
 | 72060 | Пароль валидация | ❌ |  |
@@ -65,15 +77,15 @@
 | 71837 | Search | ❌ |  |
 | 71838 | Pagination | ❌ |  |
 | 72682 | [NEW] Drill Library scope: only Public + own organization's drills | ❌ |  |
-| 72683 | [NEW] Drill detail: play instructional video (YouTube) | ✅ | owner/10-drills.spec.ts |
-| 72684 | [NEW] Create/edit drill: fields, role permissions, Visibility rules | ⏭️ | owner/10-drills.spec.ts — пропущен: covers only step 2 (create form fields); role and visibility steps are not implemented |
-| 74151 | Create drill | ✅ | owner/10-drills.spec.ts |
+| 72683 | ⭐ [NEW] Drill detail: play instructional video (YouTube) | ✅ | owner/10-drills.spec.ts |
+| 72684 | ⭐ [NEW] Create/edit drill: fields, role permissions, Visibility rules | ⏭️ | owner/10-drills.spec.ts — пропущен: covers only step 2 (create form fields); role and visibility steps are not implemented |
+| 74151 | ⭐ Create drill | ✅ | owner/10-drills.spec.ts |
 
 ### Easy join (0/4)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71847 | Easy Join Codes | ❌ |  |
+| 71847 | ⭐ Easy Join Codes | ❌ |  |
 | 71848 | disabled, inactive, or expired code | ❌ |  |
 | 71849 | Copy | ❌ |  |
 | 71850 | Delete code | ❌ |  |
@@ -82,56 +94,56 @@
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71460 | create evaluation | ✅ | owner/12-evaluations.spec.ts |
-| 71493 | Можно сделать оценку менее 3 только для 5 | ❌ |  |
-| 71494 | Рейтинг категории ниже 3 раскрывает под-скиллы | ✅ | owner/12-evaluations.spec.ts |
-| 71495 | Ввод рейтинга выше 5 блокируется с предупреждением | ✅ | owner/12-evaluations.spec.ts |
-| 71528 | Оценка категории подтягивает оценку на все сабскилы | ✅ | owner/12-evaluations.spec.ts |
-| 71561 | Просмотр not submitted evaluation | ✅ | owner/12-evaluations.spec.ts |
-| 71562 | После submit генерируется evaluation report | ✅ | owner/12-evaluations.spec.ts |
-| 71563 | После submit генерируется персонализированный workout | ✅ | owner/12-evaluations.spec.ts |
-| 71564 | После submit атлет получает notification и email | ❌ |  |
-| 71565 | После submit родитель атлета получает notification и email | ❌ |  |
-| 71567 | View evaluation | ✅ | owner/12-evaluations.spec.ts |
-| 71600 | Edit evaluation | ✅ | owner/12-evaluations.spec.ts |
+| 71460 | ⭐ create evaluation | ✅ | owner/12-evaluations.spec.ts |
+| 71493 | ⭐ Можно сделать оценку менее 3 только для 5 | ❌ |  |
+| 71494 | ⭐ Рейтинг категории ниже 3 раскрывает под-скиллы | ✅ | owner/12-evaluations.spec.ts |
+| 71495 | ⭐ Ввод рейтинга выше 5 блокируется с предупреждением | ✅ | owner/12-evaluations.spec.ts |
+| 71528 | ⭐ Оценка категории подтягивает оценку на все сабскилы | ✅ | owner/12-evaluations.spec.ts |
+| 71561 | ⭐ Просмотр not submitted evaluation | ✅ | owner/12-evaluations.spec.ts |
+| 71562 | ⭐ После submit генерируется evaluation report | ✅ | owner/12-evaluations.spec.ts |
+| 71563 | ⭐ После submit генерируется персонализированный workout | ✅ | owner/12-evaluations.spec.ts |
+| 71564 | ⭐ После submit атлет получает notification и email | ❌ |  |
+| 71565 | ⭐ После submit родитель атлета получает notification и email | ❌ |  |
+| 71567 | ⭐ View evaluation | ✅ | owner/12-evaluations.spec.ts |
+| 71600 | ⭐ Edit evaluation | ✅ | owner/12-evaluations.spec.ts |
 
 ### Evaluation report (0/6)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71601 | Athlete видит свои репорты | ❌ |  |
-| 71602 | Parent видит отчёты привязанных к нему атлетов | ❌ |  |
-| 71603 | Coach/Administrator/Owner видят все завершённые отчёты организации | ❌ |  |
-| 71604 | Родитель нескольких атлетов может перейти к отчётам конкретного ребёнка | ❌ |  |
+| 71601 | ⭐ Athlete видит свои репорты | ❌ |  |
+| 71602 | ⭐ Parent видит отчёты привязанных к нему атлетов | ❌ |  |
+| 71603 | ⭐ Coach/Administrator/Owner видят все завершённые отчёты организации | ❌ |  |
+| 71604 | ⭐ Родитель нескольких атлетов может перейти к отчётам конкретного ребёнка | ❌ |  |
 | 71605 | Переход по deep-link из уведомления/письма открывает отчёт напрямую | ❌ |  |
-| 71606 | Переход по deep-link из уведомления/письма открывает отчёт напрямую родителя | ❌ |  |
+| 71606 | ⭐ Переход по deep-link из уведомления/письма открывает отчёт напрямую родителя | ❌ |  |
 
 ### Login (7/26)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 70897 | Успешная регистрация организации Lacrosse | ⏭️ | owner/01-signin.spec.ts — пропущен: covers only navigation; the organization registration itself is not implemented yet |
+| 70897 | ⭐ Успешная регистрация организации Lacrosse | ⏭️ | owner/01-signin.spec.ts — пропущен: covers only navigation; the organization registration itself is not implemented yet |
 | 70930 | Невалидный формат email | ❌ |  |
 | 70931 | Регистрация с уже зарегистрированным email не создаёт организацию | ❌ |  |
 | 70932 | Пароль валидация | ❌ |  |
 | 70933 | Невалидный номер телефона | ❌ |  |
 | 70934 | Успешная регистрация организации Basketball | ❌ |  |
 | 70935 | Успешная регистрация организации Soccer | ❌ |  |
-| 70936 | Успешный вход зарегистрированного пользователя | ✅ | owner/01-signin.spec.ts |
+| 70936 | ⭐ Успешный вход зарегистрированного пользователя | ✅ | owner/01-signin.spec.ts |
 | 70937 | Уже авторизованный пользователь при открытии Sign In | ✅ | owner/01-signin.spec.ts |
 | 70938 | Неавторизованный пользователь перенаправляется на Sign In | ✅ | owner/01-signin.spec.ts |
 | 70939 | Пустые поля | ✅ | owner/01-signin.spec.ts — `test.fail` до исправления текстов (ankor-training-fe#315) |
 | 70940 | Невалидный формат email | ✅ | owner/01-signin.spec.ts |
 | 70941 | Неверный  пароль | ✅ | owner/01-signin.spec.ts |
 | 70942 | Несуществующий имайл | ✅ | owner/01-signin.spec.ts |
-| 70943 | Forgot password | ⏭️ | owner/01-signin.spec.ts — пропущен: covers only navigation; request submission and confirmation are not checked yet |
-| 70944 | Forgot password несуществующий юзер | ❌ |  |
-| 70977 | Athlete по join-коду без email родителя | ❌ |  |
-| 70979 | Athlete по join-коду с email родителя | ❌ |  |
-| 70980 | Parent регистрация по имайлу | ❌ |  |
+| 70943 | ⭐ Forgot password | ⏭️ | owner/01-signin.spec.ts — пропущен: covers only navigation; request submission and confirmation are not checked yet |
+| 70944 | ⭐ Forgot password несуществующий юзер | ❌ |  |
+| 70977 | ⭐ Athlete по join-коду без email родителя | ❌ |  |
+| 70979 | ⭐ Athlete по join-коду с email родителя | ❌ |  |
+| 70980 | ⭐ Parent регистрация по имайлу | ❌ |  |
 | 71013 | регистрация Coach по join-коду | ❌ |  |
 | 71046 | Валидация на имайл | ❌ |  |
-| 71047 | Athlete + existing parent | ❌ |  |
+| 71047 | ⭐ Athlete + existing parent | ❌ |  |
 | 71048 | Пароль валидация | ❌ |  |
 | 71081 | experied code | ❌ |  |
 | 71082 | not active | ❌ |  |
@@ -142,45 +154,45 @@
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
 | 72061 | View user | ❌ |  |
-| 72062 | Edit user | ❌ |  |
+| 72062 | ⭐ Edit user | ❌ |  |
 | 72063 | Пароль валидация | ❌ |  |
-| 72064 | active organization membership | ❌ |  |
-| 72065 | Deactivate | ❌ |  |
-| 74184 | Edit email | ❌ |  |
+| 72064 | ⭐ active organization membership | ❌ |  |
+| 72065 | ⭐ Deactivate | ❌ |  |
+| 74184 | ⭐ Edit email | ❌ |  |
 
 ### Notification / email (0/8)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71824 | Invation athlete | ❌ |  |
-| 71825 | Invation coach | ❌ |  |
-| 71826 | Evaluation reports | ❌ |  |
-| 71827 | Shared practice plans | ❌ |  |
-| 71828 | welcome email | ❌ |  |
-| 71829 | Evaluation reports | ❌ |  |
-| 71830 | shared plan | ❌ |  |
-| 71831 | Forgot email | ❌ |  |
+| 71824 | ⭐ Invation athlete | ❌ |  |
+| 71825 | ⭐ Invation coach | ❌ |  |
+| 71826 | ⭐ Evaluation reports | ❌ |  |
+| 71827 | ⭐ Shared practice plans | ❌ |  |
+| 71828 | ⭐ welcome email | ❌ |  |
+| 71829 | ⭐ Evaluation reports | ❌ |  |
+| 71830 | ⭐ shared plan | ❌ |  |
+| 71831 | ⭐ Forgot email | ❌ |  |
 
 ### Organization Profile (4/4)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71116 | owner / admin view own organization | ✅ | owner/04-organization.spec.ts |
-| 71922 | sys admin see all organization | ✅ | sysadmin/04-organization.spec.ts |
-| 71924 | Edit own organization | ✅ | owner/04-organization.spec.ts |
-| 71957 | Edit organization as sysadmin | ✅ | sysadmin/04-organization.spec.ts |
+| 71116 | ⭐ owner / admin view own organization | ✅ | owner/04-organization.spec.ts |
+| 71922 | ⭐ sys admin see all organization | ✅ | sysadmin/04-organization.spec.ts |
+| 71924 | ⭐ Edit own organization | ✅ | owner/04-organization.spec.ts |
+| 71957 | ⭐ Edit organization as sysadmin | ✅ | sysadmin/04-organization.spec.ts |
 
 ### Parent (2/8)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71252 | Carete parent | ✅ | owner/07-parents.spec.ts |
+| 71252 | ⭐ Carete parent | ✅ | owner/07-parents.spec.ts |
 | 71254 | Carete parent 2more athlete | ❌ |  |
 | 71255 | Пароль валидация | ❌ |  |
-| 71256 | edit parent | ✅ | owner/07-parents.spec.ts |
+| 71256 | ⭐ edit parent | ✅ | owner/07-parents.spec.ts |
 | 71257 | Delete parent | ❌ |  |
 | 71258 | Parent check email | ❌ |  |
-| 71426 | Activate from signup | ❌ |  |
+| 71426 | ⭐ Activate from signup | ❌ |  |
 | 71427 | Do not activate parent | ❌ |  |
 
 ### Plan (10/51)
@@ -189,36 +201,36 @@
 |---|---|---|---|
 | 71639 | 007 Create Plan athlete | ❌ |  |
 | 71640 | 008 Create Plan: filters athlete | ❌ |  |
-| 71641 | 016 Create plan: notes | ✅ | coach/13-plans.spec.ts |
-| 71642 | 001 View Plan athlete | ❌ |  |
-| 71643 | 002 View Plan Parent | ✅ | parent/13-plans.spec.ts |
-| 71644 | 014 View Plan coach | ❌ |  |
-| 71645 | 020 View Plan  Owner / Admin | ✅ | owner/13-plans.spec.ts |
+| 71641 | ⭐ 016 Create plan: notes | ✅ | coach/13-plans.spec.ts |
+| 71642 | ⭐ 001 View Plan athlete | ❌ |  |
+| 71643 | ⭐ 002 View Plan Parent | ✅ | parent/13-plans.spec.ts |
+| 71644 | ⭐ 014 View Plan coach | ❌ |  |
+| 71645 | ⭐ 020 View Plan  Owner / Admin | ✅ | owner/13-plans.spec.ts |
 | 71646 | 011 Edit plan athlete | ❌ |  |
 | 71647 | 006  Athlete Cant edit invited plan | ❌ |  |
 | 71649 | 009 Delete plan athlete | ❌ |  |
 | 71650 | 026 Edit  Plan  as Owner / Admin | ❌ |  |
 | 71683 | Invite user to plan  by athlete | ❌ |  |
-| 71716 | Invite multiple user to plan  by coach | ⏭️ | sysadmin/13-plans.spec.ts — пропущен: case is for coach and needs 5-10 real invites + "Invites saved" toast; the test only opened the dialog |
-| 71717 | View invited plan as athlete | ❌ |  |
+| 71716 | ⭐ Invite multiple user to plan  by coach | ⏭️ | sysadmin/13-plans.spec.ts — пропущен: case is for coach and needs 5-10 real invites + "Invites saved" toast; the test only opened the dialog |
+| 71717 | ⭐ View invited plan as athlete | ❌ |  |
 | 71718 | View invited plan as parent | ❌ |  |
 | 71719 | View invited plan as coach | ❌ |  |
 | 71752 | View edited plan | ❌ |  |
-| 72600 | 025 Create Plan as Administrator / Owner | ✅ | owner/13-plans.spec.ts |
+| 72600 | ⭐ 025 Create Plan as Administrator / Owner | ✅ | owner/13-plans.spec.ts |
 | 72601 | 019 Reorder drills via drag-and-drop | ❌ |  |
-| 72602 | 030 Parent cannot create plan | ❌ |  |
+| 72602 | ⭐ 030 Parent cannot create plan | ❌ |  |
 | 72603 | Prebuilt checkbox visible only for System Administrator on own plan | ❌ |  |
-| 72604 | 028 Non-sysadmin roles do not see Prebuilt checkbox | ✅ | owner/13-plans.spec.ts |
+| 72604 | ⭐ 028 Non-sysadmin roles do not see Prebuilt checkbox | ✅ | owner/13-plans.spec.ts |
 | 72605 | Prebuilt save blocked when plan contains Organization-scoped drill | ❌ |  |
 | 72606 | Prebuilt plan appears in Prebuilt Plans for organizations of the same sport | ❌ |  |
 | 72607 | Edit plan as System Administrator | ❌ |  |
 | 72608 | 033 Parent is blocked from Edit screen | ❌ |  |
-| 72609 | 004 Athlete cannot edit a plan they were only invited to | ✅ | athlete/13-plans.spec.ts |
+| 72609 | ⭐ 004 Athlete cannot edit a plan they were only invited to | ✅ | athlete/13-plans.spec.ts |
 | 72610 | 021 CHECK: Coach can edit a plan they were only invited to (documented divergence) | ❌ |  |
-| 72611 | Prebuilt checkbox available to System Administrator on own plan in Edit | ✅ | sysadmin/13-plans.spec.ts |
-| 72612 | System Administrator does not see Prebuilt checkbox on a plan they did not create | ❌ |  |
+| 72611 | ⭐ Prebuilt checkbox available to System Administrator on own plan in Edit | ✅ | sysadmin/13-plans.spec.ts |
+| 72612 | ⭐ System Administrator does not see Prebuilt checkbox on a plan they did not create | ❌ |  |
 | 72613 | 027 Non-sysadmin roles do not see Prebuilt checkbox in Edit | ❌ |  |
-| 72614 | Unchecking Prebuilt removes plan from Prebuilt everywhere | ✅ | sysadmin/13-plans.spec.ts |
+| 72614 | ⭐ Unchecking Prebuilt removes plan from Prebuilt everywhere | ✅ | sysadmin/13-plans.spec.ts |
 | 72615 | Prebuilt save blocked when plan contains Organization-scoped drill (Edit) | ❌ |  |
 | 72616 | 022 Prebuilt Plans tab visible to Coach | ❌ |  |
 | 72617 | 026 Prebuilt Plans and Org Plans tabs visible to Administrator / Owner / System Administrator | ✅ | sysadmin/13-plans.spec.ts |
@@ -226,14 +238,14 @@
 | 72619 | 000 Empty tab shows empty state, not another user's plans | ❌ |  |
 | 72620 | 018 Opening own plan row navigates to view screen, not edit | ❌ |  |
 | 72621 | 013 Opening invited plan row navigates to view screen | ❌ |  |
-| 72622 | 002 Athlete and Parent do not see Org Plans tab | ✅ | athlete/13-plans.spec.ts, parent/13-plans.spec.ts |
-| 72623 | 015 Coach does not see Org Plans tab | ❌ |  |
-| 72624 | 032 Parent does not see Prebuilt Plans tab | ❌ |  |
+| 72622 | ⭐ 002 Athlete and Parent do not see Org Plans tab | ✅ | athlete/13-plans.spec.ts, parent/13-plans.spec.ts |
+| 72623 | ⭐ 015 Coach does not see Org Plans tab | ❌ |  |
+| 72624 | ⭐ 032 Parent does not see Prebuilt Plans tab | ❌ |  |
 | 72625 | 005 Athlete sees Prebuilt Plans tab, Parent does not | ❌ |  |
 | 72627 | 029 CHECK: Duplicating a Prebuilt plan creates a custom copy on My Plans, original unchanged | ❌ |  |
-| 72628 | 017 Duplicate creates a copy with exact name format | ❌ |  |
+| 72628 | ⭐ 017 Duplicate creates a copy with exact name format | ❌ |  |
 | 72630 | System Administrator can duplicate a plan when acting as Owner in an organization | ❌ |  |
-| 72631 | 003 Athlete cannot duplicate a plan | ❌ |  |
+| 72631 | ⭐ 003 Athlete cannot duplicate a plan | ❌ |  |
 | 72632 | 031 Parent cannot duplicate a plan | ❌ |  |
 | 72717 | Invite on prebuild plan | ❌ |  |
 | 72750 | 030  Create own plan with private drill | ❌ |  |
@@ -244,31 +256,31 @@
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
 | 71360 | Soccer card | ❌ |  |
-| 71818 | Home page | ✅ | coach/02-homepage.spec.ts |
-| 71821 | homepage | ✅ | athlete/02-homepage.spec.ts |
-| 71822 | homepage | ✅ | parent/02-homepage.spec.ts |
-| 71823 | Home page | ✅ | owner/02-homepage.spec.ts |
-| 71843 | Permission | ✅ | owner/90-permissions.spec.ts |
-| 71844 | Permission | ✅ | coach/90-permissions.spec.ts |
-| 71845 | Permission | ✅ | athlete/90-permissions.spec.ts |
-| 71846 | Permission | ✅ | parent/90-permissions.spec.ts |
-| 71889 | Permission | ✅ | sysadmin/90-permissions.spec.ts |
-| 72667 | Workout drills come from every mapped drill on Primary Development Focus skills, no duplicates | ❌ |  |
+| 71818 | ⭐ Home page | ✅ | coach/02-homepage.spec.ts |
+| 71821 | ⭐ homepage | ✅ | athlete/02-homepage.spec.ts |
+| 71822 | ⭐ homepage | ✅ | parent/02-homepage.spec.ts |
+| 71823 | ⭐ Home page | ✅ | owner/02-homepage.spec.ts |
+| 71843 | ⭐ Permission | ✅ | owner/90-permissions.spec.ts |
+| 71844 | ⭐ Permission | ✅ | coach/90-permissions.spec.ts |
+| 71845 | ⭐ Permission | ✅ | athlete/90-permissions.spec.ts |
+| 71846 | ⭐ Permission | ✅ | parent/90-permissions.spec.ts |
+| 71889 | ⭐ Permission | ✅ | sysadmin/90-permissions.spec.ts |
+| 72667 | ⭐ Workout drills come from every mapped drill on Primary Development Focus skills, no duplicates | ❌ |  |
 | 72668 | No workout shows empty state | ❌ |  |
 | 72674 | [NEW] Coach Home: quick actions set without Add Drill | ❌ |  |
-| 72679 | [NEW] Home page (System Administrator) | ❌ |  |
-| 73162 | Drill/ skill | ❌ |  |
+| 72679 | ⭐ [NEW] Home page (System Administrator) | ❌ |  |
+| 73162 | ⭐ Drill/ skill | ❌ |  |
 | 74719 | Permission TO OTHER ORG | ❌ |  |
 
 ### Score Card Template (3/5)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71292 | Create Template | ✅ | owner/11-scorecard-templates.spec.ts |
-| 71293 | Create Template with 2+ category | ✅ | owner/11-scorecard-templates.spec.ts |
+| 71292 | ⭐ Create Template | ✅ | owner/11-scorecard-templates.spec.ts |
+| 71293 | ⭐ Create Template with 2+ category | ✅ | owner/11-scorecard-templates.spec.ts |
 | 71294 | Delete template | ❌ |  |
 | 71327 | Edit template | ❌ |  |
-| 71393 | Make inactive | ✅ | owner/11-scorecard-templates.spec.ts |
+| 71393 | ⭐ Make inactive | ✅ | owner/11-scorecard-templates.spec.ts |
 
 ### Skill (1/5)
 
@@ -278,13 +290,13 @@
 | 71832 | Search | ❌ |  |
 | 71833 | Filter | ❌ |  |
 | 71834 | Пагниация | ❌ |  |
-| 74217 | Create  skill | ✅ | owner/09-skills.spec.ts |
+| 74217 | ⭐ Create  skill | ✅ | owner/09-skills.spec.ts |
 
 ### Team (1/5)
 
 | Кейс | Название | Статус | Автотест |
 |---|---|---|---|
-| 71851 | Create team | ✅ | owner/08-teams.spec.ts |
+| 71851 | ⭐ Create team | ✅ | owner/08-teams.spec.ts |
 | 71852 | Create team non lacrose | ❌ |  |
 | 71854 | Create inactive | ❌ |  |
 | 71855 | Delete team | ❌ |  |
