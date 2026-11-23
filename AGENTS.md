@@ -9,7 +9,6 @@ Bash/PowerShell tool обрывает команду через 120 с; зада
 
 ```powershell
 Stop-Process -Name npx, node -Force -ErrorAction SilentlyContinue
-Remove-Item allure-results\*, test-results\* -Recurse -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force reports | Out-Null   # `>` сам папку не создаёт
 Remove-Item Env:NO_COLOR -ErrorAction SilentlyContinue  # иначе Node на каждый воркер пишет предупреждение в лог
 npm run test:all 2>&1 > reports\test-output.log         # или npm run test:<роль>
@@ -17,7 +16,7 @@ npm run test:all 2>&1 > reports\test-output.log         # или npm run test:<�
 
 - **Ход прогона:** `reports/progress.txt` — по роли `N/M`, `ok/x/-`, текущий тест, ниже упавшие попытки; первая строка `RUNNING` / `FINISHED`. Подробности — `reports/test-output.log` (`[N/M]` — старт теста, `ok N` / `x N` / `- N` — итог; в `test:all` строки помечены `[owner]`, `[coach]`…).
 - **Не работает:** запуск без `timeout`, `Start-Job` (файл не пишется), `Tee-Object` (блокируется). Скрытый `Start-Process powershell …` — только по просьбе пользователя.
-- После прогона чистить `allure-results/` и `test-results/` (копятся). Для выгрузки вручную: `npx allure generate --clean -o allure-report`, архив `allure-results.zip`.
+- Папки результатов чистить не нужно: `allure-results/` очищают сами `npm run test:*` (хуки `pretest:*`, `scripts/clean-results.mjs`), `test-results/<роль>` — Playwright в начале прогона. Для выгрузки вручную: `npx allure generate --clean -o allure-report`, архив `allure-results.zip`.
 
 **Команды** (всегда через npm-скрипты; `npx playwright test` без `--project` смешает роли):
 
@@ -26,7 +25,7 @@ npm run test:all 2>&1 > reports\test-output.log         # или npm run test:<�
 | Все роли параллельно | `npm run test:all` |
 | Одна роль | `npm run test:owner` / `sysadmin` / `coach` / `parent` / `athlete` |
 | Один тест | `npm run test:owner -- --grep "should edit parent"` (`--` обязателен) |
-| Файл(ы) | `npx playwright test tests/specs/owner/07-parents.spec.ts --project=owner --workers 1` (+ `npm run typecheck` вручную) |
+| Файл(ы) | `npx playwright test tests/specs/owner/07-parents.spec.ts --project=owner --workers 1` (+ `npm run typecheck` вручную; `allure-results` не очищается) |
 | Подготовка нового стенда | `npm run test:setup -- --grep "<тест>"` (вне `test:all` и CI) |
 | Проверки | `npm run typecheck`, `npm run lint` |
 | HTML-отчёт роли | `npx playwright show-report reports/html/owner` |
